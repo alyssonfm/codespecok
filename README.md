@@ -1,4 +1,4 @@
-hello-world--les
+CodeSpecOK
 ================
 
-This project will be used to show some git settings
+CodeSpecOK is a version of JMLOK for C# with contracts written in CodeContracts.
