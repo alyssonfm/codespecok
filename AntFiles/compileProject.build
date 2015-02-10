@@ -1,0 +1,18 @@
+<project name="C Sharp Compiler" default="compile_project" basedir="..">
+  
+	<target name="compile_project">
+		<echo>
+			Compiling with C Sharp compiler.
+		</echo>
+	
+		<exec program="msbuild">
+			<arg value="/p:CodeContractsEnableRuntimeChecking=true"/>
+			<arg value="/p:CodeContractsAssemblyMode=0"/>
+			<arg value="/p:CodeContractsRuntimeThrowOnFailure=true"/>
+			<arg value="/p:OutputPath=${build_dir}"/>
+			<arg value="${source_folder}\${project_name}.sln"/>
+			<arg value="/v:m"/>
+		</exec>
+	</target>
+
+</project>

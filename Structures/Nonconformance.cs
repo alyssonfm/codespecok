@@ -6,14 +6,15 @@ using System.Threading.Tasks;
 
 namespace Structures
 {
-    public enum CategoryType {
-		PRECONDITION = "precondition",
-        POSTCONDITION = "postcondition",
-        INVARIANT = "invariant", 
-		CONSTRAINT = "constraint", 
-        EVALUATION = "evaluation", 
-        MEANINGLESS = "meaningless", 
-		NEUTRAL = ""
+    public static class CategoryType
+    {
+		public const String PRECONDITION = "precondition";
+        public const String POSTCONDITION = "postcondition";
+        public const String INVARIANT = "invariant";
+        public const String CONSTRAINT = "constraint";
+        public const String EVALUATION = "evaluation";
+        public const String MEANINGLESS = "meaningless";
+        public const String NEUTRAL = "";
 	}
 
     /// <summary>
@@ -22,7 +23,7 @@ namespace Structures
     /// </summary>
     public class Nonconformance
     {
-        private CategoryType _type;
+        private String _type;
 
         // For nonconformance filtering.
         private bool _meaningless = false;
@@ -71,15 +72,15 @@ namespace Structures
             }
 
             int first, last;
-            first = data.IndexOf(" ", 1) + 1;
+            first = data.IndexOf(" ", 3) + 1;
             last = data.IndexOf(".");
-            this._namespaceName = data.Substring(first, last);
+            this._namespaceName = data.Substring(first, last - first);
             first = last + 1;
             last = data.IndexOf(".", first);
-            this._className = data.Substring(first, last);
+            this._className = data.Substring(first, last - first);
             first = last + 1;
             last = data.IndexOf("(", first);
-            this._methodName = data.Substring(first, last);
+            this._methodName = data.Substring(first, last - first);
         }
 
         /// <summary>
@@ -98,7 +99,7 @@ namespace Structures
         {
             String test = "RandoopTest";
             String unit = "UnitTest";
-            String data = this._stackTraceOrder[this._stackTraceLenght - 1];
+            String data = this._stackTraceOrder[this._stackTraceLenght - 2];
             String number = data.Substring(data.LastIndexOf(test) + test.Length, data.LastIndexOf("." + unit));
             this._testFileName = test + number;
             this._numberedTest = unit + number;

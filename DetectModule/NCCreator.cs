@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Structures;
+using Commons;
 
 namespace DetectModule
 {
@@ -23,7 +25,16 @@ namespace DetectModule
 
         public HashSet<Nonconformance> ListNonconformances()
         {
-            return null;
+            HashSet<Nonconformance> result = new HashSet<Nonconformance>();
+            XDocument doc = XDocument.Load(Constants.TEST_ERRORS);
+            var testUnits = doc.Descendants().ElementAt(7).Descendants();
+            for(int i = 0; i < testUnits.Count(); i += 5)
+            {
+                string message = testUnits.ElementAt(i + 3).Value;
+                string stackTrace = testUnits.ElementAt(i + 4).Value;
+                result.Add(new Nonconformance(message, stackTrace));
+            }
+            return result;
         }
 
     }

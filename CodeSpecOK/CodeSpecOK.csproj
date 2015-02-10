@@ -32,6 +32,10 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>
+    </StartupObject>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -45,6 +49,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DetectConsole.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DetectConsole.Designer.cs">
+      <DependentUpon>DetectConsole.cs</DependentUpon>
+    </Compile>
     <Compile Include="MainScreen.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -53,6 +63,9 @@
     </Compile>
     <Compile Include="Controller.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="DetectConsole.resx">
+      <DependentUpon>DetectConsole.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="MainScreen.resx">
       <DependentUpon>MainScreen.cs</DependentUpon>
     </EmbeddedResource>
@@ -89,6 +102,14 @@
     <ProjectReference Include="..\Commons\Commons.csproj">
       <Project>{4a77908b-2b1c-49de-91f9-2ffcd51e7d1e}</Project>
       <Name>Commons</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DetectModule\DetectModule.csproj">
+      <Project>{6932f3d6-2d49-42ff-b818-401205d154ff}</Project>
+      <Name>DetectModule</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Structures\Structures.csproj">
+      <Project>{12eeb6c8-6ec1-4eab-8fcf-56e64801b895}</Project>
+      <Name>Structures</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
