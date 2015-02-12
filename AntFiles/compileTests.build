@@ -1,0 +1,47 @@
+<project name="Tests Compiler" default="move_result" basedir="..\..">
+
+	<target name="copy_BinFile">
+		<echo>
+			Copy of DLL for Unit Testing made on Tests folder.
+		</echo>
+			<copy todir="${dir_target}">
+				<fileset basedir="${DirBin_toCopy}">
+					<include name="${name_project}.exe"/>
+				</fileset>
+			</copy>
+	</target>
+	
+	<target name="compile_tests" depends="copy_BinFile">
+		<echo>
+			Compiling tests with csc.
+		</echo>
+			<csc target="library" output="${dir_target}\RandoopTestSuite.dll" debug="false">
+				<sources basedir="${dir_target}">
+					<include name="**/*.cs"/>
+				</sources>
+				<references>
+					<include name="${dir_target}\Microsoft.VisualStudio.QualityTools.UnitTestFramework.dll"/>
+					<include name="${dir_target}\${name_project}.exe"/>
+				</references>
+			</csc>
+	</target>
+	
+	<target name="run_tests" depends="compile_tests">
+		<echo>
+			Running tests with VSTest.Console.exe.
+		</echo>
+			<exec program="${path_Vstest}">
+				<arg value="/Logger:trx"/>
+				<arg value="${dir_target}\RandoopTestSuite.dll"/>
+			</exec>
+	</target>
+								
+	<target name="move_result" depends="run_tests">
+			<move tofile="${result_dir}\TestResult.xml" >
+				<fileset basedir="${test_result_dir}">
+      				<include name="**/*.trx"/>
+			    </fileset>
+			</move>
+	</target>
+	
+</project>
