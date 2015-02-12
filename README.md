@@ -1,4 +1,4 @@
-CodeSpecOK
+ContractOk
 ================
 
-CodeSpecOK is a version of JMLOK for C# with contracts written in CodeContracts.
+ContractOk is a version of JMLOK for C# with contracts written in CodeContracts.
