@@ -174,7 +174,7 @@
             // btClean
             // 
             this.btClean.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel, ((byte)(0)));
-            this.btClean.Location = new System.Drawing.Point(327, 132);
+            this.btClean.Location = new System.Drawing.Point(218, 132);
             this.btClean.Name = "btClean";
             this.btClean.Size = new System.Drawing.Size(79, 26);
             this.btClean.TabIndex = 13;
@@ -185,7 +185,7 @@
             // btRun
             // 
             this.btRun.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel, ((byte)(0)));
-            this.btRun.Location = new System.Drawing.Point(412, 132);
+            this.btRun.Location = new System.Drawing.Point(303, 132);
             this.btRun.Name = "btRun";
             this.btRun.Size = new System.Drawing.Size(79, 26);
             this.btRun.TabIndex = 14;
@@ -197,7 +197,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(609, 171);
+            this.ClientSize = new System.Drawing.Size(473, 165);
             this.Controls.Add(this.btRun);
             this.Controls.Add(this.btClean);
             this.Controls.Add(this.lbSetSrc);
@@ -215,7 +215,8 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "MainScreen";
-            this.Text = "CodeSpecOK";
+            this.Text = "ContractOk";
+            this.Load += new System.EventHandler(this.MainScreen_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pb3)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pb2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pb1)).EndInit();

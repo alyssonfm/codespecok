@@ -53,5 +53,10 @@ namespace CodeSpecOK
         {
             Controller.startDetectPhase(this._srcFolder, this._libFolder, this.tbSeconds.Text);
         }
+
+        private void MainScreen_Load(object sender, EventArgs e)
+        {
+
+        }
     }
 }
