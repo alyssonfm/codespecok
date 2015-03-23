@@ -1,12 +1,11 @@
 ﻿using System;
 using System.IO;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Commons
 {
+    /// <summary>
+    /// Class containing path to all important folders on ContractOK execution.
+    /// </summary>
     public static class Constants
     {
         
@@ -30,6 +29,8 @@ namespace Commons
 	//Constants to result of Randoop execution under SUT.
     public static readonly String TEST_ERRORS = TEST_RESULTS + FILE_SEPARATOR + "TestResult.xml";
 	//Constant to file that contains the result more cleaned. The nonconformances detected by the tool.
-    public static readonly String RESULTS = TEMP_DIR + FILE_SEPARATOR + "results.xml";
+    public static readonly String RESULTS_DETECTED = TEST_RESULTS + FILE_SEPARATOR + "ResultsDetected.xml";
+    public static readonly String RESULTS_CATEGORIZED = TEST_RESULTS + FILE_SEPARATOR + "ResultsCategorized.xml";
+
     }
 }

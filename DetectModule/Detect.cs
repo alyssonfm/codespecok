@@ -1,61 +1,45 @@
-﻿using System;
-using System.Diagnostics;
+﻿using Commons;
+using Structures;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Resources;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using System.Xml;
-using Commons;
-using Structures;
-using NAnt.Core;
 
 namespace DetectModule
 {
+    /// <summary>
+    /// The type of Event that Detect calls on each stage of its execution.
+    /// </summary>
+    /// <param name="text">Text that will be shown on DetectScreen console.</param>
     public delegate void DetectEvent(String text);
 
-    public class CustomWriter : TextWriter
-    {
-        private StringWriter _buff;
-
-        public CustomWriter(StringWriter b)
-        {
-            this._buff = b;
-        }
-
-        public override Encoding Encoding
-        {
-            get { return Encoding.Default; }
-        }
-
-        public override void Write(int b)
-        {
-            this._buff.GetStringBuilder().Append(b);
-        }
-    }
-
+    /// <summary>
+    /// Class responsible to Detect nonconformances on a C#/CodeContracts project.
+    /// </summary>
     public class Detect
     {
+        // Events thrown to GUI purposes (they update the user on which 
+        // stage is currently running on Detect phase).
         public event DetectEvent DirectoriesCreated;
         public event DetectEvent ProjectCompiled;
         public event DetectEvent TestsGenerated;
         public event DetectEvent TestsExecuted;
         public event DetectEvent ErrorOnDetectPhase;
 
-        public static void ExMethod()
-        {
-
-        }
-
+        // Information necessary to Detect phase.
         private String _srcFolder;
         private String _libFolder;
         private String _projName;
         private String _timeout;
 
+        // A watch to analyse the time needed for each stage.
         private Stopwatch _watch;
 
+        /// <summary>
+        /// Object to help recording actual Stage of Detect phase.
+        /// </summary>
         enum Stages : int { 
             CREATED_DIRECTORIES, 
             COMPILED_PROJECT, 
@@ -72,44 +56,67 @@ namespace DetectModule
             while (!Directory.Exists(Constants.TEMP_DIR)){
                 Directory.CreateDirectory(Constants.TEMP_DIR);
             }
+            // The watch needed to record time is created.
             this._watch = new Stopwatch();
         }
-
+        /// <summary>
+        /// Detect phase begins, and the Detect object will use source location, and time
+        /// to generate tests to detect nonconformances on project given.
+        /// </summary>
+        /// <param name="source">The source folder path for the project needed to be tested.</param>
+        /// <param name="lib">The libraries folder path fot the libraries needed for project to run.</param>
+        /// <param name="timeout">Time to generate tests.</param>
+        /// <returns>Set of nonconformances founded.</returns>
         public HashSet<Nonconformance> DetectErrors(String source, String lib, String timeout)
         {
             try
             {
-                // Execute scripts division starts here
+                // Execute all scripts, one for stage.
                 Execute(source, lib, timeout);
-                // List Errors
+                // List Errors, save results and return nonconformances.
                 NCCreator ncfinder = new NCCreator();
-                return ncfinder.ListNonconformances();
+                return GenerateResult.Save(ncfinder.ListNonconformances(), false);
             }
             catch (Exception e)
             {
+                // On error, inform the user.
                 TriggersEvent(Stages.ERROR_ON_DETECTION, e.Message);
                 return new HashSet<Nonconformance>();
             }
         }
-
+        /// <summary>
+        /// Call each stage of Detection phase.
+        /// </summary>
+        /// <param name="src">Source folder path where the project are.</param>
+        /// <param name="lib">Libraries folder path where libraries needed to project run are.</param>
+        /// <param name="time">Time for test generation.</param>
         public void Execute(String src, String lib, String time)
         {
+                // Initialize information to run the stages.
                 this._srcFolder = src;
                 this._libFolder = lib;
                 this._projName = src.Substring(src.LastIndexOf(Constants.FILE_SEPARATOR) + 1).Trim();
+                this._timeout = time;
 
+                // Starts counting time.
                 InitTimer();
 
-                this._timeout = time;
+                // Call each stage of Detection phase.
                 RunStage("Creating directories", "\nDirectories created in", Stages.CREATED_DIRECTORIES);
                 RunStage("\nCompiling the project", "Project compiled in", Stages.COMPILED_PROJECT);
                 RunStage("Generating tests", "Tests generated in", Stages.GENERATED_TESTS);
                 RunStage("Running test into contract-based code", "Tests ran in", Stages.EXECUTED_TESTS);
         }
-
+        /// <summary>
+        /// Run determined stage from Detection Phase, call the necessary scripts.
+        /// </summary>
+        /// <param name="iniMsg">The text to introduce text generated with current stage execution.</param>
+        /// <param name="finMsg">The text ending text generated with current stage execution.</param>
+        /// <param name="stagesDetect">Current stage to be called.</param>
         private void RunStage(String iniMsg, String finMsg, Stages stagesDetect)
         {
             String text = iniMsg + "...\n";
+            // Call correct algorithm to each stage.
 		    switch (stagesDetect) {
 		        case Stages.CREATED_DIRECTORIES:
 			        CreateDirectories();
@@ -130,8 +137,13 @@ namespace DetectModule
 			        break;
 		    }   
             text += finMsg + " " + CountTime() + " seconds";
+
+            // Send whole text generated with execution of current stage to user.
 		    TriggersEvent(stagesDetect, text);
 	    }
+        /// <summary>
+        /// Create directories needed on temporary folder to process data.
+        /// </summary>
         private void CreateDirectories()
         {
             while (!Directory.Exists(Constants.SOURCE_BIN))
@@ -151,6 +163,10 @@ namespace DetectModule
                 Directory.CreateDirectory(Constants.LIB_FOLDER);
             }
         }
+        /// <summary>
+        /// Clean the directories created, to ensures that data will not be corrupted
+        /// also, save on these folders the extra programs needed for Detect phase.
+        /// </summary>
         private void CleanDirectories()
         {
             Array.ForEach(Directory.GetFiles(Constants.SOURCE_BIN), File.Delete);
@@ -159,6 +175,9 @@ namespace DetectModule
 
             SaveResourcesOnTemp();
         }
+        /// <summary>
+        /// Save necessary programs to Detect phase on temporary folder.
+        /// </summary>
         private void SaveResourcesOnTemp()
         {
             Process.Start("Resources" + Constants.FILE_SEPARATOR + "build.exe");
@@ -167,6 +186,10 @@ namespace DetectModule
             Process.Start("Resources" + Constants.FILE_SEPARATOR + "vstest.exe");
             Process.Start("Resources" + Constants.FILE_SEPARATOR + "testdll.exe");
         }
+        /// <summary>
+        /// Execute script that will compile project with the contracts, using MSBuild.
+        /// </summary>
+        /// <returns>Text generated when compiling project.</returns>
         private string CompileProject()
         {
             ProcessStartInfo startInfo = PrepareProcess("compileProject.build");
@@ -179,6 +202,10 @@ namespace DetectModule
 
             return RunProcess(startInfo);
         }
+        /// <summary>
+        /// Execute script that will generate Tests, using Randoop.NET.
+        /// </summary>
+        /// <returns>Text generated when generating tests.</returns>
         private string GenerateTests()
         {
             ProcessStartInfo startInfo = PrepareProcess("generateTests.build");
@@ -193,6 +220,10 @@ namespace DetectModule
 
             return RunProcess(startInfo);
         }
+        /// <summary>
+        /// Execute script that will run tests generated, using VsTest.Console.
+        /// </summary>
+        /// <returns>Text generated when running tests.</returns>
         private string RunTests()
         {
             ProcessStartInfo startInfo = PrepareProcess("compileTests.build");
@@ -206,11 +237,15 @@ namespace DetectModule
             startInfo.WorkingDirectory = Constants.TEMP_DIR;
 
             string text = RunProcess(startInfo);
+
+            // Move test results, to make nonconformances creation easier.
             MoveResultFiles();
 
             return text;
         }
-
+        /// <summary>
+        /// Move TestResult file, to turn nonconformance creation easier for NCCreator.
+        /// </summary>
         private void MoveResultFiles()
         {
             var matches = Directory.GetFiles(Constants.TEMP_DIR + Constants.FILE_SEPARATOR + "TestResults").Where(path => Regex.Match(path, @".trx").Success);
@@ -219,16 +254,26 @@ namespace DetectModule
             }
             Directory.Delete(Constants.TEMP_DIR + Constants.FILE_SEPARATOR + "TestResults", true);
         }
-        
+        /// <summary>
+        /// Prepare a process command to run determined script.
+        /// </summary>
+        /// <param name="ant">Script needed to run.</param>
+        /// <returns>Return the process information.</returns>
         private ProcessStartInfo PrepareProcess(String ant)
         {
             ProcessStartInfo startInfo = new ProcessStartInfo(Constants.NANT_EXE);
             startInfo.UseShellExecute = false;
             startInfo.RedirectStandardOutput = true;
             startInfo.RedirectStandardError = true;
+            startInfo.CreateNoWindow = true;
             startInfo.Arguments = "-buildfile:\"" + Constants.BUILDS_LIB + Constants.FILE_SEPARATOR + ant + "\"";
             return startInfo;
         }
+        /// <summary>
+        /// Run a process command, executing a script.
+        /// </summary>
+        /// <param name="startInfo">Process information needed for execution.</param>
+        /// <returns>The output of process execution.</returns>
         private String RunProcess(ProcessStartInfo startInfo)
         {
             Process p = new Process();
@@ -239,38 +284,28 @@ namespace DetectModule
             p.WaitForExit();
             return output + error;
         }
-        private void RunProject(StringWriter buff, Project p, string mainTarget, DefaultLogger consoleLogger)
-        {
-            p.BuildListeners.Add(consoleLogger);
-            p.Run();
-            try{
-                p.Execute(mainTarget);
-            } catch (Exception e){
-			    System.Console.Write(buff.ToString());
-			    throw new Exception(e.Message);
-		    }
-            System.Console.Write(buff.ToString());
-        }
-
-        
-
-        private String GetEXEPath()
-        {
-            return System.Reflection.Assembly.GetEntryAssembly().Location;
-        }
-
+        /// <summary>
+        /// Initializer timer.
+        /// </summary>
         private void InitTimer()
         {
             this._watch.Reset();
             this._watch.Start();
         }
-
+        /// <summary>
+        /// Stop timer and calculate the time it has passed.
+        /// </summary>
+        /// <returns>The time it has passed.</returns>
         private double CountTime()
         {
             this._watch.Stop();
             return this._watch.ElapsedMilliseconds / 1000.0;
         }
-
+        /// <summary>
+        /// Call event, updating user about Detection execution.
+        /// </summary>
+        /// <param name="stage">Last stage that were ran.</param>
+        /// <param name="text">Text generated with Stage execution.</param>
         private void TriggersEvent(Stages stage, String text)
         {
             switch (stage)
@@ -296,7 +331,14 @@ namespace DetectModule
                     break;
             }
         }
-
+        /// <summary>
+        /// Register events to be executed on each Stage of Detection phase.
+        /// </summary>
+        /// <param name="dc">Event telling about Directories creation process.</param>
+        /// <param name="pc">Event telling about Project compilation process.</param>
+        /// <param name="tg">Event telling about Test generation process.</param>
+        /// <param name="te">Event telling about Test execution process.</param>
+        /// <param name="ed">Event telling about any error that can occur on Detection phase.</param>
         public void RegisterEvents(DetectEvent dc, DetectEvent pc, DetectEvent tg, DetectEvent te, DetectEvent ed)
         {
             DirectoriesCreated += dc;

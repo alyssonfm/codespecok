@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace CodeSpecOK
+namespace ContractOK
 {
     public partial class MainScreen : Form
     {
@@ -51,7 +51,13 @@ namespace CodeSpecOK
 
         private void btRun_Click(object sender, EventArgs e)
         {
-            Controller.startDetectPhase(this._srcFolder, this._libFolder, this.tbSeconds.Text);
+            this.Visible = false;
+            Controller.StartDetectPhase(this._srcFolder, this._libFolder, this.tbSeconds.Text);
+        }
+
+        private void MainScreen_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }
