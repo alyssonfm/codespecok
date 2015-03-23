@@ -1,4 +1,4 @@
-﻿namespace CodeSpecOK
+﻿namespace ContractOK
 {
     partial class MainScreen
     {
@@ -112,7 +112,7 @@
             // 
             // pb3
             // 
-            this.pb3.Image = global::CodeSpecOK.Properties.Resources.ClockIcon;
+            this.pb3.Image = global::ContractOK.Properties.Resources.ClockIcon;
             this.pb3.InitialImage = ((System.Drawing.Image)(resources.GetObject("pb3.InitialImage")));
             this.pb3.Location = new System.Drawing.Point(350, 94);
             this.pb3.Name = "pb3";
@@ -123,7 +123,7 @@
             // 
             // pb2
             // 
-            this.pb2.Image = global::CodeSpecOK.Properties.Resources.FolderIcon;
+            this.pb2.Image = global::ContractOK.Properties.Resources.FolderIcon;
             this.pb2.InitialImage = ((System.Drawing.Image)(resources.GetObject("pb2.InitialImage")));
             this.pb2.Location = new System.Drawing.Point(350, 56);
             this.pb2.Name = "pb2";
@@ -134,7 +134,7 @@
             // 
             // pb1
             // 
-            this.pb1.Image = global::CodeSpecOK.Properties.Resources.FolderIcon;
+            this.pb1.Image = global::ContractOK.Properties.Resources.FolderIcon;
             this.pb1.InitialImage = ((System.Drawing.Image)(resources.GetObject("pb1.InitialImage")));
             this.pb1.Location = new System.Drawing.Point(350, 16);
             this.pb1.Name = "pb1";
@@ -215,7 +215,11 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "MainScreen";
+<<<<<<< HEAD
             this.Text = "ContractOk";
+=======
+            this.Text = "ContractOK";
+>>>>>>> 9e0b0772015380beaa660802816791312d1a2f50
             this.Load += new System.EventHandler(this.MainScreen_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pb3)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pb2)).EndInit();

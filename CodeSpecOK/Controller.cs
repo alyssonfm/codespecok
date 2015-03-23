@@ -1,14 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using DetectModule;
+using CategorizeModule;
+using Structures;
 
-namespace CodeSpecOK
+namespace ContractOK
 {
     static class Controller
     {
+        private static MainScreen mainSc;
+        private static DetectConsole dconSc;
+        private static DetectedDisplay ddisSc;
+        private static CategorizedDisplay cdisSc;
+        private static HashSet<Nonconformance> nonconformances;
+        private static String sourceFolder;
+
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
@@ -17,14 +24,40 @@ namespace CodeSpecOK
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new MainScreen());
+            mainSc = new MainScreen();
+            Application.Run(mainSc);
         }
 
-        static public void startDetectPhase(String srcFolder, String libFolder, String time){
+        static public void StartDetectPhase(String srcFolder, String libFolder, String time){
+            sourceFolder = srcFolder;
+
             Detect d = new Detect();
-            DetectConsole con = new DetectConsole(d);
-            con.Show();
-            d.DetectErrors(srcFolder, libFolder, time);
+
+            dconSc = new DetectConsole(d);
+            Application.DoEvents();
+
+            nonconformances = d.DetectErrors(srcFolder, libFolder, time);
+        }
+
+        static public void StartCategorizationPhase()
+        {
+            Categorize c = new Categorize();
+            nonconformances = c.categorize(nonconformances, sourceFolder);
+
+            dconSc.Visible = false;
+            cdisSc = new CategorizedDisplay(nonconformances);
+            Application.DoEvents();
+        }
+
+        static public void ShowDetectDisplay()
+        {
+            dconSc.Visible = false;
+            ddisSc = new DetectedDisplay(nonconformances);
+        }
+
+        static public void MakeMainVisibleAgain()
+        {
+            mainSc.Visible = true;
         }
 
 

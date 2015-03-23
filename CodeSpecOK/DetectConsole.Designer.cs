@@ -1,4 +1,4 @@
-﻿namespace CodeSpecOK
+﻿namespace ContractOK
 {
     partial class DetectConsole
     {
@@ -33,6 +33,7 @@
             this.progressBar = new System.Windows.Forms.ProgressBar();
             this.btViewNonconformances = new System.Windows.Forms.Button();
             this.btCategorize = new System.Windows.Forms.Button();
+            this.backgroundWorkerProgressBar = new System.ComponentModel.BackgroundWorker();
             this.SuspendLayout();
             // 
             // textArea
@@ -40,8 +41,11 @@
             this.textArea.Location = new System.Drawing.Point(31, 58);
             this.textArea.Multiline = true;
             this.textArea.Name = "textArea";
+            this.textArea.ReadOnly = true;
+            this.textArea.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.textArea.Size = new System.Drawing.Size(860, 314);
             this.textArea.TabIndex = 0;
+            this.textArea.TextChanged += new System.EventHandler(this.textArea_TextChanged);
             // 
             // lbStage
             // 
@@ -49,9 +53,9 @@
             this.lbStage.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel, ((byte)(0)));
             this.lbStage.Location = new System.Drawing.Point(40, 21);
             this.lbStage.Name = "lbStage";
-            this.lbStage.Size = new System.Drawing.Size(106, 20);
+            this.lbStage.Size = new System.Drawing.Size(127, 20);
             this.lbStage.TabIndex = 1;
-            this.lbStage.Text = "Detect Phase";
+            this.lbStage.Text = "Detection Phase";
             // 
             // progressBar
             // 
@@ -81,6 +85,11 @@
             this.btCategorize.TabIndex = 4;
             this.btCategorize.Text = "Categorize";
             this.btCategorize.UseVisualStyleBackColor = true;
+            this.btCategorize.Click += new System.EventHandler(this.btCategorize_Click);
+            // 
+            // backgroundWorkerProgressBar
+            // 
+            this.backgroundWorkerProgressBar.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorkerProgressBar_DoWork);
             // 
             // DetectConsole
             // 
@@ -93,7 +102,8 @@
             this.Controls.Add(this.lbStage);
             this.Controls.Add(this.textArea);
             this.Name = "DetectConsole";
-            this.Text = "DetectConsole";
+            this.Text = "Detection Screen";
+            this.Load += new System.EventHandler(this.DetectConsole_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -106,5 +116,6 @@
         private System.Windows.Forms.ProgressBar progressBar;
         private System.Windows.Forms.Button btViewNonconformances;
         private System.Windows.Forms.Button btCategorize;
+        private System.ComponentModel.BackgroundWorker backgroundWorkerProgressBar;
     }
 }
