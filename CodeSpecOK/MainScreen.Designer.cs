@@ -43,8 +43,8 @@
             this.lbSetSrc = new System.Windows.Forms.Label();
             this.btClean = new System.Windows.Forms.Button();
             this.btRun = new System.Windows.Forms.Button();
-            this.folderBrowserSrcDialog = new System.Windows.Forms.FolderBrowserDialog();
             this.folderBrowserLibDialog = new System.Windows.Forms.FolderBrowserDialog();
+            this.solutionFileBrowserDialog = new System.Windows.Forms.OpenFileDialog();
             ((System.ComponentModel.ISupportInitialize)(this.pb3)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pb2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pb1)).BeginInit();
@@ -54,11 +54,11 @@
             // 
             this.lbChooseSrc.AutoSize = true;
             this.lbChooseSrc.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel, ((byte)(0)));
-            this.lbChooseSrc.Location = new System.Drawing.Point(85, 21);
+            this.lbChooseSrc.Location = new System.Drawing.Point(70, 21);
             this.lbChooseSrc.Name = "lbChooseSrc";
-            this.lbChooseSrc.Size = new System.Drawing.Size(160, 20);
+            this.lbChooseSrc.Size = new System.Drawing.Size(175, 20);
             this.lbChooseSrc.TabIndex = 0;
-            this.lbChooseSrc.Text = "Choose source folder";
+            this.lbChooseSrc.Text = "Choose project solution";
             // 
             // btBrSrc
             // 
@@ -193,6 +193,10 @@
             this.btRun.UseVisualStyleBackColor = true;
             this.btRun.Click += new System.EventHandler(this.btRun_Click);
             // 
+            // solutionFileBrowserDialog
+            // 
+            this.solutionFileBrowserDialog.FileName = "solutionFileBrowserDialog";
+            // 
             // MainScreen
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -215,11 +219,7 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "MainScreen";
-<<<<<<< HEAD
-            this.Text = "ContractOk";
-=======
             this.Text = "ContractOK";
->>>>>>> 9e0b0772015380beaa660802816791312d1a2f50
             this.Load += new System.EventHandler(this.MainScreen_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pb3)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pb2)).EndInit();
@@ -245,8 +245,8 @@
         private System.Windows.Forms.Label lbSetSrc;
         private System.Windows.Forms.Button btClean;
         private System.Windows.Forms.Button btRun;
-        private System.Windows.Forms.FolderBrowserDialog folderBrowserSrcDialog;
         private System.Windows.Forms.FolderBrowserDialog folderBrowserLibDialog;
+        private System.Windows.Forms.OpenFileDialog solutionFileBrowserDialog;
     }
 }
 

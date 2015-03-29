@@ -14,15 +14,15 @@ namespace CategorizeModule
         public List<ArgumentSyntax> Requires { get; set; } = new List<ArgumentSyntax>();
         public List<ArgumentSyntax> Ensures { get; set; } = new List<ArgumentSyntax>();
     }
-    class Examinator
+    class Examinator 
     {
         private const int _VAR_FALSE = int.MinValue;
-        private bool _isAllVarUpdated = false;
         private string _sourceFolder;
         private string _principalClass;
         private string _CONSTRUCTOR_ALIAS = "<init>";
         private List<String> _variables;
         private Assembly _assembly;
+        private AppDomain _appDomain;
 
         public enum Operations
         {
@@ -33,7 +33,16 @@ namespace CategorizeModule
         {
             this._sourceFolder = srcFolder;
             string projName = srcFolder.Substring(srcFolder.LastIndexOf(Constants.FILE_SEPARATOR) + 1);
-            _assembly = Assembly.LoadFile(Constants.SOURCE_BIN + Constants.FILE_SEPARATOR + projName + ".exe");
+
+            _appDomain = AppDomain.CreateDomain("ExaminatorDomain", null);
+
+            var assemblyLoader = (CustomAssemblyLoader)_appDomain.
+                CreateInstanceAndUnwrap(typeof(CustomAssemblyLoader).Assembly.FullName, typeof(CustomAssemblyLoader).FullName);
+            assemblyLoader.LoadFrom(Constants.SOURCE_BIN + Constants.FILE_SEPARATOR + projName + ".exe");
+
+            _assembly = assemblyLoader.GetLoadedAssemblyOnAppDomain();
+            //_assembly = _appDomain.Load(System.IO.File.ReadAllBytes(Constants.SOURCE_BIN + Constants.FILE_SEPARATOR + projName + ".exe"));
+            //_assembly = Assembly.ReflectionOnlyLoadFrom(Constants.SOURCE_BIN + Constants.FILE_SEPARATOR + projName + ".exe");
         }
 
         public void SetPrincipalClassName(string className){
@@ -44,7 +53,6 @@ namespace CategorizeModule
                 if (!this._variables.Contains(f.Name.ToString()))
                     this._variables.Add(f.Name.ToString());
             }
-            this._isAllVarUpdated = false;
         }
         public string GetPrincipalClassName()
         {
@@ -84,37 +92,22 @@ namespace CategorizeModule
         {
             if (methodName.Equals(GetOnlyClassName(this.GetPrincipalClassName())))
                 methodName = this._CONSTRUCTOR_ALIAS;
-            try
-            {
-                return ExamineCSharpCode(this.GetPrincipalClassName(), methodName, Operations.ATR_VAR_IN_PRECONDITION);
-            }
-            catch (Exception e)
-            {
-                throw new Exception("Error when Checking Strong Precondition cause./n" + e.Message);
-            }
+            return ExamineCSharpCode(this.GetPrincipalClassName(), methodName, Operations.ATR_VAR_IN_PRECONDITION);
         }
         public bool CheckWeakPrecondition(string method)
         {
             if (method.Equals(GetOnlyClassName(this.GetPrincipalClassName())))
-                method = this._CONSTRUCTOR_ALIAS;
-            try
-            {
-                if (ExamineCSharpCode(this.GetPrincipalClassName(), method, Operations.REQUIRES_TRUE))
-                    return true;
-                if (ExamineCSharpCode(this.GetPrincipalClassName(), method, Operations.ATR_MOD))
-                    return true;
-                if (ExamineCSharpCode(this.GetPrincipalClassName(), method, Operations.ENSURES_TRUE))
-                    return true;
-            }
-            catch (Exception e)
-            {
-                throw new Exception("Error when Checking Strong Precondition cause./n" + e.Message);
-            }
+                method = this._CONSTRUCTOR_ALIAS;            
+            if (ExamineCSharpCode(this.GetPrincipalClassName(), method, Operations.REQUIRES_TRUE))
+                return true;
+            if (ExamineCSharpCode(this.GetPrincipalClassName(), method, Operations.ATR_MOD))
+                return true;
+            if (ExamineCSharpCode(this.GetPrincipalClassName(), method, Operations.ENSURES_TRUE))
+                return true;            
             return false;
         }
         private bool ExamineCSharpCode(String className, String methodName, Operations typeOfExamination)
         {
-
             ClassDeclarationSyntax ourClass = TakeClassFromFile(GetCSPathFromFile(className), className);
 		    if(ourClass == null)
 			    return false;
@@ -366,10 +359,14 @@ namespace CategorizeModule
             // Will Need Recursion.
             List<String> vars = GetListOfVarsToVerify(parameters);
 
-            foreach(ExpressionStatementSyntax e in block)
+            foreach(StatementSyntax s in block)
             {
-                if (IsSomeVarOrAtrGettingAttribution(vars, e.Expression))
-                    return true;
+                if(s is ExpressionStatementSyntax)
+                {
+                    ExpressionStatementSyntax e = (ExpressionStatementSyntax) s;
+                    if (IsSomeVarOrAtrGettingAttribution(vars, e.Expression))
+                        return true;
+                }
             }
             return false;
         }
@@ -426,10 +423,6 @@ namespace CategorizeModule
 
                 }
             }
-            else
-            {
-                this._isAllVarUpdated = true;
-            }
             return false;
         }
 
@@ -452,29 +445,42 @@ namespace CategorizeModule
 
         private ClassDeclarationSyntax TakeClassFromFile(string path, string classString)
         {
-            SyntaxTree st = CSharpSyntaxTree.ParseText(GetTextFromFile(path));
-            string className, nameSpaceName;
-            ClassDeclarationSyntax classDecl;
+            try{
+                SyntaxTree st = CSharpSyntaxTree.ParseText(GetTextFromFile(path));
+                string className, nameSpaceName;
+                ClassDeclarationSyntax classDecl;
 
-            className = GetOnlyClassName(classString);
-            if (className.Equals(classString))
-            {
-                nameSpaceName = "";
-            } else {
-                nameSpaceName = classString.Substring(0, classString.IndexOf("."));
-            }
+                className = GetOnlyClassName(classString);
+                if (className.Equals(classString))
+                {
+                    nameSpaceName = "";
+                } else {
+                    nameSpaceName = classString.Substring(0, classString.IndexOf("."));
+                }
                 
-            var root = (CompilationUnitSyntax) st.GetRoot();
+                var root = (CompilationUnitSyntax) st.GetRoot();
 
-            if (nameSpaceName.Equals(""))
-            {
-                classDecl = GetClassFromList(root.Members, className);
-            } else {
-                var nameSpaceDecl = GetNamepaceFromList(root.Members, nameSpaceName);
-                classDecl = GetClassFromList(nameSpaceDecl.Members, className);
+                if (nameSpaceName.Equals(""))
+                {
+                    classDecl = GetClassFromList(root.Members, className);
+                } else {
+                    var nameSpaceDecl = GetNamepaceFromList(root.Members, nameSpaceName);
+                    classDecl = GetClassFromList(nameSpaceDecl.Members, className);
+                }
+
+                return classDecl;
             }
-
-            return classDecl;
+            catch (Exception e)
+            {
+                if (classString.Equals(this._principalClass))
+                {
+                    throw new Exception(e.Message + "Principal class couldn't be load.");
+                }
+                else
+                {
+                    return null;
+                }
+            }
         }
 
         public NamespaceDeclarationSyntax GetNamepaceFromList(SyntaxList<MemberDeclarationSyntax> list, string name)
@@ -520,6 +526,10 @@ namespace CategorizeModule
                 String line = sr.ReadToEnd();
                 return line;
             }
+        }
+
+        public void EndExamination() {
+            AppDomain.Unload(_appDomain);
         }
     }
 }

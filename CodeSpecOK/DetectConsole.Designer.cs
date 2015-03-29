@@ -103,7 +103,6 @@
             this.Controls.Add(this.textArea);
             this.Name = "DetectConsole";
             this.Text = "Detection Screen";
-            this.Load += new System.EventHandler(this.DetectConsole_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 

@@ -30,6 +30,7 @@ namespace DetectModule
 
         // Information necessary to Detect phase.
         private String _srcFolder;
+        private String _solutionFile;
         private String _libFolder;
         private String _projName;
         private String _timeout;
@@ -67,12 +68,12 @@ namespace DetectModule
         /// <param name="lib">The libraries folder path fot the libraries needed for project to run.</param>
         /// <param name="timeout">Time to generate tests.</param>
         /// <returns>Set of nonconformances founded.</returns>
-        public HashSet<Nonconformance> DetectErrors(String source, String lib, String timeout)
+        public HashSet<Nonconformance> DetectErrors(String source, String solutionFile, String lib, String timeout)
         {
             try
             {
                 // Execute all scripts, one for stage.
-                Execute(source, lib, timeout);
+                Execute(source, solutionFile, lib, timeout);
                 // List Errors, save results and return nonconformances.
                 NCCreator ncfinder = new NCCreator();
                 return GenerateResult.Save(ncfinder.ListNonconformances(), false);
@@ -90,10 +91,11 @@ namespace DetectModule
         /// <param name="src">Source folder path where the project are.</param>
         /// <param name="lib">Libraries folder path where libraries needed to project run are.</param>
         /// <param name="time">Time for test generation.</param>
-        public void Execute(String src, String lib, String time)
+        public void Execute(String src, String sln, String lib, String time)
         {
                 // Initialize information to run the stages.
                 this._srcFolder = src;
+                this._solutionFile = sln;
                 this._libFolder = lib;
                 this._projName = src.Substring(src.LastIndexOf(Constants.FILE_SEPARATOR) + 1).Trim();
                 this._timeout = time;
@@ -169,9 +171,13 @@ namespace DetectModule
         /// </summary>
         private void CleanDirectories()
         {
-            Array.ForEach(Directory.GetFiles(Constants.SOURCE_BIN), File.Delete);
-            Array.ForEach(Directory.GetFiles(Constants.TEST_OUTPUT), File.Delete);
-            Array.ForEach(Directory.GetFiles(Constants.TEST_RESULTS), File.Delete);
+            var di = new DirectoryInfo(Constants.TEMP_DIR);
+            foreach (var file in di.GetFiles("*", SearchOption.AllDirectories))
+                //File.SetAttributes(file.DirectoryName, FileAttributes.Normal);
+                file.Attributes &= ~FileAttributes.ReadOnly;
+            foreach (var path in new string []{Constants.SOURCE_BIN, Constants.TEST_OUTPUT, Constants.TEST_RESULTS}){
+                Array.ForEach(Directory.GetFiles(path), File.Delete);
+            }
 
             SaveResourcesOnTemp();
         }
@@ -196,7 +202,7 @@ namespace DetectModule
             String arg = " ";
             arg += "-D:source_folder=\"" + this._srcFolder + "\" ";
             arg += "-D:build_dir=\"" + Constants.SOURCE_BIN + "\" ";
-            arg += "-D:project_name=" + this._projName + " ";
+            arg += "-D:project_sln=" + this._solutionFile + " ";
             arg += "compile_project";
             startInfo.Arguments += arg;
 

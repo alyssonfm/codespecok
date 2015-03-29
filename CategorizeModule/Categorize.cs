@@ -46,6 +46,7 @@ namespace CategorizeModule
             }
 
             GenerateResult.Save(errors, true);
+            this._examiner.EndExamination();
             return errors;
         }
 

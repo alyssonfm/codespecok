@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Windows.Forms;
 using Structures;
@@ -31,6 +32,11 @@ namespace ContractOK
             this.nodeClass = this.nodeNamespace.Nodes[0];
             this.nodeMethod = this.nodeClass.Nodes[0];
 
+            this.Closing += (object sender, CancelEventArgs e) =>
+            {
+                Controller.MakeMainVisibleAgain();
+            };
+
             this.Show();
         }
 
@@ -42,11 +48,6 @@ namespace ContractOK
             this.nodeClass.Text = n.GetClassName();
             this.nodeMethod.Text = n.GetMethodName();
             lbSetLikelyCause.Text = n.GetLikelyCause();
-        }
-
-        private void DetectedDisplay_Load(object sender, EventArgs e)
-        {
-
         }
 
         private void treeView1_AfterSelect(object sender, TreeViewEventArgs e)

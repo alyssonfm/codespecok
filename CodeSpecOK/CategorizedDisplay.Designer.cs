@@ -42,8 +42,8 @@
             this.treeView1 = new System.Windows.Forms.TreeView();
             this.tbTextSample = new System.Windows.Forms.TextBox();
             this.lbFixed05 = new System.Windows.Forms.Label();
-            this.button1 = new System.Windows.Forms.Button();
-            this.button2 = new System.Windows.Forms.Button();
+            this.btSaveResults = new System.Windows.Forms.Button();
+            this.btStackTrace = new System.Windows.Forms.Button();
             this.lbLikelyCause = new System.Windows.Forms.Label();
             this.lbSetLikelyCause = new System.Windows.Forms.Label();
             this.SuspendLayout();
@@ -142,25 +142,25 @@
             this.lbFixed05.TabIndex = 8;
             this.lbFixed05.Text = "Test Sample";
             // 
-            // button1
+            // btSaveResults
             // 
-            this.button1.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel, ((byte)(0)));
-            this.button1.Location = new System.Drawing.Point(37, 356);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(144, 32);
-            this.button1.TabIndex = 9;
-            this.button1.Text = "Save Results";
-            this.button1.UseVisualStyleBackColor = true;
+            this.btSaveResults.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel, ((byte)(0)));
+            this.btSaveResults.Location = new System.Drawing.Point(37, 356);
+            this.btSaveResults.Name = "btSaveResults";
+            this.btSaveResults.Size = new System.Drawing.Size(144, 32);
+            this.btSaveResults.TabIndex = 9;
+            this.btSaveResults.Text = "Save Results";
+            this.btSaveResults.UseVisualStyleBackColor = true;
             // 
-            // button2
+            // btStackTrace
             // 
-            this.button2.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel, ((byte)(0)));
-            this.button2.Location = new System.Drawing.Point(256, 356);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(134, 31);
-            this.button2.TabIndex = 10;
-            this.button2.Text = "StackTrace";
-            this.button2.UseVisualStyleBackColor = true;
+            this.btStackTrace.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel, ((byte)(0)));
+            this.btStackTrace.Location = new System.Drawing.Point(256, 356);
+            this.btStackTrace.Name = "btStackTrace";
+            this.btStackTrace.Size = new System.Drawing.Size(134, 31);
+            this.btStackTrace.TabIndex = 10;
+            this.btStackTrace.Text = "StackTrace";
+            this.btStackTrace.UseVisualStyleBackColor = true;
             // 
             // lbLikelyCause
             // 
@@ -187,8 +187,8 @@
             this.ClientSize = new System.Drawing.Size(804, 410);
             this.Controls.Add(this.lbSetLikelyCause);
             this.Controls.Add(this.lbLikelyCause);
-            this.Controls.Add(this.button2);
-            this.Controls.Add(this.button1);
+            this.Controls.Add(this.btStackTrace);
+            this.Controls.Add(this.btSaveResults);
             this.Controls.Add(this.lbFixed05);
             this.Controls.Add(this.tbTextSample);
             this.Controls.Add(this.treeView1);
@@ -200,7 +200,6 @@
             this.Controls.Add(this.lbFixed01);
             this.Name = "CategorizedDisplay";
             this.Text = "Categorization Screen";
-            this.Load += new System.EventHandler(this.DetectedDisplay_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -217,8 +216,8 @@
         private System.Windows.Forms.TreeView treeView1;
         private System.Windows.Forms.TextBox tbTextSample;
         private System.Windows.Forms.Label lbFixed05;
-        private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Button btSaveResults;
+        private System.Windows.Forms.Button btStackTrace;
         private System.Windows.Forms.Label lbLikelyCause;
         private System.Windows.Forms.Label lbSetLikelyCause;
     }

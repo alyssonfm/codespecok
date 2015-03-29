@@ -59,6 +59,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Categorize.cs" />
+    <Compile Include="CustomAssemblyLoader.cs" />
     <Compile Include="Examinator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

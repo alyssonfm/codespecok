@@ -1,11 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace ContractOK
@@ -13,6 +6,7 @@ namespace ContractOK
     public partial class MainScreen : Form
     {
         private String _srcFolder;
+        private String _solutionFile;
         private String _libFolder;
 
         public MainScreen()
@@ -31,11 +25,13 @@ namespace ContractOK
 
         private void btBrSrc_Click(object sender, EventArgs e)
         {
-            if (folderBrowserSrcDialog.ShowDialog() == DialogResult.OK)
+            if (solutionFileBrowserDialog.ShowDialog() == DialogResult.OK)
             {
-                String text = folderBrowserSrcDialog.SelectedPath;
-                this._srcFolder = text;
-                this.lbSetSrc.Text = text.Substring(text.LastIndexOf('\\') + 1);
+                String path = solutionFileBrowserDialog.FileName;
+                String solution = solutionFileBrowserDialog.SafeFileName;
+                this._srcFolder = path.Substring(0, path.IndexOf("\\" + solution));
+                this._solutionFile = solution;
+                this.lbSetSrc.Text = solution;
             }
         }
 
@@ -52,12 +48,7 @@ namespace ContractOK
         private void btRun_Click(object sender, EventArgs e)
         {
             this.Visible = false;
-            Controller.StartDetectPhase(this._srcFolder, this._libFolder, this.tbSeconds.Text);
-        }
-
-        private void MainScreen_Load(object sender, EventArgs e)
-        {
-
+            Controller.StartDetectPhase(this._srcFolder, this._solutionFile, this._libFolder, this.tbSeconds.Text);
         }
 
         private void MainScreen_Load(object sender, EventArgs e)

@@ -28,7 +28,7 @@ namespace ContractOK
             Application.Run(mainSc);
         }
 
-        static public void StartDetectPhase(String srcFolder, String libFolder, String time){
+        static public void StartDetectPhase(String srcFolder, String solutionFile, String libFolder, String time){
             sourceFolder = srcFolder;
 
             Detect d = new Detect();
@@ -36,7 +36,7 @@ namespace ContractOK
             dconSc = new DetectConsole(d);
             Application.DoEvents();
 
-            nonconformances = d.DetectErrors(srcFolder, libFolder, time);
+            nonconformances = d.DetectErrors(srcFolder, solutionFile, libFolder, time);
         }
 
         static public void StartCategorizationPhase()
@@ -44,7 +44,10 @@ namespace ContractOK
             Categorize c = new Categorize();
             nonconformances = c.categorize(nonconformances, sourceFolder);
 
-            dconSc.Visible = false;
+            if (dconSc.Visible)
+                dconSc.Visible = false;
+            else if (ddisSc.Visible)
+                ddisSc.Visible = false;
             cdisSc = new CategorizedDisplay(nonconformances);
             Application.DoEvents();
         }

@@ -1,7 +1,8 @@
 ﻿using Commons;
 using Structures;
+using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
+using System.Xml;
 using System.Xml.Linq;
 
 namespace DetectModule
@@ -27,16 +28,29 @@ namespace DetectModule
             HashSet<Nonconformance> result = new HashSet<Nonconformance>();
             // Load test results.
             XDocument doc = XDocument.Load(Constants.TEST_ERRORS);
-            var testUnits = doc.Descendants().ElementAt(7).Descendants();
-            for(int i = 0; i < testUnits.Count(); i += 5) {
+            XmlDocument docXml = new XmlDocument();
+            docXml.Load(Constants.TEST_ERRORS);
+
+            XmlNodeList nodes = docXml.GetElementsByTagName("UnitTestResult");
+
+            IEnumerator ienum = nodes.GetEnumerator();
+            while (ienum.MoveNext())
+            {
                 // Read from XML, the needed values.
-                string message = testUnits.ElementAt(i + 3).Value;
-                string stackTrace = testUnits.ElementAt(i + 4).Value;
+                XmlNode unitTestResult = (XmlNode)ienum.Current;
+                XmlNode output = unitTestResult.FirstChild;
+                XmlNode errorInfo = ((XmlElement)output).GetElementsByTagName("ErrorInfo").Item(0);
+                XmlNode mess = errorInfo.FirstChild;
+                XmlNode stac = errorInfo.LastChild;
+                string message = mess.InnerText.ToString();
+                string stackTrace = stac.InnerText.ToString();
+
                 // Create the nonconformance.
                 Nonconformance n = new Nonconformance(message, stackTrace);
-                if(!result.Contains(n))
+                if (!result.Contains(n))
                     result.Add(new Nonconformance(message, stackTrace));
             }
+
             return result;
         }
 

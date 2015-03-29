@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Windows.Forms;
 using Structures;
@@ -26,10 +27,16 @@ namespace ContractOK
             }
             listBox.SelectionMode = SelectionMode.One;
 
+
             TreeNodeCollection nodes = treeView1.Nodes;
             this.nodeNamespace = treeView1.Nodes[0];
             this.nodeClass = this.nodeNamespace.Nodes[0];
             this.nodeMethod = this.nodeClass.Nodes[0];
+
+            this.Closing += (object sender, CancelEventArgs e) =>
+            {
+                Controller.MakeMainVisibleAgain();
+            };
 
             this.Show();
         }
@@ -43,14 +50,19 @@ namespace ContractOK
             this.nodeMethod.Text = n.GetMethodName();
         }
 
-        private void DetectedDisplay_Load(object sender, EventArgs e)
-        {
-
-        }
-
         private void treeView1_AfterSelect(object sender, TreeViewEventArgs e)
         {
             
+        }
+
+        private void btCategorize_Click(object sender, EventArgs e)
+        {
+            Controller.StartCategorizationPhase();
+        }
+        private void DetectedDisplay_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            Controller.MakeMainVisibleAgain();
+            this.Visible = false;
         }
     }
 }

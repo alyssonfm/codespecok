@@ -14,76 +14,9 @@ namespace ContractOK
 
         public static String GetTestMethod(String namefile)
         {
-            SyntaxTree tree = CSharpSyntaxTree.ParseText(@"using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Diagnostics.Contracts;
-
-namespace CodeContractsTest
-{
-    public class GenCounter
-    {
-        private const int _MAX = 3;
-        private int _count = 0;
-        
-        [ContractInvariantMethod]
-        private void LocalInvariant()
-        {
-             Contract.Invariant(0 <= this._count, 'Counter off limits');
-             Contract.Invariant(this._count <= _MAX, 'Counter off limits');
-        }
-
-        public GenCounter()
-        {
-            this._count = 1;
-        }
-
-        public void updateCount(bool b)
-        {
-            Contract.Requires(b || 0 < _MAX);
-            Contract.Requires(!b || (getCount() < _MAX));
-            Contract.Ensures(!b || (this._count == Contract.OldValue<int>(this._count) + 1), 'Counter wasn\'t updated. Bad Code.');
-            int a = 0;
-            if(a++ > 2)
-                a = 0;
-            if (b) { this._count++; }
-        }
-
-        [Pure]
-        public int getCount()
-        {
-            return this._count;
-        }
-
-        public void resetCount()
-        {
-            this._count = 0;
-        }
-
-        static void Main(string[] args)
-        {
-
-        }
-
-    }
-}
-");
+            SyntaxTree tree = CSharpSyntaxTree.ParseText(GetTextFromFile(namefile));
             var root = (CompilationUnitSyntax)tree.GetRoot();
-            var nameSpaceDecl = GetNamepaceFromList(root.Members, "CodeContractsTest");
-            var classDecl = GetClassFromList(nameSpaceDecl.Members, "GenCounter");
-
-            Assembly ass = Assembly.LoadFile(Constants.SOURCE_BIN + Constants.FILE_SEPARATOR +
-                "CodeContractsTest.exe");
-            Type classType = ass.GetType("CodeContractsTest.GenCounter");
-            var listFields = classType.GetRuntimeFields();
-            var listInterfaces = classType.GetInterfaces();
-            var listSuperclasses = classType.BaseType;
-
-            tree = CSharpSyntaxTree.ParseText(GetTextFromFile(namefile));
-            root = (CompilationUnitSyntax)tree.GetRoot();
-            classDecl = (ClassDeclarationSyntax)root.Members.ElementAt(0);
+            var classDecl = (ClassDeclarationSyntax)root.Members.ElementAt(0);
             MethodDeclarationSyntax methodDecl = (MethodDeclarationSyntax)classDecl.Members.ElementAt(0);
 
             return methodDecl.ToString();

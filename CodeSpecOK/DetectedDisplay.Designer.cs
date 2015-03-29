@@ -28,11 +28,11 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.TreeNode treeNode4 = new System.Windows.Forms.TreeNode("Method");
-            System.Windows.Forms.TreeNode treeNode5 = new System.Windows.Forms.TreeNode("Class", new System.Windows.Forms.TreeNode[] {
-            treeNode4});
-            System.Windows.Forms.TreeNode treeNode6 = new System.Windows.Forms.TreeNode("Namespace", new System.Windows.Forms.TreeNode[] {
-            treeNode5});
+            System.Windows.Forms.TreeNode treeNode1 = new System.Windows.Forms.TreeNode("Method");
+            System.Windows.Forms.TreeNode treeNode2 = new System.Windows.Forms.TreeNode("Class", new System.Windows.Forms.TreeNode[] {
+            treeNode1});
+            System.Windows.Forms.TreeNode treeNode3 = new System.Windows.Forms.TreeNode("Namespace", new System.Windows.Forms.TreeNode[] {
+            treeNode2});
             this.lbFixed01 = new System.Windows.Forms.Label();
             this.lbSetNumberNonconformances = new System.Windows.Forms.Label();
             this.lbFixed02 = new System.Windows.Forms.Label();
@@ -42,9 +42,9 @@
             this.treeView1 = new System.Windows.Forms.TreeView();
             this.tbTextSample = new System.Windows.Forms.TextBox();
             this.lbFixed05 = new System.Windows.Forms.Label();
-            this.button1 = new System.Windows.Forms.Button();
-            this.button2 = new System.Windows.Forms.Button();
-            this.button3 = new System.Windows.Forms.Button();
+            this.btSaveResults = new System.Windows.Forms.Button();
+            this.btStackTrace = new System.Windows.Forms.Button();
+            this.btCategorize = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // lbFixed01
@@ -89,9 +89,8 @@
             // 
             // listBox
             // 
-            this.listBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel, ((byte)(0)));
+            this.listBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.listBox.FormattingEnabled = true;
-            this.listBox.ItemHeight = 20;
             this.listBox.Location = new System.Drawing.Point(18, 67);
             this.listBox.Name = "listBox";
             this.listBox.Size = new System.Drawing.Size(192, 264);
@@ -112,14 +111,14 @@
             // 
             this.treeView1.Location = new System.Drawing.Point(230, 67);
             this.treeView1.Name = "treeView1";
-            treeNode4.Name = "SetMethod";
-            treeNode4.Text = "Method";
-            treeNode5.Name = "SetClass";
-            treeNode5.Text = "Class";
-            treeNode6.Name = "SetNamespace";
-            treeNode6.Text = "Namespace";
+            treeNode1.Name = "SetMethod";
+            treeNode1.Text = "Method";
+            treeNode2.Name = "SetClass";
+            treeNode2.Text = "Class";
+            treeNode3.Name = "SetNamespace";
+            treeNode3.Text = "Namespace";
             this.treeView1.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
-            treeNode6});
+            treeNode3});
             this.treeView1.Size = new System.Drawing.Size(182, 142);
             this.treeView1.TabIndex = 6;
             this.treeView1.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeView1_AfterSelect);
@@ -142,44 +141,45 @@
             this.lbFixed05.TabIndex = 8;
             this.lbFixed05.Text = "Test Sample";
             // 
-            // button1
+            // btSaveResults
             // 
-            this.button1.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel, ((byte)(0)));
-            this.button1.Location = new System.Drawing.Point(37, 356);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(144, 32);
-            this.button1.TabIndex = 9;
-            this.button1.Text = "Save Results";
-            this.button1.UseVisualStyleBackColor = true;
+            this.btSaveResults.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel, ((byte)(0)));
+            this.btSaveResults.Location = new System.Drawing.Point(37, 356);
+            this.btSaveResults.Name = "btSaveResults";
+            this.btSaveResults.Size = new System.Drawing.Size(144, 32);
+            this.btSaveResults.TabIndex = 9;
+            this.btSaveResults.Text = "Save Results";
+            this.btSaveResults.UseVisualStyleBackColor = true;
             // 
-            // button2
+            // btStackTrace
             // 
-            this.button2.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel, ((byte)(0)));
-            this.button2.Location = new System.Drawing.Point(256, 356);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(134, 31);
-            this.button2.TabIndex = 10;
-            this.button2.Text = "StackTrace";
-            this.button2.UseVisualStyleBackColor = true;
+            this.btStackTrace.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel, ((byte)(0)));
+            this.btStackTrace.Location = new System.Drawing.Point(256, 356);
+            this.btStackTrace.Name = "btStackTrace";
+            this.btStackTrace.Size = new System.Drawing.Size(134, 31);
+            this.btStackTrace.TabIndex = 10;
+            this.btStackTrace.Text = "StackTrace";
+            this.btStackTrace.UseVisualStyleBackColor = true;
             // 
-            // button3
+            // btCategorize
             // 
-            this.button3.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel, ((byte)(0)));
-            this.button3.Location = new System.Drawing.Point(541, 356);
-            this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(150, 32);
-            this.button3.TabIndex = 12;
-            this.button3.Text = "Categorize";
-            this.button3.UseVisualStyleBackColor = true;
+            this.btCategorize.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel, ((byte)(0)));
+            this.btCategorize.Location = new System.Drawing.Point(541, 356);
+            this.btCategorize.Name = "btCategorize";
+            this.btCategorize.Size = new System.Drawing.Size(150, 32);
+            this.btCategorize.TabIndex = 12;
+            this.btCategorize.Text = "Categorize";
+            this.btCategorize.UseVisualStyleBackColor = true;
+            this.btCategorize.Click += new System.EventHandler(this.btCategorize_Click);
             // 
             // DetectedDisplay
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(804, 410);
-            this.Controls.Add(this.button3);
-            this.Controls.Add(this.button2);
-            this.Controls.Add(this.button1);
+            this.Controls.Add(this.btCategorize);
+            this.Controls.Add(this.btStackTrace);
+            this.Controls.Add(this.btSaveResults);
             this.Controls.Add(this.lbFixed05);
             this.Controls.Add(this.tbTextSample);
             this.Controls.Add(this.treeView1);
@@ -191,7 +191,6 @@
             this.Controls.Add(this.lbFixed01);
             this.Name = "DetectedDisplay";
             this.Text = "Detection Screen";
-            this.Load += new System.EventHandler(this.DetectedDisplay_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -208,8 +207,8 @@
         private System.Windows.Forms.TreeView treeView1;
         private System.Windows.Forms.TextBox tbTextSample;
         private System.Windows.Forms.Label lbFixed05;
-        private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.Button button2;
-        private System.Windows.Forms.Button button3;
+        private System.Windows.Forms.Button btSaveResults;
+        private System.Windows.Forms.Button btStackTrace;
+        private System.Windows.Forms.Button btCategorize;
     }
 }
