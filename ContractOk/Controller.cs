@@ -62,7 +62,5 @@ namespace ContractOK
         {
             mainSc.Visible = true;
         }
-
-
     }
 }

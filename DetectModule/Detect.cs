@@ -1,4 +1,5 @@
-﻿using Commons;
+﻿#define DETECT_READY
+using Commons;
 using Structures;
 using System;
 using System.Collections.Generic;
@@ -6,6 +7,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+
 
 namespace DetectModule
 {
@@ -70,13 +72,16 @@ namespace DetectModule
         /// <returns>Set of nonconformances founded.</returns>
         public HashSet<Nonconformance> DetectErrors(String source, String solutionFile, String lib, String timeout)
         {
+#if DETECT_READY
             try
             {
+#endif
                 // Execute all scripts, one for stage.
                 Execute(source, solutionFile, lib, timeout);
                 // List Errors, save results and return nonconformances.
                 NCCreator ncfinder = new NCCreator();
                 return GenerateResult.Save(ncfinder.ListNonconformances(), false);
+#if DETECT_READY
             }
             catch (Exception e)
             {
@@ -84,20 +89,24 @@ namespace DetectModule
                 TriggersEvent(Stages.ERROR_ON_DETECTION, e.Message);
                 return new HashSet<Nonconformance>();
             }
+#endif
         }
-        /// <summary>
-        /// Call each stage of Detection phase.
-        /// </summary>
-        /// <param name="src">Source folder path where the project are.</param>
-        /// <param name="lib">Libraries folder path where libraries needed to project run are.</param>
-        /// <param name="time">Time for test generation.</param>
+            /// <summary>
+            /// Call each stage of Detection phase.
+            /// </summary>
+            /// <param name="src">Source folder path where the project are.</param>
+            /// <param name="lib">Libraries folder path where libraries needed to project run are.</param>
+            /// <param name="time">Time for test generation.</param>
         public void Execute(String src, String sln, String lib, String time)
         {
                 // Initialize information to run the stages.
                 this._srcFolder = src;
                 this._solutionFile = sln;
-                this._libFolder = lib;
-                this._projName = src.Substring(src.LastIndexOf(Constants.FILE_SEPARATOR) + 1).Trim();
+                if (this._libFolder == null || this._libFolder.Equals(""))
+                    this._libFolder = Constants.TEST_RESULTS;
+                else
+                    this._libFolder = lib;
+                this._projName = sln.Substring(0, sln.LastIndexOf(".sln")).Trim();
                 this._timeout = time;
 
                 // Starts counting time.
@@ -105,9 +114,14 @@ namespace DetectModule
 
                 // Call each stage of Detection phase.
                 RunStage("Creating directories", "\nDirectories created in", Stages.CREATED_DIRECTORIES);
+                UnblockFolder(this._srcFolder);
                 RunStage("\nCompiling the project", "Project compiled in", Stages.COMPILED_PROJECT);
+                UnblockFolder(Constants.SOURCE_BIN);
                 RunStage("Generating tests", "Tests generated in", Stages.GENERATED_TESTS);
+                UnblockFolder(Constants.TEST_OUTPUT);
                 RunStage("Running test into contract-based code", "Tests ran in", Stages.EXECUTED_TESTS);
+                // Move test results, to make nonconformances creation easier.
+                MoveResultFiles();
         }
         /// <summary>
         /// Run determined stage from Detection Phase, call the necessary scripts.
@@ -201,6 +215,7 @@ namespace DetectModule
             ProcessStartInfo startInfo = PrepareProcess("compileProject.build");
             String arg = " ";
             arg += "-D:source_folder=\"" + this._srcFolder + "\" ";
+            arg += "-D:lib_folder=\"" + this._libFolder + "\" ";
             arg += "-D:build_dir=\"" + Constants.SOURCE_BIN + "\" ";
             arg += "-D:project_sln=" + this._solutionFile + " ";
             arg += "compile_project";
@@ -214,18 +229,41 @@ namespace DetectModule
         /// <returns>Text generated when generating tests.</returns>
         private string GenerateTests()
         {
+            string listDLLs = LookForDLLToTest();
+            string listEXEs = LookForEXEToTest();
+
             ProcessStartInfo startInfo = PrepareProcess("generateTests.build");
             String arg = " ";
-            arg += "-D:build_dir=\"" + Constants.SOURCE_BIN + "\" ";
+            arg += "-D:toTest.Folder=\"" + Constants.SOURCE_BIN + "\" ";
             arg += "-D:timeout=" + this._timeout + " ";
             arg += "-D:output.dir=\"" + Constants.TEST_OUTPUT + "\" ";
             arg += "-D:randoop_dir=\"" + Constants.RANDOOP_LIB + "\" ";
-            arg += "-D:project_name=" + this._projName + " ";
+            arg += "-D:listDlls=\"" + listDLLs + "\" ";
+            arg += "-D:listEXEs=\"" + listEXEs + "\" ";
             arg += "generateTests";
             startInfo.Arguments += arg;
 
             return RunProcess(startInfo);
         }
+
+        private string LookForDLLToTest()
+        {
+            string toReturn = "";
+            var di = new DirectoryInfo(Constants.SOURCE_BIN);
+            foreach (FileInfo file in di.GetFiles("*.dll", SearchOption.TopDirectoryOnly))
+                toReturn += file.Name + " ;";
+            return toReturn.Trim();
+        }
+
+        private string LookForEXEToTest()
+        {
+            string toReturn = "";
+            var di = new DirectoryInfo(Constants.SOURCE_BIN);
+            foreach (FileInfo file in di.GetFiles("*.exe", SearchOption.TopDirectoryOnly))
+                toReturn += file.Name + " ;";
+            return toReturn.Trim();
+        }
+
         /// <summary>
         /// Execute script that will run tests generated, using VsTest.Console.
         /// </summary>
@@ -243,9 +281,6 @@ namespace DetectModule
             startInfo.WorkingDirectory = Constants.TEMP_DIR;
 
             string text = RunProcess(startInfo);
-
-            // Move test results, to make nonconformances creation easier.
-            MoveResultFiles();
 
             return text;
         }
@@ -307,6 +342,12 @@ namespace DetectModule
             this._watch.Stop();
             return this._watch.ElapsedMilliseconds / 1000.0;
         }
+        private void UnblockFolder(string path)
+        {
+            DirectoryInfo d = new DirectoryInfo(path);
+            d.Unblock();
+        }
+
         /// <summary>
         /// Call event, updating user about Detection execution.
         /// </summary>

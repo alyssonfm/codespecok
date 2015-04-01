@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using System.Reflection;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -46,47 +48,63 @@ namespace CategorizeModule
             }
 
             GenerateResult.Save(errors, true);
-            this._examiner.EndExamination();
             return errors;
         }
 
         public string CategorizePrecondition(Nonconformance n)
         {
-            if (n.GetNameSpace() == "")
-                this._examiner.SetPrincipalClassName(n.GetClassName());
-            else
-                this._examiner.SetPrincipalClassName(n.GetNameSpace() + "." + n.GetClassName());
-            if (this._examiner.CheckStrongPrecondition(n.GetMethodName()))
-                return Cause.STRONG_PRE;
-            else
-                return Cause.WEAK_POST;
-        }
+            try { 
+                if (n.GetNameSpace() == "")
+                    this._examiner.SetPrincipalClassName(n.GetClassName());
+                else
+                    this._examiner.SetPrincipalClassName(n.GetNameSpace() + "." + n.GetClassName());
+                if (this._examiner.CheckStrongPrecondition(n.GetMethodName()))
+                    return Cause.STRONG_PRE;
+                else
+                    return Cause.WEAK_POST;
+            }
+            catch (FileNotFoundException e)
+            {
+                return Cause.NOT_EVAL_EXP;
+            }
+}
 
         public string CategorizePostcondition(Nonconformance n)
         {
-            if (n.GetNameSpace() == "")
-                this._examiner.SetPrincipalClassName(n.GetClassName());
-            else
-                this._examiner.SetPrincipalClassName(n.GetNameSpace() + "." + n.GetClassName());
-            if (this._examiner.CheckWeakPrecondition(n.GetMethodName()))
-                return Cause.WEAK_PRE;
-            else
-                return Cause.STRONG_POST;
-        }
+            try { 
+                if (n.GetNameSpace() == "")
+                    this._examiner.SetPrincipalClassName(n.GetClassName());
+                else
+                    this._examiner.SetPrincipalClassName(n.GetNameSpace() + "." + n.GetClassName());
+                if (this._examiner.CheckWeakPrecondition(n.GetMethodName()))
+                    return Cause.WEAK_PRE;
+                else
+                    return Cause.STRONG_POST;
+            }
+            catch (FileNotFoundException e)
+            {
+                return Cause.NOT_EVAL_EXP;
+            }
+}
 
         public string CategorizeInvariant(Nonconformance n)
         {
-            if (n.GetNameSpace() == "")
-                this._examiner.SetPrincipalClassName(n.GetClassName());
-            else
-                this._examiner.SetPrincipalClassName(n.GetNameSpace() + "." + n.GetClassName());
+            try
+            {
+                if (n.GetNameSpace() == "")
+                    this._examiner.SetPrincipalClassName(n.GetClassName());
+                else
+                    this._examiner.SetPrincipalClassName(n.GetNameSpace() + "." + n.GetClassName());
 
-            /* if (this._examiner.CheckNull(n.GetMethodName()))
-                    return Cause.NULL_RELATED;
-            else */ if (this._examiner.CheckWeakPrecondition(n.GetMethodName()))
-                    return Cause.WEAK_PRE;
-            else
-                    return Cause.STRONG_INV;
+                if (this._examiner.CheckWeakPrecondition(n.GetMethodName()))
+                        return Cause.WEAK_PRE;
+                else
+                        return Cause.STRONG_INV;
+            }
+            catch (FileNotFoundException e)
+            {
+                return Cause.NOT_EVAL_EXP;
+            }
         }
     }
 }

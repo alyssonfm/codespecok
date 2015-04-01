@@ -12,8 +12,7 @@ namespace Commons
 	//Constant to get the file separator of the System.
 	public static readonly char FILE_SEPARATOR = Path.DirectorySeparatorChar;
 	//Constants to folders created path.
-	//public static const String TEMP_DIR = Path.GetTempPath() + FILE_SEPARATOR + "jmlOK";
-    public static readonly String TEMP_DIR = "C:" + FILE_SEPARATOR + "CodeSpecOK";
+	public static readonly String TEMP_DIR = Path.GetTempPath() + FILE_SEPARATOR + "ContractOk";
     public static readonly String SOURCE_BIN = TEMP_DIR + FILE_SEPARATOR + "bin";
     public static readonly String TEST_OUTPUT = TEMP_DIR + FILE_SEPARATOR + "tests";
     public static readonly String LIB_FOLDER = TEMP_DIR + FILE_SEPARATOR + "resources";

@@ -150,23 +150,36 @@ namespace Structures
         // Save StackTrace of nonconformance on the object on a array.
         private void SetStackTrace(string stackTrace)
         {
-            this._stackTraceOrder = stackTrace.Split(new Char[] { '\n' });
+            this._stackTraceOrder = stackTrace.Trim().Split(new Char[] { '\n' });
             this._stackTraceLenght = this._stackTraceOrder.Length;
         }
         // Set the contract Type of Nonconformance, and defines meaningless classification.
         private void SetType()
         {
-            String data = this._stackTraceOrder[2];
-            if (data.Contains("Invariant")) {
-                this._type = CategoryType.INVARIANT;
-            } else if (data.Contains("Ensures")) {
-                this._type = CategoryType.POSTCONDITION;
-            } else if (data.Contains("Requires")) {
-                if (this._stackTraceLenght == 5) {
+            if (this._stackTraceLenght < 5) {
+                this.SetMeaningless(true);
+                this._type = CategoryType.MEANINGLESS;
+            }
+            else
+            {
+                String data = this._stackTraceOrder[2];
+                if (data.Contains("Invariant")) {
+                    this._type = CategoryType.INVARIANT;
+                } else if (data.Contains("Ensures")) {
+                    this._type = CategoryType.POSTCONDITION;
+                } else if (data.Contains("Requires")) {
+                    if (this._stackTraceLenght == 5) {
+                        this.SetMeaningless(true);
+                        this._type = CategoryType.MEANINGLESS;
+                    } else {
+                        this._type = CategoryType.PRECONDITION;
+                    }
+                }
+                else
+                {
+                    // Other Errors, like NullPointerException
                     this.SetMeaningless(true);
                     this._type = CategoryType.MEANINGLESS;
-                } else {
-                    this._type = CategoryType.PRECONDITION;
                 }
             }
         }
@@ -176,7 +189,7 @@ namespace Structures
             this._meaningless = value;
         }
         // Defines if the nonconformance is meaningless or not.
-        private bool IsMeaningless()
+        public bool IsMeaningless()
         {
             return this._meaningless;
         }

@@ -38,17 +38,23 @@ namespace DetectModule
             {
                 // Read from XML, the needed values.
                 XmlNode unitTestResult = (XmlNode)ienum.Current;
-                XmlNode output = unitTestResult.FirstChild;
-                XmlNode errorInfo = ((XmlElement)output).GetElementsByTagName("ErrorInfo").Item(0);
-                XmlNode mess = errorInfo.FirstChild;
-                XmlNode stac = errorInfo.LastChild;
-                string message = mess.InnerText.ToString();
-                string stackTrace = stac.InnerText.ToString();
+                if (unitTestResult.HasChildNodes)
+                {
+                    XmlNode output = unitTestResult.FirstChild;
+                    var errorInfoMatch = ((XmlElement)output).GetElementsByTagName("ErrorInfo");
+                    if (errorInfoMatch.Count == 1) { 
+                        XmlNode errorInfo = errorInfoMatch.Item(0);
+                        XmlNode mess = errorInfo.FirstChild;
+                        XmlNode stac = errorInfo.LastChild;
+                        string message = mess.InnerText.ToString();
+                        string stackTrace = stac.InnerText.ToString();
 
-                // Create the nonconformance.
-                Nonconformance n = new Nonconformance(message, stackTrace);
-                if (!result.Contains(n))
-                    result.Add(new Nonconformance(message, stackTrace));
+                        // Create the nonconformance.
+                        Nonconformance n = new Nonconformance(message, stackTrace);
+                        if (!result.Contains(n) && !n.IsMeaningless())
+                            result.Add(new Nonconformance(message, stackTrace));
+                    }
+                }
             }
 
             return result;

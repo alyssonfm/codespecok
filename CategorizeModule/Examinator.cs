@@ -22,31 +22,58 @@ namespace CategorizeModule
         private string _CONSTRUCTOR_ALIAS = "<init>";
         private List<String> _variables;
         private Assembly _assembly;
-        private AppDomain _appDomain;
 
         public enum Operations
         {
-            ATR_VAR_IN_PRECONDITION, REQUIRES_TRUE, ATR_MOD, /* ISNT_NULL_RELATED, */ ENSURES_TRUE
+            ATR_VAR_IN_PRECONDITION, REQUIRES_TRUE, ATR_MOD, ENSURES_TRUE, WITHOUT_ASSEMBLY
         }
 
         public Examinator(string srcFolder)
         {
             this._sourceFolder = srcFolder;
             string projName = srcFolder.Substring(srcFolder.LastIndexOf(Constants.FILE_SEPARATOR) + 1);
-
-            _appDomain = AppDomain.CreateDomain("ExaminatorDomain", null);
-
-            var assemblyLoader = (CustomAssemblyLoader)_appDomain.
-                CreateInstanceAndUnwrap(typeof(CustomAssemblyLoader).Assembly.FullName, typeof(CustomAssemblyLoader).FullName);
-            assemblyLoader.LoadFrom(Constants.SOURCE_BIN + Constants.FILE_SEPARATOR + projName + ".exe");
-
-            _assembly = assemblyLoader.GetLoadedAssemblyOnAppDomain();
-            //_assembly = _appDomain.Load(System.IO.File.ReadAllBytes(Constants.SOURCE_BIN + Constants.FILE_SEPARATOR + projName + ".exe"));
-            //_assembly = Assembly.ReflectionOnlyLoadFrom(Constants.SOURCE_BIN + Constants.FILE_SEPARATOR + projName + ".exe");
         }
+
+        private bool TryToLoadAssembly(Assembly assembly, string path)
+        {
+            try
+            {
+                assembly = Assembly.LoadFrom(path);
+                return true;
+            }
+            catch (Exception e)
+            {
+                return false;
+            }
+        }
+        private Assembly GetCorrectAssembly(string className) {
+            Assembly toReturn = null;
+            foreach (FileInfo f in new DirectoryInfo(Constants.SOURCE_BIN).GetFiles("*.dll"))
+            {
+                if (TryToLoadAssembly(toReturn, f.FullName))
+                {
+                    toReturn = Assembly.LoadFrom(f.FullName);
+                }
+                if (toReturn != null && toReturn.GetType(className) != null)
+                    return toReturn;
+            }
+            foreach (FileInfo f in new DirectoryInfo(Constants.SOURCE_BIN).GetFiles("*.exe"))
+            {
+                if (TryToLoadAssembly(toReturn, f.FullName))
+                {
+                    toReturn = Assembly.LoadFrom(f.FullName);
+                }
+                if (toReturn != null && toReturn.GetType(className) != null)
+                    return toReturn;
+            }
+            return null;
+        }
+
 
         public void SetPrincipalClassName(string className){
             this._principalClass = className;
+            _assembly = GetCorrectAssembly(className);
+
             this._variables = new List<String>();
             foreach(FieldInfo f in GetVariablesFromClass(className))
             {
@@ -69,9 +96,21 @@ namespace CategorizeModule
 
         private String GetCSPathFromFile(String className)
         {
-            String name = className.Replace('.', '/');
-            name += ".cs";
-            return this._sourceFolder + Constants.FILE_SEPARATOR + name;
+            String[] classNameArr = className.Split('.');
+            String classStr = classNameArr[1];
+            classStr += ".cs";
+            var fileList = new DirectoryInfo(this._sourceFolder).GetFiles(classStr, SearchOption.AllDirectories);
+            foreach(FileInfo f in fileList){
+                if(f.FullName.Substring(0, f.FullName.LastIndexOf("\\"+ classStr)).EndsWith(classNameArr[0]))
+                {
+                    return f.FullName;
+                }
+            }
+            foreach (FileInfo f in fileList)
+            {
+                return f.FullName;
+            }
+            return "";
         }
 
         private void UpdateVariables(string className)
@@ -84,8 +123,14 @@ namespace CategorizeModule
 
         private IEnumerable<FieldInfo> GetVariablesFromClass(string className)
         {
-            Type classType = _assembly.GetType(className);
-            return classType.GetRuntimeFields();
+            if (_assembly == null) { 
+                return new List<FieldInfo>();
+            }
+            else
+            {
+                Type classType = _assembly.GetType(className);
+                return classType.GetRuntimeFields();
+            }
         }
 
         public bool CheckStrongPrecondition(string methodName)
@@ -330,14 +375,17 @@ namespace CategorizeModule
                 if (s is ExpressionStatementSyntax) {
                     ExpressionStatementSyntax e = (ExpressionStatementSyntax) s;
 
-                    string contractType = ((MemberAccessExpressionSyntax)((InvocationExpressionSyntax)e.Expression).Expression).Name.Identifier.Value.ToString();
-                    if (contractType.Equals("Requires"))
+                    if(e.Expression is InvocationExpressionSyntax)
                     {
-                        contracts.Requires.Add(((InvocationExpressionSyntax)e.Expression).ArgumentList.Arguments[0]);
-                    }
-                    else if (contractType.Equals("Ensures"))
-                    {
-                        contracts.Ensures.Add(((InvocationExpressionSyntax)e.Expression).ArgumentList.Arguments[0]);
+                        string contractType = ((MemberAccessExpressionSyntax)((InvocationExpressionSyntax)e.Expression).Expression).Name.Identifier.Value.ToString();
+                        if (contractType.Equals("Requires"))
+                        {
+                            contracts.Requires.Add(((InvocationExpressionSyntax)e.Expression).ArgumentList.Arguments[0]);
+                        }
+                        else if (contractType.Equals("Ensures"))
+                        {
+                            contracts.Ensures.Add(((InvocationExpressionSyntax)e.Expression).ArgumentList.Arguments[0]);
+                        }
                     }
                 }
             }
@@ -428,19 +476,26 @@ namespace CategorizeModule
 
         private List<String> GetInterfacesPathFromClass(string className)
         {
-            Type classToLoad = this._assembly.GetType(className);
-            List<String> toReturn = new List<String>();
-            foreach(Type t in classToLoad.GetInterfaces())
+            if(this._assembly != null)
             {
-                toReturn.Add(t.FullName.ToString());
+                Type classToLoad = this._assembly.GetType(className);
+                List<String> toReturn = new List<String>();
+                foreach(Type t in classToLoad.GetInterfaces())
+                {
+                    toReturn.Add(t.FullName.ToString());
+                }
+                return toReturn;
             }
-            return toReturn;
+            return new List<String>();
         }
 
         private String GetSuperclassPathFromClass(string className)
         {
-            Type classToLoad = this._assembly.GetType(className);
-            return classToLoad.BaseType.FullName.ToString();
+            if(this._assembly != null){
+                Type classToLoad = this._assembly.GetType(className);
+                return classToLoad.BaseType.FullName.ToString();
+            }
+            return "";
         }
 
         private ClassDeclarationSyntax TakeClassFromFile(string path, string classString)
@@ -474,7 +529,7 @@ namespace CategorizeModule
             {
                 if (classString.Equals(this._principalClass))
                 {
-                    throw new Exception(e.Message + "Principal class couldn't be load.");
+                    throw new FileNotFoundException(e.Message + "Principal class couldn't be load.");
                 }
                 else
                 {
@@ -526,10 +581,6 @@ namespace CategorizeModule
                 String line = sr.ReadToEnd();
                 return line;
             }
-        }
-
-        public void EndExamination() {
-            AppDomain.Unload(_appDomain);
         }
     }
 }
