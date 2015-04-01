@@ -198,7 +198,7 @@ namespace Structures
         {
             String test = "RandoopTest";
             String unit = "UnitTest";
-            String data = this._stackTraceOrder[this._stackTraceLenght - 2];
+            String data = this._stackTraceOrder[this._stackTraceLenght - 1];
             int first = data.LastIndexOf(test) + test.Length;
             int last = data.LastIndexOf("." + unit);
             String number = data.Substring(first, last - first);
