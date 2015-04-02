@@ -48,6 +48,7 @@ namespace ContractOK
         private void btRun_Click(object sender, EventArgs e)
         {
             this.Visible = false;
+            if (this._libFolder == null) { this._libFolder = ""; }
             Controller.StartDetectPhase(this._srcFolder, this._solutionFile, this._libFolder, this.tbSeconds.Text);
         }
 
