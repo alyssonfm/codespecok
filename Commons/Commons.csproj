@@ -38,7 +38,7 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="Trinet.Core.IO.Ntfs">
-      <HintPath>..\..\..\Downloads\Trinet.Core.IO.Ntfs.dll</HintPath>
+      <HintPath>Resources\Trinet.Core.IO.Ntfs.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

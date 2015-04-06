@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Globalization;
 using System.IO;
-
 using Trinet.Core.IO.Ntfs;
 
 public static class FileInfoExtensions
