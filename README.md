@@ -1,4 +1,4 @@
 ContractOk
 ================
 
-ContractOk is a version of JMLOK for C# with contracts written in CodeContracts.
+ContractOk is a tool for detecting and classifying nonconformances in C# -- Code Contracts systems.
