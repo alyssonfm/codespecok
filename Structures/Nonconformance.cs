@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.RegularExpressions;
 
 namespace Structures
 {
@@ -221,16 +222,15 @@ namespace Structures
                 data = this._stackTraceOrder[3];
             }
             // Fill location information.
-            int first, last;
-            first = data.IndexOf(" ", 3) + 1;
-            last = data.IndexOf(".");
-            this._namespaceName = data.Substring(first, last - first);
-            first = last + 1;
-            last = data.IndexOf(".", first);
-            this._className = data.Substring(first, last - first);
-            first = last + 1;
-            last = data.IndexOf("(", first);
-            this._methodName = data.Substring(first, last - first);
+            foreach(Match m in Regex.Matches(data, @"(?:(?:([\S]*)[.])|())([^. ]+)[.](.*)[(].*[)]"))
+            {
+                if (m.Groups[1].Value.Equals(""))
+                    this._namespaceName = m.Groups[2].Value;
+                else
+                    this._namespaceName = m.Groups[1].Value;
+                this._className = m.Groups[3].Value;
+                this._methodName = m.Groups[4].Value;
+            }
         }
 
 

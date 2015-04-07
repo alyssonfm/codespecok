@@ -102,12 +102,12 @@ namespace DetectModule
                 // Initialize information to run the stages.
                 this._srcFolder = src;
                 this._solutionFile = sln;
-            if (lib == null || lib.Equals(""))
-            {
-                this._libFolder = Constants.TEST_RESULTS;
-            } else {
-                this._libFolder = lib;
-            }
+                if (lib == null || lib.Equals(""))
+                {
+                    this._libFolder = Constants.TEST_RESULTS;
+                } else {
+                    this._libFolder = lib;
+                }
                 this._projName = sln.Substring(0, sln.LastIndexOf(".sln")).Trim();
                 this._timeout = time;
 
