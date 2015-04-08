@@ -242,7 +242,7 @@ namespace DetectModule
             arg += "-D:randoop_dir=\"" + Constants.RANDOOP_LIB + "\" ";
             arg += "-D:listDlls=\"" + listDLLs + "\" ";
             arg += "-D:listEXEs=\"" + listEXEs + "\" ";
-            arg += "generateTests";
+            arg += "filterTests";
             startInfo.Arguments += arg;
 
             return RunProcess(startInfo);
