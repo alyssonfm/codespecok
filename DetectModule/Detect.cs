@@ -231,8 +231,8 @@ namespace DetectModule
         /// <returns>Text generated when generating tests.</returns>
         private string GenerateTests()
         {
-            string listDLLs = LookForDLLToTest();
-            string listEXEs = LookForEXEToTest();
+            //string listDLLs = LookForDLLToTest();
+            //string listEXEs = LookForEXEToTest();
 
             ProcessStartInfo startInfo = PrepareProcess("generateTests.build");
             String arg = " ";
@@ -240,8 +240,7 @@ namespace DetectModule
             arg += "-D:timeout=" + this._timeout + " ";
             arg += "-D:output.dir=\"" + Constants.TEST_OUTPUT + "\" ";
             arg += "-D:randoop_dir=\"" + Constants.RANDOOP_LIB + "\" ";
-            arg += "-D:listDlls=\"" + listDLLs + "\" ";
-            arg += "-D:listEXEs=\"" + listEXEs + "\" ";
+            arg += "-D:lib_folder=\"" + this._libFolder + "\" ";
             arg += "filterTests";
             startInfo.Arguments += arg;
 
