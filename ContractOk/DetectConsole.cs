@@ -92,7 +92,7 @@ namespace ContractOK
 
             textArea.Text += text;
             this._detectionSuceeded = false;
-            lbStage.Text = "Detection Phase finished.";
+            lbStage.Text = "Detection Phase finished with an error.";
 
             ModifyButton();
         }

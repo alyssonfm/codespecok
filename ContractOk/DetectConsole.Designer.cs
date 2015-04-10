@@ -49,13 +49,13 @@
             // 
             // lbStage
             // 
-            this.lbStage.AutoSize = true;
+            this.lbStage.AutoSize = false;
             this.lbStage.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel, ((byte)(0)));
             this.lbStage.Location = new System.Drawing.Point(40, 21);
             this.lbStage.Name = "lbStage";
-            this.lbStage.Size = new System.Drawing.Size(127, 20);
+            this.lbStage.Size = new System.Drawing.Size(281, 20);
             this.lbStage.TabIndex = 1;
-            this.lbStage.Text = "Detection Phase";
+            this.lbStage.Text = "Detection Phase finished with an error.";
             // 
             // progressBar
             // 
