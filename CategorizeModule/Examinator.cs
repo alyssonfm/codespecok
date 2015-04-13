@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Collections.Generic;
 using Commons;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.MSBuild;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -32,6 +33,35 @@ namespace CategorizeModule
         {
             this._sourceFolder = srcFolder;
             string projName = srcFolder.Substring(srcFolder.LastIndexOf(Constants.FILE_SEPARATOR) + 1);
+            TestWorkspaceExp();
+        }
+
+        public void TestWorkspaceExp()
+        {
+            string solutionsStr = @"C:\Users\denni_000\OneDrive\Documents\ContracOK UE\UE04 - Boogie - 25 NC\Source\Boogie.sln";
+            var solution = MSBuildWorkspace.Create().OpenSolutionAsync(solutionsStr).Result;
+            
+
+            var projects = solution.Projects;
+            foreach(Project p in projects)
+            {
+                string nome = p.AssemblyName;
+                foreach(Document d in p.Documents)
+                {
+                    SyntaxTree s = d.GetSyntaxTreeAsync().Result;
+                    CompilationUnitSyntax root = (CompilationUnitSyntax)s.GetRoot();
+                    foreach(MemberDeclarationSyntax m in root.Members)
+                    {
+
+                    }
+                    var i = 2;
+
+
+                }
+
+            }
+
+
         }
 
         private bool TryToLoadAssembly(Assembly assembly, string path)
