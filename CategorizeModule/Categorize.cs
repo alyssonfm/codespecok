@@ -1,10 +1,7 @@
 ﻿using System;
 using System.IO;
-using System.Reflection;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Commons;
 using Structures;
 
@@ -26,9 +23,9 @@ namespace CategorizeModule
     {
         private Examinator _examiner;
 
-        public HashSet<Nonconformance> categorize(HashSet<Nonconformance> errors, String sourceFolder)
+        public HashSet<Nonconformance> categorize(HashSet<Nonconformance> errors, String sourceFolder, String solutionPath)
         {
-            this._examiner = new Examinator(sourceFolder);
+            this._examiner = new Examinator(sourceFolder + Constants.FILE_SEPARATOR + solutionPath);
             for (int i = 0; i < errors.Count; i++ )
             {
                 Nonconformance n = errors.ElementAt(i);
@@ -53,11 +50,9 @@ namespace CategorizeModule
 
         public string CategorizePrecondition(Nonconformance n)
         {
-            try { 
-                if (n.GetNameSpace() == "")
-                    this._examiner.SetPrincipalClassName(n.GetClassName());
-                else
-                    this._examiner.SetPrincipalClassName(n.GetNameSpace() + "." + n.GetClassName());
+            try {
+                this._examiner.SetPrincipalClassName(n.GetNameSpace(), n.GetClassName());
+
                 if (this._examiner.CheckStrongPrecondition(n.GetMethodName()))
                     return Cause.STRONG_PRE;
                 else
@@ -71,11 +66,9 @@ namespace CategorizeModule
 
         public string CategorizePostcondition(Nonconformance n)
         {
-            try { 
-                if (n.GetNameSpace() == "")
-                    this._examiner.SetPrincipalClassName(n.GetClassName());
-                else
-                    this._examiner.SetPrincipalClassName(n.GetNameSpace() + "." + n.GetClassName());
+            try {
+                this._examiner.SetPrincipalClassName(n.GetNameSpace(), n.GetClassName());
+
                 if (this._examiner.CheckWeakPrecondition(n.GetMethodName()))
                     return Cause.WEAK_PRE;
                 else
@@ -91,10 +84,7 @@ namespace CategorizeModule
         {
             try
             {
-                if (n.GetNameSpace() == "")
-                    this._examiner.SetPrincipalClassName(n.GetClassName());
-                else
-                    this._examiner.SetPrincipalClassName(n.GetNameSpace() + "." + n.GetClassName());
+                this._examiner.SetPrincipalClassName(n.GetNameSpace(), n.GetClassName());
 
                 if (this._examiner.CheckWeakPrecondition(n.GetMethodName()))
                         return Cause.WEAK_PRE;

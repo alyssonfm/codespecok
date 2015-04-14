@@ -18,10 +18,11 @@ namespace CategorizeModule
     class Examinator 
     {
         private const int _VAR_FALSE = int.MinValue;
-        private string _sourceFolder;
-        private string _principalClass;
+        private Tuple<string, string> _principalClass;
+        private List<FileInfo> _binaries;
         private string _CONSTRUCTOR_ALIAS = "<init>";
         private List<String> _variables;
+        private Solution _snl;
         private Assembly _assembly;
 
         public enum Operations
@@ -29,11 +30,40 @@ namespace CategorizeModule
             ATR_VAR_IN_PRECONDITION, REQUIRES_TRUE, ATR_MOD, ENSURES_TRUE, WITHOUT_ASSEMBLY
         }
 
-        public Examinator(string srcFolder)
+        private void StoreBinaries()
         {
-            this._sourceFolder = srcFolder;
-            string projName = srcFolder.Substring(srcFolder.LastIndexOf(Constants.FILE_SEPARATOR) + 1);
-            TestWorkspaceExp();
+            this._binaries = new List<FileInfo>();
+            DirectoryInfo binFolder = new DirectoryInfo(Constants.SOURCE_BIN);
+            this._binaries.AddRange(new List<FileInfo>(binFolder.GetFiles("*.dll")));
+            this._binaries.AddRange(new List<FileInfo>(binFolder.GetFiles("*.exe")));
+        }
+
+        public Examinator(string solutionPath)
+        {
+            StoreBinaries();
+            OpenSolutionFile(solutionPath);
+        }
+
+        private void OpenSolutionFile(string solutionPath)
+        {
+            // Precondition:
+            // ==> Solution path must be non-null, non-empty.
+            if (solutionPath == null || solutionPath.Equals(""))
+            {
+                throw new FileLoadException("We didn't receive any Solution File");
+            }
+
+            // Create solution file.
+            this._snl = MSBuildWorkspace.Create().OpenSolutionAsync(solutionPath).Result;
+
+            // Postcondition:
+            // ==> Solution should be found, if Detection phase already was completed.
+            if (this._snl.FilePath == null)
+            {
+                throw new FileLoadException("For some reason, we couldn't load the Solution file.\n"
+                                          + "See the string we receive:\n"
+                                          + "SolutionPath ==" + solutionPath);
+            }          
         }
 
         public void TestWorkspaceExp()
@@ -41,7 +71,6 @@ namespace CategorizeModule
             string solutionsStr = @"C:\Users\denni_000\OneDrive\Documents\ContracOK UE\UE04 - Boogie - 25 NC\Source\Boogie.sln";
             var solution = MSBuildWorkspace.Create().OpenSolutionAsync(solutionsStr).Result;
             
-
             var projects = solution.Projects;
             foreach(Project p in projects)
             {
@@ -64,30 +93,22 @@ namespace CategorizeModule
 
         }
 
-        private bool TryToLoadAssembly(Assembly assembly, string path)
-        {
-            try
-            {
-                assembly = Assembly.LoadFrom(path);
-                return true;
-            }
-            catch (Exception e)
-            {
-                return false;
+        private Tuple<bool, Assembly> TryToLoadAssembly(string path) {
+
+            try {
+                Assembly ass = Assembly.LoadFrom(path);
+                return new Tuple<bool, Assembly>(true, ass);
+
+            } catch (Exception e) {
+                return new Tuple<bool, Assembly>(false, null);
+
             }
         }
+
+        /*
         private Assembly GetCorrectAssembly(string className) {
             Assembly toReturn = null;
-            foreach (FileInfo f in new DirectoryInfo(Constants.SOURCE_BIN).GetFiles("*.dll"))
-            {
-                if (TryToLoadAssembly(toReturn, f.FullName))
-                {
-                    toReturn = Assembly.LoadFrom(f.FullName);
-                }
-                if (toReturn != null && toReturn.GetType(className) != null)
-                    return toReturn;
-            }
-            foreach (FileInfo f in new DirectoryInfo(Constants.SOURCE_BIN).GetFiles("*.exe"))
+            foreach (FileInfo f in this._binaries)
             {
                 if (TryToLoadAssembly(toReturn, f.FullName))
                 {
@@ -97,21 +118,21 @@ namespace CategorizeModule
                     return toReturn;
             }
             return null;
-        }
+        }*/
 
 
-        public void SetPrincipalClassName(string className){
-            this._principalClass = className;
-            _assembly = GetCorrectAssembly(className);
-
+        public void SetPrincipalClassName(string nameSpaceName, string className){
+            this._principalClass = new Tuple<string, string>(nameSpaceName, className);
+            
             this._variables = new List<String>();
-            foreach(FieldInfo f in GetVariablesFromClass(className))
+            /*
+            foreach (FieldInfo f in GetVariablesFromClass(this._principalClass))
             {
                 if (!this._variables.Contains(f.Name.ToString()))
                     this._variables.Add(f.Name.ToString());
-            }
+            }*/
         }
-        public string GetPrincipalClassName()
+        public Tuple<string, string> GetPrincipalClassName()
         {
             return this._principalClass;
         }
@@ -123,13 +144,13 @@ namespace CategorizeModule
             else
                  return className;
         }
-
+        /*
         private String GetCSPathFromFile(String className)
         {
             String[] classNameArr = className.Split('.');
             String classStr = classNameArr[1];
             classStr += ".cs";
-            var fileList = new DirectoryInfo(this._sourceFolder).GetFiles(classStr, SearchOption.AllDirectories);
+            var fileList = new DirectoryInfo(this._snl.FilePath).GetFiles(classStr, SearchOption.AllDirectories);
             foreach(FileInfo f in fileList){
                 if(f.FullName.Substring(0, f.FullName.LastIndexOf("\\"+ classStr)).EndsWith(classNameArr[0]))
                 {
@@ -142,36 +163,37 @@ namespace CategorizeModule
             }
             return "";
         }
-
-        private void UpdateVariables(string className)
+        */
+        private void UpdateVariables(Tuple<string, string> classLocation)
         {
-            if (!className.Equals(this.GetPrincipalClassName()))
-                foreach (FieldInfo s in GetVariablesFromClass(className))
+            // If ClassLocation refers to pricipal class, secure that variables wasn't initialized.
+            if (!classLocation.Equals(this.GetPrincipalClassName()) || this._variables.Count == 0)
+                foreach (FieldInfo s in GetVariablesFromClass(classLocation))
                     if (!this._variables.Contains(s.Name.ToString()))
                         this._variables.Add(s.ToString());
         }
 
-        private IEnumerable<FieldInfo> GetVariablesFromClass(string className)
+        private IEnumerable<FieldInfo> GetVariablesFromClass(Tuple<string, string> classLocation)
         {
             if (_assembly == null) { 
                 return new List<FieldInfo>();
             }
             else
             {
-                Type classType = _assembly.GetType(className);
+                Type classType = _assembly.GetType(classLocation.Item1 + "." + classLocation.Item2);
                 return classType.GetRuntimeFields();
             }
         }
 
-        public bool CheckStrongPrecondition(string methodName)
+        public bool CheckStrongPrecondition(string method)
         {
-            if (methodName.Equals(GetOnlyClassName(this.GetPrincipalClassName())))
-                methodName = this._CONSTRUCTOR_ALIAS;
-            return ExamineCSharpCode(this.GetPrincipalClassName(), methodName, Operations.ATR_VAR_IN_PRECONDITION);
+            if (method.Equals(this.GetPrincipalClassName().Item2))
+                method = this._CONSTRUCTOR_ALIAS;
+            return ExamineCSharpCode(this.GetPrincipalClassName(), method, Operations.ATR_VAR_IN_PRECONDITION);
         }
         public bool CheckWeakPrecondition(string method)
         {
-            if (method.Equals(GetOnlyClassName(this.GetPrincipalClassName())))
+            if (method.Equals(this.GetPrincipalClassName().Item2))
                 method = this._CONSTRUCTOR_ALIAS;            
             if (ExamineCSharpCode(this.GetPrincipalClassName(), method, Operations.REQUIRES_TRUE))
                 return true;
@@ -181,15 +203,115 @@ namespace CategorizeModule
                 return true;            
             return false;
         }
-        private bool ExamineCSharpCode(String className, String methodName, Operations typeOfExamination)
+        private bool ExamineCSharpCode(Tuple<string, string> className, String methodName, Operations typeOfExamination)
         {
-            ClassDeclarationSyntax ourClass = TakeClassFromFile(GetCSPathFromFile(className), className);
+            ClassDeclarationSyntax ourClass = TakeClassFromSolution(className);
+            //ClassDeclarationSyntax ourClass = TakeClassFromFile(GetCSPathFromFile(className), className);
 		    if(ourClass == null)
 			    return false;
             UpdateVariables(className);
 		    if(ExamineAllClassAssociated(className, methodName, typeOfExamination))
 			    return true;
 		    return ExamineMethods(TakeMethodsFromClass(ourClass, methodName), typeOfExamination); 
+        }
+
+        private Tuple<List<Document>, List<Document>> GetDocumentsToSearchForClass(string nameOfClass)
+        {
+            List<Document> docsPrior = new List<Document>();
+            List<Document> docsGeneral = new List<Document>();
+
+            foreach (Project proj in this._snl.Projects)
+            {
+                foreach (Document d in proj.Documents)
+                {
+                    if (d.Name.Equals(nameOfClass))
+                        docsPrior.Add(d);
+                    else
+                        docsGeneral.Add(d);
+                }
+            }
+
+            return new Tuple<List<Document>, List<Document>>(docsPrior, docsGeneral);
+        }
+        private Tuple<bool, ClassDeclarationSyntax> SearchForClassOnDocument(Document doc, Tuple<string, string> classLocation)
+        {
+            // Load AST its root node.
+            SyntaxTree st = doc.GetSyntaxTreeAsync().Result;
+            var root = (CompilationUnitSyntax) st.GetRoot();
+
+            // If there are no Namespace in location, seach through class on AST.
+            if (classLocation.Item1.Equals("")) {
+                Tuple<bool, ClassDeclarationSyntax> simpleSearch = GetClassFromList(root.Members, classLocation.Item2);
+                if (simpleSearch.Item1)
+                    return simpleSearch;
+            // Search through namespace.class on AST.
+            } else {
+                Tuple<bool, NamespaceDeclarationSyntax> simpleSearch = GetNamepaceFromList(root.Members, classLocation.Item1);
+                if (simpleSearch.Item1) {
+                    NamespaceDeclarationSyntax n = simpleSearch.Item2;
+                    Tuple<bool, ClassDeclarationSyntax> completeSearch = GetClassFromList(n.Members, classLocation.Item2);
+                }
+
+            }
+
+            return new Tuple<bool, ClassDeclarationSyntax>(false, null);
+        }
+
+        private void LoadCorrectAssembly(bool isPossibleToFindAssembly, string nameOfAssembly)
+        {
+            if (!isPossibleToFindAssembly)
+            {
+                this._assembly = null;
+                return;
+            }
+                
+            foreach (FileInfo f in this._binaries)
+            {
+                if (f.Name.Equals(nameOfAssembly))
+                {
+                    Tuple<bool, Assembly> loadTry = TryToLoadAssembly(f.FullName);
+                    if (loadTry.Item1) { 
+                        this._assembly = loadTry.Item2;
+                        return;
+                    }
+                }
+            }
+        }
+
+        private Tuple<bool, ClassDeclarationSyntax> SearchForClassOnDocuments(List<Document> docs, Tuple<string, string> classLocation) {
+            foreach(Document doc in docs)
+            {
+                Tuple<bool, ClassDeclarationSyntax> searchTry = SearchForClassOnDocument(doc, classLocation);
+                if (searchTry.Item1) {
+                    // If the document contain the Class searched, we need to load the Assembly from this document project.
+                    LoadCorrectAssembly(true, doc.Project.AssemblyName);
+                    return searchTry;
+                }
+            }
+            return new Tuple<bool, ClassDeclarationSyntax>(false, null);
+        }
+
+        private ClassDeclarationSyntax TakeClassFromSolution(Tuple<string, string> classLocation)
+        {
+            // Define: Prior Search = Search in Documents.Where(doc, doc.Name == className).
+            // Define: General Search = Search in Documents.Where(doc, doc.Name != className).
+            // ===> Search all Documents, and separate Prior Search from General Search
+            Tuple<List<Document>, List<Document>> documents = GetDocumentsToSearchForClass(classLocation.Item2);
+
+            // Execute Prior Search.
+            Tuple<bool, ClassDeclarationSyntax> priorAttempt = SearchForClassOnDocuments(documents.Item1, classLocation);
+            if (priorAttempt.Item1) {
+                return priorAttempt.Item2;
+            // If Prior Search didn't found anything, executes General Search.
+            } else {
+                Tuple<bool, ClassDeclarationSyntax> generalAttempt = SearchForClassOnDocuments(documents.Item2, classLocation);
+                if (generalAttempt.Item1)
+                    return generalAttempt.Item2;
+            }
+
+            // If anything was Found, it may be because Class searched is from some external library.
+            LoadCorrectAssembly(false, null);
+            return null;
         }
         private List<MethodDeclarationSyntax> TakeMethodsFromClass(ClassDeclarationSyntax cl, string methodName)
         {
@@ -476,25 +598,40 @@ namespace CategorizeModule
             }
             return false;
         }
-        private bool ExamineAllClassAssociated(string className, string methodName, Operations typeOfOperation)
+        private bool ExamineAllClassAssociated(Tuple<string, string> classLocation, string methodName, Operations typeOfOperation)
         {
             if(typeOfOperation.Equals(Operations.ATR_VAR_IN_PRECONDITION) || typeOfOperation.Equals(Operations.REQUIRES_TRUE)){
-                List<String> interfacesOfClass = GetInterfacesPathFromClass(className);
+                List<String> interfacesOfClass = GetInterfacesPathFromClass(classLocation);
                 if(interfacesOfClass.Count != 0)
                 {
                     foreach(String i in interfacesOfClass){
-                        if (ExamineCSharpCode(i, methodName, typeOfOperation))
-                            return true;
+                        int dotIndex = i.LastIndexOf(".");
+                        if(dotIndex > 0) {
+                            string nameOfNameSpace = i.Substring(0, dotIndex);
+                            string nameOfClass = i.Substring(dotIndex + 1);
+                            if (ExamineCSharpCode(new Tuple<string, string>(nameOfNameSpace, nameOfClass), methodName, typeOfOperation))
+                                return true;
+                        } else
+                            if (ExamineCSharpCode(new Tuple<string, string>("", i), methodName, typeOfOperation))
+                                return true;
                     }
                 }
             }
-            String superClass = GetSuperclassPathFromClass(className);
+            String superClass = GetSuperclassPathFromClass(classLocation);
             if (!superClass.Equals(""))
             {
                 try
                 {
-                    if (ExamineCSharpCode(superClass, methodName, typeOfOperation))
-                        return true;
+                    int dotIndex = superClass.LastIndexOf(".");
+                    if (dotIndex > 0) {
+                        string nameOfNameSpace = superClass.Substring(0, dotIndex);
+                        string nameOfClass = superClass.Substring(dotIndex + 1);
+                        if (ExamineCSharpCode(new Tuple<string, string>(nameOfNameSpace, nameOfClass), methodName, typeOfOperation))
+                            return true;
+                    } else {
+                        if (ExamineCSharpCode(new Tuple<string, string>("", superClass), methodName, typeOfOperation))
+                            return true;
+                    }
                 }
                 catch(Exception e)
                 {
@@ -504,11 +641,11 @@ namespace CategorizeModule
             return false;
         }
 
-        private List<String> GetInterfacesPathFromClass(string className)
+        private List<String> GetInterfacesPathFromClass(Tuple<string, string> classLocation)
         {
             if(this._assembly != null)
             {
-                Type classToLoad = this._assembly.GetType(className);
+                Type classToLoad = this._assembly.GetType(classLocation.Item1 + "." + classLocation.Item2);
                 List<String> toReturn = new List<String>();
                 foreach(Type t in classToLoad.GetInterfaces())
                 {
@@ -519,15 +656,15 @@ namespace CategorizeModule
             return new List<String>();
         }
 
-        private String GetSuperclassPathFromClass(string className)
+        private String GetSuperclassPathFromClass(Tuple<string, string> classLocation)
         {
             if(this._assembly != null){
-                Type classToLoad = this._assembly.GetType(className);
+                Type classToLoad = this._assembly.GetType(classLocation.Item1 + "." + classLocation.Item2);
                 return classToLoad.BaseType.FullName.ToString();
             }
             return "";
         }
-
+        /*
         private ClassDeclarationSyntax TakeClassFromFile(string path, string classString)
         {
             try{
@@ -566,9 +703,9 @@ namespace CategorizeModule
                     return null;
                 }
             }
-        }
+        }*/
 
-        public NamespaceDeclarationSyntax GetNamepaceFromList(SyntaxList<MemberDeclarationSyntax> list, string name)
+        public Tuple<bool, NamespaceDeclarationSyntax> GetNamepaceFromList(SyntaxList<MemberDeclarationSyntax> list, string name)
         {
             foreach (MemberDeclarationSyntax m in list)
             {
@@ -576,32 +713,32 @@ namespace CategorizeModule
                 {
                     NamespaceDeclarationSyntax n = (NamespaceDeclarationSyntax)m;
 
-                    string nameOfNameSpace = ((IdentifierNameSyntax)n.Name).Identifier.Value.ToString();
+                    string nameOfNameSpace = n.Name.ToString();
                     if (nameOfNameSpace.Equals(name))
                     {
-                        return n;
+                        return new Tuple<bool, NamespaceDeclarationSyntax>(true, n);
                     }
                 }
                 
             }
-            return null;
+            return new Tuple<bool, NamespaceDeclarationSyntax>(false, null);
         }
 
-        public ClassDeclarationSyntax GetClassFromList(SyntaxList<MemberDeclarationSyntax> list, string name)
+        public Tuple<bool, ClassDeclarationSyntax> GetClassFromList(SyntaxList<MemberDeclarationSyntax> list, string name)
         {
             foreach (MemberDeclarationSyntax m in list)
             {
                 if(m is ClassDeclarationSyntax)
                 {
-                    ClassDeclarationSyntax c = (ClassDeclarationSyntax)m;
+                    ClassDeclarationSyntax c = (ClassDeclarationSyntax) m;
                     string nameOfClass = c.Identifier.Value.ToString();
                     if (nameOfClass.Equals(name))
                     {
-                        return c;
+                        return new Tuple<bool, ClassDeclarationSyntax>(true, c);
                     }
                 }
             }
-            return null;
+            return new Tuple<bool, ClassDeclarationSyntax>(false, null);
         }
 
         private String GetTextFromFile(string path)
