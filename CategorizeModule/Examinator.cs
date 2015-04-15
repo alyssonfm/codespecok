@@ -5,11 +5,12 @@ using System.Collections.Generic;
 using Commons;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.MSBuild;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.VisualStudio.ComponentModelHost;
 
 namespace CategorizeModule
 {
+
     class ContractArguments
     {
         public List<ArgumentSyntax> Requires { get; set; } = new List<ArgumentSyntax>();
@@ -41,6 +42,7 @@ namespace CategorizeModule
         public Examinator(string solutionPath)
         {
             StoreBinaries();
+            TestWorkspaceExp();
             OpenSolutionFile(solutionPath);
         }
 
@@ -58,19 +60,24 @@ namespace CategorizeModule
 
             // Postcondition:
             // ==> Solution should be found, if Detection phase already was completed.
-            if (this._snl.FilePath == null)
-            {
+            // ==> Some projects had to be found.
+            if (this._snl.FilePath == null) {
                 throw new FileLoadException("For some reason, we couldn't load the Solution file.\n"
                                           + "See the string we receive:\n"
                                           + "SolutionPath ==" + solutionPath);
-            }          
+            } else if(!this._snl.Projects.IsAny<Project>()) {
+                throw new FileLoadException("For some reason, Solution loaded doesn't have any project.\n"
+                                          + "See the string we receive:\n"
+                                          + "SolutionPath ==" + solutionPath);
+            }
         }
 
         public void TestWorkspaceExp()
         {
-            string solutionsStr = @"C:\Users\denni_000\OneDrive\Documents\ContracOK UE\UE04 - Boogie - 25 NC\Source\Boogie.sln";
-            var solution = MSBuildWorkspace.Create().OpenSolutionAsync(solutionsStr).Result;
-            
+            string solutionsStr = @"C:\Users\denni_000\OneDrive\Documents\ContractOK-UE\UE04-Boogie-15NC\Source\Boogie.sln";
+            var workspace = MSBuildWorkspace.Create();
+            var solution = workspace.OpenSolutionAsync(solutionsStr).Result;
+   
             var projects = solution.Projects;
             foreach(Project p in projects)
             {
@@ -84,13 +91,8 @@ namespace CategorizeModule
 
                     }
                     var i = 2;
-
-
                 }
-
             }
-
-
         }
 
         private Tuple<bool, Assembly> TryToLoadAssembly(string path) {

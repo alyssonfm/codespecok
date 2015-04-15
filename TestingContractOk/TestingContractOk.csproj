@@ -75,6 +75,10 @@
       <Project>{8c461b7a-ae00-4a47-83df-58426f16200b}</Project>
       <Name>CategorizeModule</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Commons\Commons.csproj">
+      <Project>{4a77908b-2b1c-49de-91f9-2ffcd51e7d1e}</Project>
+      <Name>Commons</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DetectModule\DetectModule.csproj">
       <Project>{6932f3d6-2d49-42ff-b818-401205d154ff}</Project>
       <Name>DetectModule</Name>
