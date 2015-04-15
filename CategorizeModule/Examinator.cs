@@ -38,7 +38,7 @@ namespace CategorizeModule
 
         public void TestWorkspaceExp()
         {
-            string solutionsStr = @"C:\Users\denni_000\OneDrive\Documents\ContracOK UE\UE04 - Boogie - 25 NC\Source\Boogie.sln";
+            string solutionsStr = @"C:\Users\denni_000\OneDrive\Documents\ContractOK-UE\UE04-Boogie-15NC\Source\Boogie.sln";
             var solution = MSBuildWorkspace.Create().OpenSolutionAsync(solutionsStr).Result;
             
 
