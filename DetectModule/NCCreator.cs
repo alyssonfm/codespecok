@@ -10,7 +10,7 @@ namespace DetectModule
     /// <summary>
     /// Load file with test results, then create nonconformances that were founded.
     /// </summary>
-    class NCCreator
+    public class NCCreator
     {
         /// <summary>
         /// Constructor of NCCreator class.
@@ -18,18 +18,22 @@ namespace DetectModule
         public NCCreator()
         {
         }
-        
+
+        public HashSet<Nonconformance> ListNonconformances()
+        {
+            return ListNonconformances(Constants.TEST_ERRORS);
+        }
+
         /// <summary>
         /// Return a list of distinct nonconformances founded with tests.
         /// </summary>
         /// <returns>List of distinct nonconformances founded with tests.</returns>
-        public HashSet<Nonconformance> ListNonconformances()
+        public HashSet<Nonconformance> ListNonconformances(string fileToLoad)
         {
             HashSet<Nonconformance> result = new HashSet<Nonconformance>();
             // Load test results.
-            XDocument doc = XDocument.Load(Constants.TEST_ERRORS);
             XmlDocument docXml = new XmlDocument();
-            docXml.Load(Constants.TEST_ERRORS);
+            docXml.Load(fileToLoad);
 
             XmlNodeList nodes = docXml.GetElementsByTagName("UnitTestResult");
 
@@ -42,7 +46,8 @@ namespace DetectModule
                 {
                     XmlNode output = unitTestResult.FirstChild;
                     var errorInfoMatch = ((XmlElement)output).GetElementsByTagName("ErrorInfo");
-                    if (errorInfoMatch.Count == 1) { 
+                    if (errorInfoMatch.Count == 1)
+                    {
                         XmlNode errorInfo = errorInfoMatch.Item(0);
                         XmlNode mess = errorInfo.FirstChild;
                         XmlNode stac = errorInfo.LastChild;
