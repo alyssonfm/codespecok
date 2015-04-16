@@ -12,8 +12,8 @@ namespace CategorizeModule
 {
     class ContractArguments
     {
-        public List<ArgumentSyntax> Requires { get; set; } = new List<ArgumentSyntax>();
-        public List<ArgumentSyntax> Ensures { get; set; } = new List<ArgumentSyntax>();
+        public List<ArgumentSyntax> Requires { get; set; }
+        public List<ArgumentSyntax> Ensures { get; set; }
     }
     class Examinator 
     {
