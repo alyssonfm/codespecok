@@ -55,7 +55,7 @@ namespace CategorizeModule
             {
                 this._examiner.SetPrincipalClassName(n.GetNameSpace(), n.GetClassName());
 
-                if (this._examiner.CheckStrongPrecondition(n.GetMethodName()))
+                if (this._examiner.CheckStrongPrecondition(n.GetMethodName(), n.GetParametersArray()))
                     return Cause.STRONG_PRE;
                 else
                     return Cause.WEAK_POST;
@@ -73,7 +73,7 @@ namespace CategorizeModule
             {
                 this._examiner.SetPrincipalClassName(n.GetNameSpace(), n.GetClassName());
 
-                if (this._examiner.CheckWeakPrecondition(n.GetMethodName()))
+                if (this._examiner.CheckWeakPrecondition(n.GetMethodName()), n.GetParametersArray()))
                     return Cause.WEAK_PRE;
                 else
                     return Cause.STRONG_POST;
@@ -91,7 +91,7 @@ namespace CategorizeModule
             {
                 this._examiner.SetPrincipalClassName(n.GetNameSpace(), n.GetClassName());
 
-                if (this._examiner.CheckWeakPrecondition(n.GetMethodName()))
+                if (this._examiner.CheckWeakPrecondition(n.GetMethodName(), n.GetParametersArray())
                     return Cause.WEAK_PRE;
                 else
                     return Cause.STRONG_INV;

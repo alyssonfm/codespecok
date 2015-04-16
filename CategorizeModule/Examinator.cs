@@ -138,34 +138,34 @@ namespace CategorizeModule
             }
         }
 
-        public bool CheckStrongPrecondition(string method)
+        public bool CheckStrongPrecondition(string method, String [] arrParameters)
         {
             /*if (method.Equals(this._CONSTRUCTOR_ALIAS))
                 method = this.GetPrincipalClassName().Item2;*/
-            return ExamineCSharpCode(this.GetPrincipalClassName(), method, Operations.ATR_VAR_IN_PRECONDITION);
+            return ExamineCSharpCode(this.GetPrincipalClassName(), method, arrParameters, Operations.ATR_VAR_IN_PRECONDITION);
         }
-        public bool CheckWeakPrecondition(string method)
+        public bool CheckWeakPrecondition(string method, String [] arrParameters)
         {
             /*if (method.Equals(this._CONSTRUCTOR_ALIAS))
                 method = this.GetPrincipalClassName().Item2;*/       
-            if (ExamineCSharpCode(this.GetPrincipalClassName(), method, Operations.REQUIRES_TRUE))
+            if (ExamineCSharpCode(this.GetPrincipalClassName(), method, arrParameters, Operations.REQUIRES_TRUE))
                 return true;
-            if (ExamineCSharpCode(this.GetPrincipalClassName(), method, Operations.ATR_MOD))
+            if (ExamineCSharpCode(this.GetPrincipalClassName(), method, arrParameters, Operations.ATR_MOD))
                 return true;
-            if (ExamineCSharpCode(this.GetPrincipalClassName(), method, Operations.ENSURES_TRUE))
+            if (ExamineCSharpCode(this.GetPrincipalClassName(), method, arrParameters, Operations.ENSURES_TRUE))
                 return true;            
             return false;
         }
-        private bool ExamineCSharpCode(Tuple<string, string> className, String methodName, Operations typeOfExamination)
+        private bool ExamineCSharpCode(Tuple<string, string> className, String methodName, String arrParameters, Operations typeOfExamination)
         {
             ClassDeclarationSyntax ourClass = TakeClassFromSolution(className);
             //ClassDeclarationSyntax ourClass = TakeClassFromFile(GetCSPathFromFile(className), className);
 		    if(ourClass == null)
 			    return false;
             UpdateVariables(className);
-		    if(ExamineAllClassAssociated(className, methodName, typeOfExamination))
+		    if(ExamineAllClassAssociated(className, methodName, arrParameters, typeOfExamination))
 			    return true;
-		    return ExamineMethods(TakeMethodsFromClass(ourClass, methodName), typeOfExamination); 
+		    return ExamineMethods(TakeMethodsFromClass(ourClass, methodName), arrParameters, typeOfExamination); 
         }
 
         private Tuple<List<Document>, List<Document>> GetDocumentsToSearchForClass(string nameOfClass)
@@ -295,24 +295,26 @@ namespace CategorizeModule
         {
             if (methods != null)
             {
-                foreach (BaseMethodDeclarationSyntax m in methods)
-                {
-                    if (typeOfOperation.Equals(Operations.ATR_MOD))
+                if(MethodIsTheRightOne()){
+                    foreach (BaseMethodDeclarationSyntax m in methods)
                     {
-                        if (ExamineCodeFromMethod(m))
-                            return true;
-                    }
-                    ContractArguments contracts = GetContractsPreAndPostFromMethod(m);
-                    if (contracts.Requires.Count + contracts.Ensures.Count != 0)
-                    {
-                        if (typeOfOperation.Equals(Operations.ATR_VAR_IN_PRECONDITION) || typeOfOperation.Equals(Operations.REQUIRES_TRUE) || typeOfOperation.Equals(Operations.ENSURES_TRUE))
+                        if (typeOfOperation.Equals(Operations.ATR_MOD))
                         {
-                            if (ExaminePrePostClauses(typeOfOperation, m, contracts))
+                            if (ExamineCodeFromMethod(m))
                                 return true;
                         }
+                        ContractArguments contracts = GetContractsPreAndPostFromMethod(m);
+                        if (contracts.Requires.Count + contracts.Ensures.Count != 0)
+                        {
+                            if (typeOfOperation.Equals(Operations.ATR_VAR_IN_PRECONDITION) || typeOfOperation.Equals(Operations.REQUIRES_TRUE) || typeOfOperation.Equals(Operations.ENSURES_TRUE))
+                            {
+                                if (ExaminePrePostClauses(typeOfOperation, m, contracts))
+                                    return true;
+                            }
+                        }
+                        else if (typeOfOperation.Equals(Operations.REQUIRES_TRUE) || typeOfOperation.Equals(Operations.ENSURES_TRUE))
+                            return true;
                     }
-                    else if (typeOfOperation.Equals(Operations.REQUIRES_TRUE) || typeOfOperation.Equals(Operations.ENSURES_TRUE))
-                        return true;
                 }
             }
             return false;
@@ -563,7 +565,7 @@ namespace CategorizeModule
             }
             return false;
         }
-        private bool ExamineAllClassAssociated(Tuple<string, string> classLocation, string methodName, Operations typeOfOperation)
+        private bool ExamineAllClassAssociated(Tuple<string, string> classLocation, string methodName, string arrParameters, Operations typeOfOperation)
         {
             if(typeOfOperation.Equals(Operations.ATR_VAR_IN_PRECONDITION) || typeOfOperation.Equals(Operations.REQUIRES_TRUE)){
                 List<String> interfacesOfClass = GetInterfacesPathFromClass(classLocation);
@@ -574,10 +576,10 @@ namespace CategorizeModule
                         if(dotIndex > 0) {
                             string nameOfNameSpace = i.Substring(0, dotIndex);
                             string nameOfClass = i.Substring(dotIndex + 1);
-                            if (ExamineCSharpCode(new Tuple<string, string>(nameOfNameSpace, nameOfClass), methodName, typeOfOperation))
+                            if (ExamineCSharpCode(new Tuple<string, string>(nameOfNameSpace, nameOfClass), methodName, arrParameters, typeOfOperation))
                                 return true;
                         } else
-                            if (ExamineCSharpCode(new Tuple<string, string>("", i), methodName, typeOfOperation))
+                            if (ExamineCSharpCode(new Tuple<string, string>("", i), methodName, arrParameters, typeOfOperation))
                                 return true;
                     }
                 }
