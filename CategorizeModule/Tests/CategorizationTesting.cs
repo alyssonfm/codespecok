@@ -10,12 +10,13 @@ namespace CategorizeTest
 {
     public class CategorizationTesting
     {
-
+        // These tests, still depend on correct Location of SLN given on this file. Also, depends that the bin file
+        // are on Bin folder.
         enum NonconformancesSuite { Boogie = 0 };
 
         private string[] sourceFolderPath = { @"C:\Users\denni_000\OneDrive\Documents\ContractOK-UE\UE04-Boogie-15NC\Source" };
         private string[] solutionFile = { @"Boogie.sln" };
-        private string[] testResultsPath = { @"C:\Users\denni_000\Documents\contractok\CategorizeTest\Resources\TestResultFromBoogie.xml" };
+        private string[] testResultsPath = { @"C:\Users\denni_000\Documents\contractok\CategorizeModule\Resources\TestResultFromBoogie.xml" };
         private string[][] correctLikelyCause = { new string[] { "Weak Precondition", "Strong Invariant", "Strong Invariant", "Strong Invariant", "Strong Precondition", "Strong Precondition", "Strong Precondition", "Strong Precondition", "Strong Precondition", "Strong Precondition", "Strong Precondition", "Strong Precondition", "Strong Precondition", "Strong Precondition", "Strong Precondition" } };
 
         private HashSet<Nonconformance> GetNonconformancesSuite(NonconformancesSuite suite)

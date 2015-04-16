@@ -45,8 +45,6 @@ namespace CategorizeModule
 
         public Examinator(string solutionPath)
         {
-            if(!solutionPath.Contains("Boogie"))
-                TestWorkspaceExp();
             StoreBinaries();
             OpenSolutionFile(solutionPath);
         }
@@ -75,16 +73,6 @@ namespace CategorizeModule
                                           + "See the string we receive:\n"
                                           + "SolutionPath ==" + solutionPath);
             }
-        }
-
-        public void TestWorkspaceExp()
-        {
-            string solutionsStr = @"C:\Users\denni_000\OneDrive\Documents\ContractOK-UE\UE04-Boogie-15NC\Source\Boogie.sln";
-            var solution = MSBuildWorkspace.Create().OpenSolutionAsync(solutionsStr).Result;
-   
-            //var projects = solution.Projects;
-
-            (new CategorizeTest.CategorizationTesting()).TestNonconformancesLikelyCause();
         }
 
         private Tuple<bool, Assembly> TryToLoadAssembly(string path) {
