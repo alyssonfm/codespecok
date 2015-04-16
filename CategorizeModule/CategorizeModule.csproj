@@ -97,6 +97,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CategorizationTesting.cs" />
     <Compile Include="Categorize.cs" />
     <Compile Include="CustomAssemblyLoader.cs" />
     <Compile Include="Examinator.cs" />
@@ -106,6 +107,10 @@
     <ProjectReference Include="..\Commons\Commons.csproj">
       <Project>{4a77908b-2b1c-49de-91f9-2ffcd51e7d1e}</Project>
       <Name>Commons</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DetectModule\DetectModule.csproj">
+      <Project>{6932f3d6-2d49-42ff-b818-401205d154ff}</Project>
+      <Name>DetectModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\Structures\Structures.csproj">
       <Project>{12eeb6c8-6ec1-4eab-8fcf-56e64801b895}</Project>

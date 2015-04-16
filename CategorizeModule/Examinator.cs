@@ -12,6 +12,11 @@ namespace CategorizeModule
 
     class ContractArguments
     {
+        public ContractArguments()
+        {
+            this.Requires = new List<ArgumentSyntax>();
+            this.Ensures = new List<ArgumentSyntax>();
+        }
         public List<ArgumentSyntax> Requires { get; set; }
         public List<ArgumentSyntax> Ensures { get; set; }
     }
@@ -20,7 +25,7 @@ namespace CategorizeModule
         private const int _VAR_FALSE = int.MinValue;
         private Tuple<string, string> _principalClass;
         private List<FileInfo> _binaries;
-        private string _CONSTRUCTOR_ALIAS = "<init>";
+        private string _CONSTRUCTOR_ALIAS = ".ctor";
         private List<String> _variables;
         private Solution _snl;
         private Assembly _assembly;
@@ -40,8 +45,9 @@ namespace CategorizeModule
 
         public Examinator(string solutionPath)
         {
+            if(!solutionPath.Contains("Boogie"))
+                TestWorkspaceExp();
             StoreBinaries();
-            TestWorkspaceExp();
             OpenSolutionFile(solutionPath);
         }
 
@@ -74,23 +80,11 @@ namespace CategorizeModule
         public void TestWorkspaceExp()
         {
             string solutionsStr = @"C:\Users\denni_000\OneDrive\Documents\ContractOK-UE\UE04-Boogie-15NC\Source\Boogie.sln";
-            var workspace = MSBuildWorkspace.Create();
-            var solution = workspace.OpenSolutionAsync(solutionsStr).Result;
+            var solution = MSBuildWorkspace.Create().OpenSolutionAsync(solutionsStr).Result;
    
-            var projects = solution.Projects;
-            foreach(Project p in projects)
-            {
-                string nome = p.AssemblyName;
-                foreach(Document d in p.Documents)
-                {
-                    SyntaxTree s = d.GetSyntaxTreeAsync().Result;
-                    CompilationUnitSyntax root = (CompilationUnitSyntax)s.GetRoot();
-                    foreach(MemberDeclarationSyntax m in root.Members)
-                    {
+            //var projects = solution.Projects;
 
-                    }
-                }
-            }
+            (new CategorizeTest.CategorizationTesting()).TestNonconformancesLikelyCause();
         }
 
         private Tuple<bool, Assembly> TryToLoadAssembly(string path) {
@@ -106,32 +100,10 @@ namespace CategorizeModule
             }
         }
 
-        /*
-        private Assembly GetCorrectAssembly(string className) {
-            Assembly toReturn = null;
-            foreach (FileInfo f in this._binaries)
-            {
-                if (TryToLoadAssembly(toReturn, f.FullName))
-                {
-                    toReturn = Assembly.LoadFrom(f.FullName);
-                }
-                if (toReturn != null && toReturn.GetType(className) != null)
-                    return toReturn;
-            }
-            return null;
-        }*/
-
-
         public void SetPrincipalClassName(string nameSpaceName, string className){
             this._principalClass = new Tuple<string, string>(nameSpaceName, className);
             
             this._variables = new List<String>();
-            /*
-            foreach (FieldInfo f in GetVariablesFromClass(this._principalClass))
-            {
-                if (!this._variables.Contains(f.Name.ToString()))
-                    this._variables.Add(f.Name.ToString());
-            }*/
         }
         public Tuple<string, string> GetPrincipalClassName()
         {
@@ -145,26 +117,6 @@ namespace CategorizeModule
             else
                  return className;
         }
-        /*
-        private String GetCSPathFromFile(String className)
-        {
-            String[] classNameArr = className.Split('.');
-            String classStr = classNameArr[1];
-            classStr += ".cs";
-            var fileList = new DirectoryInfo(this._snl.FilePath).GetFiles(classStr, SearchOption.AllDirectories);
-            foreach(FileInfo f in fileList){
-                if(f.FullName.Substring(0, f.FullName.LastIndexOf("\\"+ classStr)).EndsWith(classNameArr[0]))
-                {
-                    return f.FullName;
-                }
-            }
-            foreach (FileInfo f in fileList)
-            {
-                return f.FullName;
-            }
-            return "";
-        }
-        */
         private void UpdateVariables(Tuple<string, string> classLocation)
         {
             // If ClassLocation refers to pricipal class, secure that variables wasn't initialized.
@@ -188,14 +140,14 @@ namespace CategorizeModule
 
         public bool CheckStrongPrecondition(string method)
         {
-            if (method.Equals(this.GetPrincipalClassName().Item2))
-                method = this._CONSTRUCTOR_ALIAS;
+            /*if (method.Equals(this._CONSTRUCTOR_ALIAS))
+                method = this.GetPrincipalClassName().Item2;*/
             return ExamineCSharpCode(this.GetPrincipalClassName(), method, Operations.ATR_VAR_IN_PRECONDITION);
         }
         public bool CheckWeakPrecondition(string method)
         {
-            if (method.Equals(this.GetPrincipalClassName().Item2))
-                method = this._CONSTRUCTOR_ALIAS;            
+            /*if (method.Equals(this._CONSTRUCTOR_ALIAS))
+                method = this.GetPrincipalClassName().Item2;*/       
             if (ExamineCSharpCode(this.GetPrincipalClassName(), method, Operations.REQUIRES_TRUE))
                 return true;
             if (ExamineCSharpCode(this.GetPrincipalClassName(), method, Operations.ATR_MOD))
@@ -251,6 +203,8 @@ namespace CategorizeModule
                 if (simpleSearch.Item1) {
                     NamespaceDeclarationSyntax n = simpleSearch.Item2;
                     Tuple<bool, ClassDeclarationSyntax> completeSearch = GetClassFromList(n.Members, classLocation.Item2);
+                    if (completeSearch.Item1)
+                        return completeSearch;
                 }
 
             }
@@ -314,24 +268,34 @@ namespace CategorizeModule
             LoadCorrectAssembly(false, null);
             return null;
         }
-        private List<MethodDeclarationSyntax> TakeMethodsFromClass(ClassDeclarationSyntax cl, string methodName)
+        private List<BaseMethodDeclarationSyntax> TakeMethodsFromClass(ClassDeclarationSyntax cl, string methodName)
         {
-            List<MethodDeclarationSyntax> methods = new List<MethodDeclarationSyntax>();
+            List<BaseMethodDeclarationSyntax> methods = new List<BaseMethodDeclarationSyntax>();
             foreach(MemberDeclarationSyntax m in cl.Members)
             {
-                if (m is MethodDeclarationSyntax)
+                if (methodName.Equals(this._CONSTRUCTOR_ALIAS))
                 {
-                    if (((MethodDeclarationSyntax)m).Identifier.Value.ToString().Equals(methodName))
-                        methods.Add((MethodDeclarationSyntax)m);
+                    if (m is ConstructorDeclarationSyntax)
+                    {
+                        methods.Add((ConstructorDeclarationSyntax)m);
+                    }
+                }
+                else
+                {
+                    if (m is MethodDeclarationSyntax)
+                    {
+                        if (((MethodDeclarationSyntax)m).Identifier.Value.ToString().Equals(methodName))
+                            methods.Add((MethodDeclarationSyntax)m);
+                    }
                 }
             }
             return methods;
         }
-        private bool ExamineMethods(List<MethodDeclarationSyntax> methods, Operations typeOfOperation)
+        private bool ExamineMethods(List<BaseMethodDeclarationSyntax> methods, Operations typeOfOperation)
         {
             if (methods != null)
             {
-                foreach(MethodDeclarationSyntax m in methods)
+                foreach (BaseMethodDeclarationSyntax m in methods)
                 {
                     if (typeOfOperation.Equals(Operations.ATR_MOD))
                     {
@@ -354,7 +318,7 @@ namespace CategorizeModule
             return false;
         }
 
-        private bool ExaminePrePostClauses(Operations typeOfOperation, MethodDeclarationSyntax method, ContractArguments contracts)
+        private bool ExaminePrePostClauses(Operations typeOfOperation, BaseMethodDeclarationSyntax method, ContractArguments contracts)
         {
             bool isRequiresClauseNotFounded = true, isEnsuresClauseNotFounded = true;
             if(contracts.Requires.Count != 0)
@@ -520,7 +484,7 @@ namespace CategorizeModule
             return _VAR_FALSE;
         }
 
-        private ContractArguments GetContractsPreAndPostFromMethod(MethodDeclarationSyntax method)
+        private ContractArguments GetContractsPreAndPostFromMethod(BaseMethodDeclarationSyntax method)
         {
             ContractArguments contracts = new ContractArguments();
             foreach(StatementSyntax s in method.Body.Statements)
@@ -545,7 +509,7 @@ namespace CategorizeModule
             return contracts;
         }
 
-        private bool ExamineCodeFromMethod(MethodDeclarationSyntax method)
+        private bool ExamineCodeFromMethod(BaseMethodDeclarationSyntax method)
         {
             SyntaxList<StatementSyntax> block = method.Body.Statements;
             ParameterListSyntax parameters = method.ParameterList;
@@ -665,47 +629,7 @@ namespace CategorizeModule
             }
             return "";
         }
-        /*
-        private ClassDeclarationSyntax TakeClassFromFile(string path, string classString)
-        {
-            try{
-                SyntaxTree st = CSharpSyntaxTree.ParseText(GetTextFromFile(path));
-                string className, nameSpaceName;
-                ClassDeclarationSyntax classDecl;
-
-                className = GetOnlyClassName(classString);
-                if (className.Equals(classString))
-                {
-                    nameSpaceName = "";
-                } else {
-                    nameSpaceName = classString.Substring(0, classString.IndexOf("."));
-                }
-                
-                var root = (CompilationUnitSyntax) st.GetRoot();
-
-                if (nameSpaceName.Equals(""))
-                {
-                    classDecl = GetClassFromList(root.Members, className);
-                } else {
-                    var nameSpaceDecl = GetNamepaceFromList(root.Members, nameSpaceName);
-                    classDecl = GetClassFromList(nameSpaceDecl.Members, className);
-                }
-
-                return classDecl;
-            }
-            catch (Exception e)
-            {
-                if (classString.Equals(this._principalClass))
-                {
-                    throw new FileNotFoundException(e.Message + "Principal class couldn't be load.");
-                }
-                else
-                {
-                    return null;
-                }
-            }
-        }*/
-
+        
         public Tuple<bool, NamespaceDeclarationSyntax> GetNamepaceFromList(SyntaxList<MemberDeclarationSyntax> list, string name)
         {
             foreach (MemberDeclarationSyntax m in list)
