@@ -122,8 +122,13 @@ namespace CategorizeModule
             // If ClassLocation refers to pricipal class, secure that variables wasn't initialized.
             if (!classLocation.Equals(this.GetPrincipalClassName()) || this._variables.Count == 0)
                 foreach (FieldInfo s in GetVariablesFromClass(classLocation))
-                    if (!this._variables.Contains(s.Name.ToString()))
-                        this._variables.Add(s.ToString());
+                {
+                    string varName = s.Name.ToString();
+                    if (varName.Contains(" "))
+                         varName = varName.Split(' ')[1];
+                    if (!this._variables.Contains(varName))
+                        this._variables.Add(varName);
+                }
         }
 
         private IEnumerable<FieldInfo> GetVariablesFromClass(Tuple<string, string> classLocation)
@@ -140,22 +145,23 @@ namespace CategorizeModule
 
         public bool CheckStrongPrecondition(string method, String [] arrParameters)
         {
-            /*if (method.Equals(this._CONSTRUCTOR_ALIAS))
-                method = this.GetPrincipalClassName().Item2;*/
             return ExamineCSharpCode(this.GetPrincipalClassName(), method, arrParameters, Operations.ATR_VAR_IN_PRECONDITION);
         }
         public bool CheckWeakPrecondition(string method, String [] arrParameters)
-        {
-            /*if (method.Equals(this._CONSTRUCTOR_ALIAS))
-                method = this.GetPrincipalClassName().Item2;*/       
+        {     
             if (ExamineCSharpCode(this.GetPrincipalClassName(), method, arrParameters, Operations.REQUIRES_TRUE))
                 return true;
             if (ExamineCSharpCode(this.GetPrincipalClassName(), method, arrParameters, Operations.ATR_MOD))
-                return true;
-            if (ExamineCSharpCode(this.GetPrincipalClassName(), method, arrParameters, Operations.ENSURES_TRUE))
-                return true;            
+                return true;         
             return false;
         }
+        public bool CheckWeakPostcondition(string method, String[] arrParameters)
+        {
+            if (ExamineCSharpCode(this.GetPrincipalClassName(), method, arrParameters, Operations.ENSURES_TRUE))
+                return true;
+            return false;
+        }
+
         private bool ExamineCSharpCode(Tuple<string, string> className, String methodName, String [] arrParameters, Operations typeOfExamination)
         {
             ClassDeclarationSyntax ourClass = TakeClassFromSolution(className);
@@ -222,7 +228,10 @@ namespace CategorizeModule
                 
             foreach (FileInfo f in this._binaries)
             {
-                if (f.Name.Equals(nameOfAssembly))
+                string fileN = f.Name;
+                fileN = fileN.Remove(fileN.IndexOf(f.Extension));
+
+                if (fileN.Equals(nameOfAssembly))
                 {
                     Tuple<bool, Assembly> loadTry = TryToLoadAssembly(f.FullName);
                     if (loadTry.Item1) { 
@@ -297,7 +306,7 @@ namespace CategorizeModule
             List<BaseMethodDeclarationSyntax> toReturn = new List<BaseMethodDeclarationSyntax>();
             foreach (BaseMethodDeclarationSyntax m in methods)
             {
-                if (m.AttributeLists.Count == arrParameters.Length)
+                if (m.ParameterList.Parameters.Count == arrParameters.Length)
                     toReturn.Add(m);
             }
 
@@ -443,6 +452,8 @@ namespace CategorizeModule
             }
             else if(exp is LiteralExpressionSyntax)
             {
+                if (((LiteralExpressionSyntax)exp).Token.Value == null)
+                    return 0;
                 return (int) ((LiteralExpressionSyntax)exp).Token.Value;
             }
             else if (exp is BinaryExpressionSyntax)
@@ -571,6 +582,15 @@ namespace CategorizeModule
             {
                 string expName = ((IdentifierNameSyntax)line).Identifier.Value.ToString();
                 foreach(String s in vars)
+                {
+                    if (expName.Equals(s))
+                        return true;
+                }
+            }
+            else if (line is MemberAccessExpressionSyntax)
+            {
+                string expName = ((MemberAccessExpressionSyntax)line).ToString();
+                foreach (String s in vars)
                 {
                     if (expName.Equals(s))
                         return true;

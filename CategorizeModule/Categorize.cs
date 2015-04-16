@@ -75,6 +75,8 @@ namespace CategorizeModule
 
                 if (this._examiner.CheckWeakPrecondition(n.GetMethodName(), n.GetParametersArray()))
                     return Cause.WEAK_PRE;
+                if (this._examiner.CheckWeakPostcondition(n.GetMethodName(), n.GetParametersArray()))
+                    return Cause.WEAK_PRE;
                 else
                     return Cause.STRONG_POST;
             }

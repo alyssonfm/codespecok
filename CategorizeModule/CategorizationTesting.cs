@@ -16,7 +16,7 @@ namespace CategorizeTest
         private string[] sourceFolderPath = { @"C:\Users\denni_000\OneDrive\Documents\ContractOK-UE\UE04-Boogie-15NC\Source" };
         private string[] solutionFile = { @"Boogie.sln" };
         private string[] testResultsPath = { @"C:\Users\denni_000\Documents\contractok\CategorizeTest\Resources\TestResultFromBoogie.xml" };
-        private string[][] correctLikelyCause = { new string[] { "Strong Invariant", "Strong Invariant", "Strong Invariant", "Strong Invariant", "Strong Precondition", "Strong Precondition", "Strong Precondition", "Strong Precondition", "Strong Precondition", "Strong Precondition", "Strong Precondition", "Strong Precondition", "Strong Precondition", "Strong Precondition", "Strong Precondition" } };
+        private string[][] correctLikelyCause = { new string[] { "Weak Precondition", "Strong Invariant", "Strong Invariant", "Strong Invariant", "Strong Precondition", "Strong Precondition", "Strong Precondition", "Strong Precondition", "Strong Precondition", "Strong Precondition", "Strong Precondition", "Strong Precondition", "Strong Precondition", "Strong Precondition", "Strong Precondition" } };
 
         private HashSet<Nonconformance> GetNonconformancesSuite(NonconformancesSuite suite)
         {
