@@ -37,9 +37,8 @@ namespace Structures
         private String _className = "";
         private String _methodName = "";
         private String _namespaceName = "";
-        private String _likelyCause = "";
         // Categorization module main product.
-        private String _cause = "";
+        private String _likelyCause = "";
         // StackTrace related.
         private String [] _stackTraceOrder;
         private int _stackTraceLenght;

@@ -15,6 +15,7 @@ namespace ContractOK
         private static CategorizedDisplay cdisSc;
         private static HashSet<Nonconformance> nonconformances;
         private static String sourceFolder;
+        private static String solutionFile;
 
         /// <summary>
         /// The main entry point for the application.
@@ -28,21 +29,22 @@ namespace ContractOK
             Application.Run(mainSc);
         }
 
-        static public void StartDetectPhase(String srcFolder, String solutionFile, String libFolder, String time){
+        static public void StartDetectPhase(String srcFolder, String slnFile, String libFolder, String time){
             sourceFolder = srcFolder;
+            solutionFile = slnFile;
 
             Detect d = new Detect();
 
             dconSc = new DetectConsole(d);
             Application.DoEvents();
 
-            nonconformances = d.DetectErrors(srcFolder, solutionFile, libFolder, time);
+            nonconformances = d.DetectErrors(srcFolder, slnFile, libFolder, time);
         }
 
         static public void StartCategorizationPhase()
         {
             Categorize c = new Categorize();
-            nonconformances = c.categorize(nonconformances, sourceFolder);
+            nonconformances = c.categorize(nonconformances, sourceFolder, solutionFile);
 
             if (dconSc.Visible)
                 dconSc.Visible = false;

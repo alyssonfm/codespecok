@@ -54,7 +54,6 @@ namespace CategorizeModule
                     {
 
                     }
-                    var i = 2;
 
 
                 }
@@ -73,6 +72,7 @@ namespace CategorizeModule
             }
             catch (Exception e)
             {
+                Console.WriteLine(e.Message);
                 return false;
             }
         }
@@ -100,12 +100,12 @@ namespace CategorizeModule
         }
 
 
-        public void SetPrincipalClassName(string className){
-            this._principalClass = className;
-            _assembly = GetCorrectAssembly(className);
+        public void SetPrincipalClassName(string nameSpace, string className){
+            this._principalClass = nameSpace + "." + className;
+            _assembly = GetCorrectAssembly(nameSpace + "." + className);
 
             this._variables = new List<String>();
-            foreach(FieldInfo f in GetVariablesFromClass(className))
+            foreach(FieldInfo f in GetVariablesFromClass(nameSpace + "." + className))
             {
                 if (!this._variables.Contains(f.Name.ToString()))
                     this._variables.Add(f.Name.ToString());
@@ -498,7 +498,7 @@ namespace CategorizeModule
                 }
                 catch(Exception e)
                 {
-
+                    Console.WriteLine(e.Message);
                 }
             }
             return false;
