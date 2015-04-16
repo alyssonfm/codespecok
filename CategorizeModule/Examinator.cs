@@ -156,7 +156,7 @@ namespace CategorizeModule
                 return true;            
             return false;
         }
-        private bool ExamineCSharpCode(Tuple<string, string> className, String methodName, String arrParameters, Operations typeOfExamination)
+        private bool ExamineCSharpCode(Tuple<string, string> className, String methodName, String [] arrParameters, Operations typeOfExamination)
         {
             ClassDeclarationSyntax ourClass = TakeClassFromSolution(className);
             //ClassDeclarationSyntax ourClass = TakeClassFromFile(GetCSPathFromFile(className), className);
@@ -291,11 +291,25 @@ namespace CategorizeModule
             }
             return methods;
         }
-        private bool ExamineMethods(List<BaseMethodDeclarationSyntax> methods, Operations typeOfOperation)
+
+        List<BaseMethodDeclarationSyntax> FilterMethodsByParametersList(List<BaseMethodDeclarationSyntax> methods, string [] arrParameters)
         {
+            List<BaseMethodDeclarationSyntax> toReturn = new List<BaseMethodDeclarationSyntax>();
+            foreach (BaseMethodDeclarationSyntax m in methods)
+            {
+                if (m.AttributeLists.Count == arrParameters.Length)
+                    toReturn.Add(m);
+            }
+
+            return toReturn;
+        }
+
+        private bool ExamineMethods(List<BaseMethodDeclarationSyntax> methods, string [] arrParameters, Operations typeOfOperation)
+        {
+            methods = FilterMethodsByParametersList(methods, arrParameters);
+
             if (methods != null)
             {
-                if(MethodIsTheRightOne()){
                     foreach (BaseMethodDeclarationSyntax m in methods)
                     {
                         if (typeOfOperation.Equals(Operations.ATR_MOD))
@@ -315,7 +329,6 @@ namespace CategorizeModule
                         else if (typeOfOperation.Equals(Operations.REQUIRES_TRUE) || typeOfOperation.Equals(Operations.ENSURES_TRUE))
                             return true;
                     }
-                }
             }
             return false;
         }
@@ -565,7 +578,7 @@ namespace CategorizeModule
             }
             return false;
         }
-        private bool ExamineAllClassAssociated(Tuple<string, string> classLocation, string methodName, string arrParameters, Operations typeOfOperation)
+        private bool ExamineAllClassAssociated(Tuple<string, string> classLocation, string methodName, string [] arrParameters, Operations typeOfOperation)
         {
             if(typeOfOperation.Equals(Operations.ATR_VAR_IN_PRECONDITION) || typeOfOperation.Equals(Operations.REQUIRES_TRUE)){
                 List<String> interfacesOfClass = GetInterfacesPathFromClass(classLocation);
@@ -593,10 +606,10 @@ namespace CategorizeModule
                     if (dotIndex > 0) {
                         string nameOfNameSpace = superClass.Substring(0, dotIndex);
                         string nameOfClass = superClass.Substring(dotIndex + 1);
-                        if (ExamineCSharpCode(new Tuple<string, string>(nameOfNameSpace, nameOfClass), methodName, typeOfOperation))
+                        if (ExamineCSharpCode(new Tuple<string, string>(nameOfNameSpace, nameOfClass), methodName, arrParameters, typeOfOperation))
                             return true;
                     } else {
-                        if (ExamineCSharpCode(new Tuple<string, string>("", superClass), methodName, typeOfOperation))
+                        if (ExamineCSharpCode(new Tuple<string, string>("", superClass), methodName, arrParameters, typeOfOperation))
                             return true;
                     }
                 }
