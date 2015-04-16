@@ -122,7 +122,6 @@
             treeNode3});
             this.treeView1.Size = new System.Drawing.Size(182, 142);
             this.treeView1.TabIndex = 6;
-            this.treeView1.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeView1_AfterSelect);
             // 
             // tbTextSample
             // 

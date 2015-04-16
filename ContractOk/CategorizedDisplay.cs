@@ -42,20 +42,14 @@ namespace ContractOK
 
         private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (listBox.SelectedIndex == -1)
-            {
                 Nonconformance n = nonconformances.ElementAt(listBox.SelectedIndex);
                 tbTextSample.Text = CodeReader.GetTestMethod(n.GetTestFileName());
                 this.nodeNamespace.Text = n.GetNameSpace();
                 this.nodeClass.Text = n.GetClassName();
                 this.nodeMethod.Text = n.GetMethodName();
                 lbSetLikelyCause.Text = n.GetLikelyCause();
-            }
+         
         }
 
-        private void treeView1_AfterSelect(object sender, TreeViewEventArgs e)
-        {
-            
-        }
     }
 }

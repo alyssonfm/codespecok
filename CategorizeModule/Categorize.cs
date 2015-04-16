@@ -26,10 +26,11 @@ namespace CategorizeModule
         public HashSet<Nonconformance> categorize(HashSet<Nonconformance> errors, String sourceFolder, String solutionPath)
         {
             this._examiner = new Examinator(sourceFolder + Constants.FILE_SEPARATOR + solutionPath);
-            for (int i = 0; i < errors.Count; i++ )
+            for (int i = 0; i < errors.Count; i++)
             {
                 Nonconformance n = errors.ElementAt(i);
-                switch(n.GetContractType()){
+                switch (n.GetContractType())
+                {
                     case Structures.CategoryType.PRECONDITION:
                         n.SetLikelyCause(CategorizePrecondition(n));
                         break;
@@ -50,35 +51,41 @@ namespace CategorizeModule
 
         public string CategorizePrecondition(Nonconformance n)
         {
-            try {
+            try
+            {
                 this._examiner.SetPrincipalClassName(n.GetNameSpace(), n.GetClassName());
 
-                if (this._examiner.CheckStrongPrecondition(n.GetMethodName()))
+                if (this._examiner.CheckStrongPrecondition(n.GetMethodName(), n.GetParametersArray()))
                     return Cause.STRONG_PRE;
                 else
                     return Cause.WEAK_POST;
             }
             catch (FileNotFoundException e)
             {
+                Console.WriteLine(e.Message);
                 return Cause.NOT_EVAL_EXP;
             }
-}
+        }
 
         public string CategorizePostcondition(Nonconformance n)
         {
-            try {
+            try
+            {
                 this._examiner.SetPrincipalClassName(n.GetNameSpace(), n.GetClassName());
 
-                if (this._examiner.CheckWeakPrecondition(n.GetMethodName()))
+                if (this._examiner.CheckWeakPrecondition(n.GetMethodName(), n.GetParametersArray()))
+                    return Cause.WEAK_PRE;
+                if (this._examiner.CheckWeakPostcondition(n.GetMethodName(), n.GetParametersArray()))
                     return Cause.WEAK_PRE;
                 else
                     return Cause.STRONG_POST;
             }
             catch (FileNotFoundException e)
             {
+                Console.WriteLine(e.Message);
                 return Cause.NOT_EVAL_EXP;
             }
-}
+        }
 
         public string CategorizeInvariant(Nonconformance n)
         {
@@ -86,13 +93,14 @@ namespace CategorizeModule
             {
                 this._examiner.SetPrincipalClassName(n.GetNameSpace(), n.GetClassName());
 
-                if (this._examiner.CheckWeakPrecondition(n.GetMethodName()))
-                        return Cause.WEAK_PRE;
+                if (this._examiner.CheckWeakPrecondition(n.GetMethodName(), n.GetParametersArray()))
+                    return Cause.WEAK_PRE;
                 else
-                        return Cause.STRONG_INV;
+                    return Cause.STRONG_INV;
             }
             catch (FileNotFoundException e)
             {
+                Console.WriteLine(e.Message);
                 return Cause.NOT_EVAL_EXP;
             }
         }

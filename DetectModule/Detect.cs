@@ -72,16 +72,16 @@ namespace DetectModule
         /// <returns>Set of nonconformances founded.</returns>
         public HashSet<Nonconformance> DetectErrors(String source, String solutionFile, String lib, String timeout)
         {
-#if DETECT_READY
+        #if DETECT_READY
             try
             {
-#endif
+        #endif
                 // Execute all scripts, one for stage.
                 Execute(source, solutionFile, lib, timeout);
                 // List Errors, save results and return nonconformances.
                 NCCreator ncfinder = new NCCreator();
                 return GenerateResult.Save(ncfinder.ListNonconformances(), false);
-#if DETECT_READY
+        #if DETECT_READY
             }
             catch (Exception e)
             {
@@ -89,7 +89,7 @@ namespace DetectModule
                 TriggersEvent(Stages.ERROR_ON_DETECTION, e.Message);
                 return new HashSet<Nonconformance>();
             }
-#endif
+        #endif
         }
             /// <summary>
             /// Call each stage of Detection phase.

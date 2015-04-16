@@ -1,4 +1,5 @@
-﻿using System;
+﻿//#define MAKE_TESTS
+using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
 using DetectModule;
@@ -23,10 +24,18 @@ namespace ContractOK
         [STAThread]
         static void Main()
         {
+            #if MAKE_TESTS
+                MakeTests();
+            #endif
+
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             mainSc = new MainScreen();
             Application.Run(mainSc);
+        }
+
+        static public void MakeTests(){
+            (new CategorizeTest.CategorizationTesting()).TestNonconformancesLikelyCause();
         }
 
         static public void StartDetectPhase(String srcFolder, String slnFile, String libFolder, String time){
@@ -38,7 +47,7 @@ namespace ContractOK
             dconSc = new DetectConsole(d);
             Application.DoEvents();
 
-            nonconformances = d.DetectErrors(srcFolder, solutionFile, libFolder, time);
+            nonconformances = d.DetectErrors(srcFolder, slnFile, libFolder, time);
         }
 
         static public void StartCategorizationPhase()

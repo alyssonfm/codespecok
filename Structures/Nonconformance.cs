@@ -37,9 +37,9 @@ namespace Structures
         private String _className = "";
         private String _methodName = "";
         private String _namespaceName = "";
-        private String _likelyCause = "";
+        private String[] _methodParameters;
         // Categorization module main product.
-        private String _cause = "";
+        private String _likelyCause = "";
         // StackTrace related.
         private String [] _stackTraceOrder;
         private int _stackTraceLenght;
@@ -98,6 +98,11 @@ namespace Structures
         public string GetMethodName()
         {
             return this._methodName;
+        }
+
+        public String[] GetParametersArray()
+        {
+            return this._methodParameters;
         }
         /// <summary>
         /// Get error message thrown when nonconformance were found.
@@ -222,7 +227,7 @@ namespace Structures
                 data = this._stackTraceOrder[3];
             }
             // Fill location information.
-            foreach(Match m in Regex.Matches(data, @"(?:(?:([\S]*)[.])|())([^. ]+)[.](.*)[(].*[)]"))
+            foreach(Match m in Regex.Matches(data, @"(?:(?:([\S]*)[.])|())([^. ]+)[.](.*)([(].*[)])"))
             {
                 if (m.Groups[1].Value.Equals(""))
                     this._namespaceName = m.Groups[2].Value;
@@ -230,6 +235,7 @@ namespace Structures
                     this._namespaceName = m.Groups[1].Value;
                 this._className = m.Groups[3].Value;
                 this._methodName = m.Groups[4].Value;
+                this._methodParameters = (m.Groups[5].Value.Split(','));
             }
         }
 

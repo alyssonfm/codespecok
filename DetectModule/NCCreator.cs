@@ -3,7 +3,6 @@ using Structures;
 using System.Collections;
 using System.Collections.Generic;
 using System.Xml;
-using System.Xml.Linq;
 
 namespace DetectModule
 {
@@ -46,7 +45,8 @@ namespace DetectModule
                 {
                     XmlNode output = unitTestResult.FirstChild;
                     var errorInfoMatch = ((XmlElement)output).GetElementsByTagName("ErrorInfo");
-                    if (errorInfoMatch.Count == 1) { 
+                    if (errorInfoMatch.Count == 1)
+                    {
                         XmlNode errorInfo = errorInfoMatch.Item(0);
                         XmlNode mess = errorInfo.FirstChild;
                         XmlNode stac = errorInfo.LastChild;

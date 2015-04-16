@@ -104,6 +104,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Tests\CategorizationTesting.cs" />
     <Compile Include="Categorize.cs" />
     <Compile Include="CustomAssemblyLoader.cs" />
     <Compile Include="Examinator.cs" />
@@ -113,6 +119,10 @@
     <ProjectReference Include="..\Commons\Commons.csproj">
       <Project>{4a77908b-2b1c-49de-91f9-2ffcd51e7d1e}</Project>
       <Name>Commons</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DetectModule\DetectModule.csproj">
+      <Project>{6932f3d6-2d49-42ff-b818-401205d154ff}</Project>
+      <Name>DetectModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\Structures\Structures.csproj">
       <Project>{12eeb6c8-6ec1-4eab-8fcf-56e64801b895}</Project>
@@ -127,7 +137,13 @@
     <Analyzer Include="..\packages\Microsoft.CodeAnalysis.Analyzers.1.0.0-rc1\tools\analyzers\Microsoft.CodeAnalysis.Analyzers.dll" />
   </ItemGroup>
   <ItemGroup>
-    <WCFMetadata Include="Service References\" />
+    <None Include="Resources\TestResultFromBoogie.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

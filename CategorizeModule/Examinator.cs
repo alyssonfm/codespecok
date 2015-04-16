@@ -6,22 +6,26 @@ using Commons;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.MSBuild;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.VisualStudio.ComponentModelHost;
 
 namespace CategorizeModule
 {
 
     class ContractArguments
     {
-        public List<ArgumentSyntax> Requires { get; set; } = new List<ArgumentSyntax>();
-        public List<ArgumentSyntax> Ensures { get; set; } = new List<ArgumentSyntax>();
+        public ContractArguments()
+        {
+            this.Requires = new List<ArgumentSyntax>();
+            this.Ensures = new List<ArgumentSyntax>();
+        }
+        public List<ArgumentSyntax> Requires { get; set; }
+        public List<ArgumentSyntax> Ensures { get; set; }
     }
     class Examinator 
     {
         private const int _VAR_FALSE = int.MinValue;
         private Tuple<string, string> _principalClass;
         private List<FileInfo> _binaries;
-        private string _CONSTRUCTOR_ALIAS = "<init>";
+        private string _CONSTRUCTOR_ALIAS = ".ctor";
         private List<String> _variables;
         private Solution _snl;
         private Assembly _assembly;
@@ -42,7 +46,6 @@ namespace CategorizeModule
         public Examinator(string solutionPath)
         {
             StoreBinaries();
-            TestWorkspaceExp();
             OpenSolutionFile(solutionPath);
         }
 
@@ -72,29 +75,6 @@ namespace CategorizeModule
             }
         }
 
-        public void TestWorkspaceExp()
-        {
-            string solutionsStr = @"C:\Users\denni_000\OneDrive\Documents\ContractOK-UE\UE04-Boogie-15NC\Source\Boogie.sln";
-            var workspace = MSBuildWorkspace.Create();
-            var solution = workspace.OpenSolutionAsync(solutionsStr).Result;
-   
-            var projects = solution.Projects;
-            foreach(Project p in projects)
-            {
-                string nome = p.AssemblyName;
-                foreach(Document d in p.Documents)
-                {
-                    SyntaxTree s = d.GetSyntaxTreeAsync().Result;
-                    CompilationUnitSyntax root = (CompilationUnitSyntax)s.GetRoot();
-                    foreach(MemberDeclarationSyntax m in root.Members)
-                    {
-
-                    }
-                    var i = 2;
-                }
-            }
-        }
-
         private Tuple<bool, Assembly> TryToLoadAssembly(string path) {
 
             try {
@@ -102,37 +82,15 @@ namespace CategorizeModule
                 return new Tuple<bool, Assembly>(true, ass);
 
             } catch (Exception e) {
+                Console.WriteLine(e.Message);
                 return new Tuple<bool, Assembly>(false, null);
 
             }
         }
-
-        /*
-        private Assembly GetCorrectAssembly(string className) {
-            Assembly toReturn = null;
-            foreach (FileInfo f in this._binaries)
-            {
-                if (TryToLoadAssembly(toReturn, f.FullName))
-                {
-                    toReturn = Assembly.LoadFrom(f.FullName);
-                }
-                if (toReturn != null && toReturn.GetType(className) != null)
-                    return toReturn;
-            }
-            return null;
-        }*/
-
-
         public void SetPrincipalClassName(string nameSpaceName, string className){
             this._principalClass = new Tuple<string, string>(nameSpaceName, className);
             
             this._variables = new List<String>();
-            /*
-            foreach (FieldInfo f in GetVariablesFromClass(this._principalClass))
-            {
-                if (!this._variables.Contains(f.Name.ToString()))
-                    this._variables.Add(f.Name.ToString());
-            }*/
         }
         public Tuple<string, string> GetPrincipalClassName()
         {
@@ -146,33 +104,18 @@ namespace CategorizeModule
             else
                  return className;
         }
-        /*
-        private String GetCSPathFromFile(String className)
-        {
-            String[] classNameArr = className.Split('.');
-            String classStr = classNameArr[1];
-            classStr += ".cs";
-            var fileList = new DirectoryInfo(this._snl.FilePath).GetFiles(classStr, SearchOption.AllDirectories);
-            foreach(FileInfo f in fileList){
-                if(f.FullName.Substring(0, f.FullName.LastIndexOf("\\"+ classStr)).EndsWith(classNameArr[0]))
-                {
-                    return f.FullName;
-                }
-            }
-            foreach (FileInfo f in fileList)
-            {
-                return f.FullName;
-            }
-            return "";
-        }
-        */
         private void UpdateVariables(Tuple<string, string> classLocation)
         {
             // If ClassLocation refers to pricipal class, secure that variables wasn't initialized.
             if (!classLocation.Equals(this.GetPrincipalClassName()) || this._variables.Count == 0)
                 foreach (FieldInfo s in GetVariablesFromClass(classLocation))
-                    if (!this._variables.Contains(s.Name.ToString()))
-                        this._variables.Add(s.ToString());
+                {
+                    string varName = s.Name.ToString();
+                    if (varName.Contains(" "))
+                         varName = varName.Split(' ')[1];
+                    if (!this._variables.Contains(varName))
+                        this._variables.Add(varName);
+                }
         }
 
         private IEnumerable<FieldInfo> GetVariablesFromClass(Tuple<string, string> classLocation)
@@ -187,34 +130,33 @@ namespace CategorizeModule
             }
         }
 
-        public bool CheckStrongPrecondition(string method)
+        public bool CheckStrongPrecondition(string method, String [] arrParameters)
         {
-            if (method.Equals(this.GetPrincipalClassName().Item2))
-                method = this._CONSTRUCTOR_ALIAS;
-            return ExamineCSharpCode(this.GetPrincipalClassName(), method, Operations.ATR_VAR_IN_PRECONDITION);
+            return ExamineCSharpCode(this.GetPrincipalClassName(), method, arrParameters, Operations.ATR_VAR_IN_PRECONDITION);
         }
-        public bool CheckWeakPrecondition(string method)
-        {
-            if (method.Equals(this.GetPrincipalClassName().Item2))
-                method = this._CONSTRUCTOR_ALIAS;            
-            if (ExamineCSharpCode(this.GetPrincipalClassName(), method, Operations.REQUIRES_TRUE))
+        public bool CheckWeakPrecondition(string method, String [] arrParameters)
+        {     
+            if (ExamineCSharpCode(this.GetPrincipalClassName(), method, arrParameters, Operations.REQUIRES_TRUE))
                 return true;
-            if (ExamineCSharpCode(this.GetPrincipalClassName(), method, Operations.ATR_MOD))
-                return true;
-            if (ExamineCSharpCode(this.GetPrincipalClassName(), method, Operations.ENSURES_TRUE))
-                return true;            
+            if (ExamineCSharpCode(this.GetPrincipalClassName(), method, arrParameters, Operations.ATR_MOD))
+                return true;         
             return false;
         }
-        private bool ExamineCSharpCode(Tuple<string, string> className, String methodName, Operations typeOfExamination)
+        public bool CheckWeakPostcondition(string method, String[] arrParameters)
+        {
+            if (ExamineCSharpCode(this.GetPrincipalClassName(), method, arrParameters, Operations.ENSURES_TRUE))
+                return true;
+            return false;
+        }
+        private bool ExamineCSharpCode(Tuple<string, string> className, String methodName, String [] arrParameters, Operations typeOfExamination)
         {
             ClassDeclarationSyntax ourClass = TakeClassFromSolution(className);
-            //ClassDeclarationSyntax ourClass = TakeClassFromFile(GetCSPathFromFile(className), className);
 		    if(ourClass == null)
 			    return false;
             UpdateVariables(className);
-		    if(ExamineAllClassAssociated(className, methodName, typeOfExamination))
+		    if(ExamineAllClassAssociated(className, methodName, arrParameters, typeOfExamination))
 			    return true;
-		    return ExamineMethods(TakeMethodsFromClass(ourClass, methodName), typeOfExamination); 
+		    return ExamineMethods(TakeMethodsFromClass(ourClass, methodName), arrParameters, typeOfExamination); 
         }
 
         private Tuple<List<Document>, List<Document>> GetDocumentsToSearchForClass(string nameOfClass)
@@ -252,6 +194,8 @@ namespace CategorizeModule
                 if (simpleSearch.Item1) {
                     NamespaceDeclarationSyntax n = simpleSearch.Item2;
                     Tuple<bool, ClassDeclarationSyntax> completeSearch = GetClassFromList(n.Members, classLocation.Item2);
+                    if (completeSearch.Item1)
+                        return completeSearch;
                 }
 
             }
@@ -269,7 +213,10 @@ namespace CategorizeModule
                 
             foreach (FileInfo f in this._binaries)
             {
-                if (f.Name.Equals(nameOfAssembly))
+                string fileN = f.Name;
+                fileN = fileN.Remove(fileN.IndexOf(f.Extension));
+
+                if (fileN.Equals(nameOfAssembly))
                 {
                     Tuple<bool, Assembly> loadTry = TryToLoadAssembly(f.FullName);
                     if (loadTry.Item1) { 
@@ -315,47 +262,72 @@ namespace CategorizeModule
             LoadCorrectAssembly(false, null);
             return null;
         }
-        private List<MethodDeclarationSyntax> TakeMethodsFromClass(ClassDeclarationSyntax cl, string methodName)
+        private List<BaseMethodDeclarationSyntax> TakeMethodsFromClass(ClassDeclarationSyntax cl, string methodName)
         {
-            List<MethodDeclarationSyntax> methods = new List<MethodDeclarationSyntax>();
+            List<BaseMethodDeclarationSyntax> methods = new List<BaseMethodDeclarationSyntax>();
             foreach(MemberDeclarationSyntax m in cl.Members)
             {
-                if (m is MethodDeclarationSyntax)
+                if (methodName.Equals(this._CONSTRUCTOR_ALIAS))
                 {
-                    if (((MethodDeclarationSyntax)m).Identifier.Value.ToString().Equals(methodName))
-                        methods.Add((MethodDeclarationSyntax)m);
+                    if (m is ConstructorDeclarationSyntax)
+                    {
+                        methods.Add((ConstructorDeclarationSyntax)m);
+                    }
+                }
+                else
+                {
+                    if (m is MethodDeclarationSyntax)
+                    {
+                        if (((MethodDeclarationSyntax)m).Identifier.Value.ToString().Equals(methodName))
+                            methods.Add((MethodDeclarationSyntax)m);
+                    }
                 }
             }
             return methods;
         }
-        private bool ExamineMethods(List<MethodDeclarationSyntax> methods, Operations typeOfOperation)
+
+        List<BaseMethodDeclarationSyntax> FilterMethodsByParametersList(List<BaseMethodDeclarationSyntax> methods, string [] arrParameters)
         {
+            List<BaseMethodDeclarationSyntax> toReturn = new List<BaseMethodDeclarationSyntax>();
+            foreach (BaseMethodDeclarationSyntax m in methods)
+            {
+                if (m.ParameterList.Parameters.Count == arrParameters.Length)
+                    toReturn.Add(m);
+            }
+
+            return toReturn;
+        }
+
+        private bool ExamineMethods(List<BaseMethodDeclarationSyntax> methods, string [] arrParameters, Operations typeOfOperation)
+        {
+            methods = FilterMethodsByParametersList(methods, arrParameters);
+
             if (methods != null)
             {
-                foreach(MethodDeclarationSyntax m in methods)
-                {
-                    if (typeOfOperation.Equals(Operations.ATR_MOD))
+                    foreach (BaseMethodDeclarationSyntax m in methods)
                     {
-                        if (ExamineCodeFromMethod(m))
-                            return true;
-                    }
-                    ContractArguments contracts = GetContractsPreAndPostFromMethod(m);
-                    if (contracts.Requires.Count + contracts.Ensures.Count != 0)
-                    {
-                        if (typeOfOperation.Equals(Operations.ATR_VAR_IN_PRECONDITION) || typeOfOperation.Equals(Operations.REQUIRES_TRUE) || typeOfOperation.Equals(Operations.ENSURES_TRUE))
+                        if (typeOfOperation.Equals(Operations.ATR_MOD))
                         {
-                            if (ExaminePrePostClauses(typeOfOperation, m, contracts))
+                            if (ExamineCodeFromMethod(m))
                                 return true;
                         }
+                        ContractArguments contracts = GetContractsPreAndPostFromMethod(m);
+                        if (contracts.Requires.Count + contracts.Ensures.Count != 0)
+                        {
+                            if (typeOfOperation.Equals(Operations.ATR_VAR_IN_PRECONDITION) || typeOfOperation.Equals(Operations.REQUIRES_TRUE) || typeOfOperation.Equals(Operations.ENSURES_TRUE))
+                            {
+                                if (ExaminePrePostClauses(typeOfOperation, m, contracts))
+                                    return true;
+                            }
+                        }
+                        else if (typeOfOperation.Equals(Operations.REQUIRES_TRUE) || typeOfOperation.Equals(Operations.ENSURES_TRUE))
+                            return true;
                     }
-                    else if (typeOfOperation.Equals(Operations.REQUIRES_TRUE) || typeOfOperation.Equals(Operations.ENSURES_TRUE))
-                        return true;
-                }
             }
             return false;
         }
 
-        private bool ExaminePrePostClauses(Operations typeOfOperation, MethodDeclarationSyntax method, ContractArguments contracts)
+        private bool ExaminePrePostClauses(Operations typeOfOperation, BaseMethodDeclarationSyntax method, ContractArguments contracts)
         {
             bool isRequiresClauseNotFounded = true, isEnsuresClauseNotFounded = true;
             if(contracts.Requires.Count != 0)
@@ -465,6 +437,8 @@ namespace CategorizeModule
             }
             else if(exp is LiteralExpressionSyntax)
             {
+                if (((LiteralExpressionSyntax)exp).Token.Value == null)
+                    return 0;
                 return (int) ((LiteralExpressionSyntax)exp).Token.Value;
             }
             else if (exp is BinaryExpressionSyntax)
@@ -521,7 +495,7 @@ namespace CategorizeModule
             return _VAR_FALSE;
         }
 
-        private ContractArguments GetContractsPreAndPostFromMethod(MethodDeclarationSyntax method)
+        private ContractArguments GetContractsPreAndPostFromMethod(BaseMethodDeclarationSyntax method)
         {
             ContractArguments contracts = new ContractArguments();
             foreach(StatementSyntax s in method.Body.Statements)
@@ -546,7 +520,7 @@ namespace CategorizeModule
             return contracts;
         }
 
-        private bool ExamineCodeFromMethod(MethodDeclarationSyntax method)
+        private bool ExamineCodeFromMethod(BaseMethodDeclarationSyntax method)
         {
             SyntaxList<StatementSyntax> block = method.Body.Statements;
             ParameterListSyntax parameters = method.ParameterList;
@@ -598,9 +572,18 @@ namespace CategorizeModule
                         return true;
                 }
             }
+            else if (line is MemberAccessExpressionSyntax)
+            {
+                string expName = ((MemberAccessExpressionSyntax)line).ToString();
+                foreach (String s in vars)
+                {
+                    if (expName.Equals(s))
+                        return true;
+                }
+            }
             return false;
         }
-        private bool ExamineAllClassAssociated(Tuple<string, string> classLocation, string methodName, Operations typeOfOperation)
+        private bool ExamineAllClassAssociated(Tuple<string, string> classLocation, string methodName, string [] arrParameters, Operations typeOfOperation)
         {
             if(typeOfOperation.Equals(Operations.ATR_VAR_IN_PRECONDITION) || typeOfOperation.Equals(Operations.REQUIRES_TRUE)){
                 List<String> interfacesOfClass = GetInterfacesPathFromClass(classLocation);
@@ -611,10 +594,10 @@ namespace CategorizeModule
                         if(dotIndex > 0) {
                             string nameOfNameSpace = i.Substring(0, dotIndex);
                             string nameOfClass = i.Substring(dotIndex + 1);
-                            if (ExamineCSharpCode(new Tuple<string, string>(nameOfNameSpace, nameOfClass), methodName, typeOfOperation))
+                            if (ExamineCSharpCode(new Tuple<string, string>(nameOfNameSpace, nameOfClass), methodName, arrParameters, typeOfOperation))
                                 return true;
                         } else
-                            if (ExamineCSharpCode(new Tuple<string, string>("", i), methodName, typeOfOperation))
+                            if (ExamineCSharpCode(new Tuple<string, string>("", i), methodName, arrParameters, typeOfOperation))
                                 return true;
                     }
                 }
@@ -628,16 +611,16 @@ namespace CategorizeModule
                     if (dotIndex > 0) {
                         string nameOfNameSpace = superClass.Substring(0, dotIndex);
                         string nameOfClass = superClass.Substring(dotIndex + 1);
-                        if (ExamineCSharpCode(new Tuple<string, string>(nameOfNameSpace, nameOfClass), methodName, typeOfOperation))
+                        if (ExamineCSharpCode(new Tuple<string, string>(nameOfNameSpace, nameOfClass), methodName, arrParameters, typeOfOperation))
                             return true;
                     } else {
-                        if (ExamineCSharpCode(new Tuple<string, string>("", superClass), methodName, typeOfOperation))
+                        if (ExamineCSharpCode(new Tuple<string, string>("", superClass), methodName, arrParameters, typeOfOperation))
                             return true;
                     }
                 }
                 catch(Exception e)
                 {
-
+                    Console.WriteLine(e.Message);
                 }
             }
             return false;
@@ -666,47 +649,6 @@ namespace CategorizeModule
             }
             return "";
         }
-        /*
-        private ClassDeclarationSyntax TakeClassFromFile(string path, string classString)
-        {
-            try{
-                SyntaxTree st = CSharpSyntaxTree.ParseText(GetTextFromFile(path));
-                string className, nameSpaceName;
-                ClassDeclarationSyntax classDecl;
-
-                className = GetOnlyClassName(classString);
-                if (className.Equals(classString))
-                {
-                    nameSpaceName = "";
-                } else {
-                    nameSpaceName = classString.Substring(0, classString.IndexOf("."));
-                }
-                
-                var root = (CompilationUnitSyntax) st.GetRoot();
-
-                if (nameSpaceName.Equals(""))
-                {
-                    classDecl = GetClassFromList(root.Members, className);
-                } else {
-                    var nameSpaceDecl = GetNamepaceFromList(root.Members, nameSpaceName);
-                    classDecl = GetClassFromList(nameSpaceDecl.Members, className);
-                }
-
-                return classDecl;
-            }
-            catch (Exception e)
-            {
-                if (classString.Equals(this._principalClass))
-                {
-                    throw new FileNotFoundException(e.Message + "Principal class couldn't be load.");
-                }
-                else
-                {
-                    return null;
-                }
-            }
-        }*/
-
         public Tuple<bool, NamespaceDeclarationSyntax> GetNamepaceFromList(SyntaxList<MemberDeclarationSyntax> list, string name)
         {
             foreach (MemberDeclarationSyntax m in list)
