@@ -14,6 +14,7 @@ namespace CategorizeTest
         enum NonconformancesSuite { Boogie = 0 };
 
         private string[] sourceFolderPath = { @"C:\Users\denni_000\OneDrive\Documents\ContractOK-UE\UE04-Boogie-15NC\Source" };
+        private string[] binFolderPath = { @"C:\Users\denni_000\OneDrive.old\Documents\ContractOK-UE\UE04-Boogie-15NC\Binaries" };
         private string[] solutionFile = { @"Boogie.sln" };
         private string[] testResultsPath = { @"C:\Users\denni_000\Documents\contractok\CategorizeModule\Resources\TestResultFromBoogie.xml" };
         private string[][] correctLikelyCause = { new string[] { "Weak Precondition", "Strong Invariant", "Strong Invariant", "Strong Invariant", "Strong Precondition", "Strong Precondition", "Strong Precondition", "Strong Precondition", "Strong Precondition", "Strong Precondition", "Strong Precondition", "Strong Precondition", "Strong Precondition", "Strong Precondition", "Strong Precondition" } };
@@ -56,13 +57,38 @@ namespace CategorizeTest
                 Directory.CreateDirectory(Constants.SOURCE_BIN);
             }
         }
+        private void CleanDirectories()
+        {
+            var di = new DirectoryInfo(Constants.TEMP_DIR);
+            // This assures that files non-executing can be deleted.
+            foreach (var file in di.GetFiles("*", SearchOption.AllDirectories))
+                file.Attributes &= ~FileAttributes.ReadOnly;
+
+            // Deletes all files in SOURCE_BIN dir, where all bin files will be stored.
+            foreach (var path in new string[] { Constants.SOURCE_BIN })
+            {
+                Array.ForEach(Directory.GetFiles(path), File.Delete);
+            }
+        }
         private void CopyBinFiles(NonconformancesSuite suite)
         {
+            // Currently, this only add files directly on SOURCE_BIN dir.
 
+            string[] files = System.IO.Directory.GetFiles(binFolderPath[(int)suite]);
+
+            // Copy the files and overwrite destination files if they already exist.
+            foreach (string f in files)
+            {
+                // Use static Path methods to extract only the file name from the path.
+                string fileName = System.IO.Path.GetFileName(f);
+                string destFile = System.IO.Path.Combine(Constants.SOURCE_BIN, fileName);
+                System.IO.File.Copy(f, destFile, true);
+            }
         }
         private void PrepareSuiteForTests(NonconformancesSuite suite)
         {
             CreateDirectories();
+            CleanDirectories();
             CopyBinFiles(suite);
         }
         public void TestNonconformancesLikelyCause()
