@@ -10,8 +10,7 @@ namespace CategorizeTest
 {
     public class CategorizationTesting
     {
-        // These tests, still depend on correct Location of SLN given on this file. Also, depends that the bin file
-        // are on Bin folder.
+        // These tests, still depend that the bin file are on bin folder.
         enum NonconformancesSuite { Boogie = 0 };
 
         private string[] sourceFolderPath = { @"C:\Users\denni_000\OneDrive\Documents\ContractOK-UE\UE04-Boogie-15NC\Source" };
@@ -50,10 +49,27 @@ namespace CategorizeTest
                 }
             }
         }
-       public void TestNonconformancesLikelyCause()
+        private void CreateDirectories()
+        {
+            while (!Directory.Exists(Constants.SOURCE_BIN))
+            {
+                Directory.CreateDirectory(Constants.SOURCE_BIN);
+            }
+        }
+        private void CopyBinFiles(NonconformancesSuite suite)
+        {
+
+        }
+        private void PrepareSuiteForTests(NonconformancesSuite suite)
+        {
+            CreateDirectories();
+            CopyBinFiles(suite);
+        }
+        public void TestNonconformancesLikelyCause()
         {
             foreach (NonconformancesSuite suite in Utils.GetList<NonconformancesSuite>())
             {
+                PrepareSuiteForTests(suite);
                 VerifyLikelyCausesForNCSuite(suite);
             }
 
