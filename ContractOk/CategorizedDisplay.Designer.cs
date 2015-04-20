@@ -46,6 +46,7 @@
             this.btStackTrace = new System.Windows.Forms.Button();
             this.lbLikelyCause = new System.Windows.Forms.Label();
             this.lbSetLikelyCause = new System.Windows.Forms.Label();
+            this.saveResultsBrowser = new System.Windows.Forms.FolderBrowserDialog();
             this.SuspendLayout();
             // 
             // lbFixed01
@@ -150,6 +151,7 @@
             this.btSaveResults.TabIndex = 9;
             this.btSaveResults.Text = "Save Results";
             this.btSaveResults.UseVisualStyleBackColor = true;
+            this.btSaveResults.Click += new System.EventHandler(this.btSaveResults_Click);
             // 
             // btStackTrace
             // 
@@ -219,5 +221,6 @@
         private System.Windows.Forms.Button btStackTrace;
         private System.Windows.Forms.Label lbLikelyCause;
         private System.Windows.Forms.Label lbSetLikelyCause;
+        private System.Windows.Forms.FolderBrowserDialog saveResultsBrowser;
     }
 }

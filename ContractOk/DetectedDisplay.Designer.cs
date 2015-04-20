@@ -45,6 +45,7 @@
             this.btSaveResults = new System.Windows.Forms.Button();
             this.btStackTrace = new System.Windows.Forms.Button();
             this.btCategorize = new System.Windows.Forms.Button();
+            this.saveResultsBrowser = new System.Windows.Forms.FolderBrowserDialog();
             this.SuspendLayout();
             // 
             // lbFixed01
@@ -150,6 +151,7 @@
             this.btSaveResults.TabIndex = 9;
             this.btSaveResults.Text = "Save Results";
             this.btSaveResults.UseVisualStyleBackColor = true;
+            this.btSaveResults.Click += new System.EventHandler(this.btSaveResults_Click);
             // 
             // btStackTrace
             // 
@@ -160,6 +162,7 @@
             this.btStackTrace.TabIndex = 10;
             this.btStackTrace.Text = "StackTrace";
             this.btStackTrace.UseVisualStyleBackColor = true;
+            this.btStackTrace.Click += new System.EventHandler(this.btStackTrace_Click);
             // 
             // btCategorize
             // 
@@ -210,5 +213,6 @@
         private System.Windows.Forms.Button btSaveResults;
         private System.Windows.Forms.Button btStackTrace;
         private System.Windows.Forms.Button btCategorize;
+        private System.Windows.Forms.FolderBrowserDialog saveResultsBrowser;
     }
 }
