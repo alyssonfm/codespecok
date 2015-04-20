@@ -78,16 +78,26 @@ namespace ContractOK
                 // Select the folder of destination.
                 String destinationFolder = saveResultsBrowser.SelectedPath;
 
-                // Currently, select files of results folder to Copy.
-                string[] files = System.IO.Directory.GetFiles(Constants.TEST_RESULTS);
-
-                // Copy the files and overwrite destination files if they already exist.
-                foreach (string f in files)
+                try
                 {
-                    // Use static Path methods to extract only the file name from the path.
-                    string fileName = System.IO.Path.GetFileName(f);
-                    string destFile = System.IO.Path.Combine(destinationFolder, fileName);
-                    System.IO.File.Copy(f, destFile, true);
+                    // Currently, select files of results folder to Copy.
+                    string[] files = System.IO.Directory.GetFiles(Constants.TEST_RESULTS);
+
+                    // Copy the files and overwrite destination files if they already exist.
+                    foreach (string f in files)
+                    {
+                        // Use static Path methods to extract only the file name from the path.
+                        string fileName = System.IO.Path.GetFileName(f);
+                        string destFile = System.IO.Path.Combine(destinationFolder, fileName);
+                        System.IO.File.Copy(f, destFile, true);
+                    }
+
+                    MessageBox.Show("The files indicating Detection result were saved correctly.");
+                }
+                catch (Exception excep)
+                {
+                    Console.WriteLine(excep.Message);
+                    MessageBox.Show("The files indicating Detection result couldn't be saved.");
                 }
             }
 
