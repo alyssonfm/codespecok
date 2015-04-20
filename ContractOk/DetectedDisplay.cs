@@ -14,6 +14,7 @@ namespace ContractOK
         private TreeNode nodeNamespace;
         private TreeNode nodeClass;
         private TreeNode nodeMethod;
+        private bool HasAnyIndexSelected = false;
 
         public DetectedDisplay(HashSet<Nonconformance> nonconformance)
         {
@@ -28,6 +29,7 @@ namespace ContractOK
             }
             listBox.SelectionMode = SelectionMode.One;
 
+            btStackTrace.Visible = false;
 
             TreeNodeCollection nodes = treeView1.Nodes;
             this.nodeNamespace = treeView1.Nodes[0];
@@ -49,6 +51,9 @@ namespace ContractOK
             this.nodeNamespace.Text = n.GetNameSpace();
             this.nodeClass.Text = n.GetClassName();
             this.nodeMethod.Text = n.GetMethodName();
+
+            this.HasAnyIndexSelected = true;
+            btStackTrace.Visible = true;
         }
 
         private void treeView1_AfterSelect(object sender, TreeViewEventArgs e)
@@ -68,7 +73,15 @@ namespace ContractOK
 
         private void btStackTrace_Click(object sender, EventArgs e)
         {
-
+            if (HasAnyIndexSelected)
+            {
+                string toShow = "Stack Trace of Nonconformance: \n\n   ";
+                foreach (var line in nonconformances.ElementAt(listBox.SelectedIndex).GetStackTrace())
+                {
+                    toShow += line + "\n";
+                }
+                MessageBox.Show(toShow);
+            }
         }
 
         private void btSaveResults_Click(object sender, EventArgs e)

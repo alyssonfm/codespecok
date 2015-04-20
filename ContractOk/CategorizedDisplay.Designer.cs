@@ -28,11 +28,11 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.TreeNode treeNode1 = new System.Windows.Forms.TreeNode("Method");
-            System.Windows.Forms.TreeNode treeNode2 = new System.Windows.Forms.TreeNode("Class", new System.Windows.Forms.TreeNode[] {
-            treeNode1});
-            System.Windows.Forms.TreeNode treeNode3 = new System.Windows.Forms.TreeNode("Namespace", new System.Windows.Forms.TreeNode[] {
-            treeNode2});
+            System.Windows.Forms.TreeNode treeNode4 = new System.Windows.Forms.TreeNode("Method");
+            System.Windows.Forms.TreeNode treeNode5 = new System.Windows.Forms.TreeNode("Class", new System.Windows.Forms.TreeNode[] {
+            treeNode4});
+            System.Windows.Forms.TreeNode treeNode6 = new System.Windows.Forms.TreeNode("Namespace", new System.Windows.Forms.TreeNode[] {
+            treeNode5});
             this.lbFixed01 = new System.Windows.Forms.Label();
             this.lbSetNumberNonconformances = new System.Windows.Forms.Label();
             this.lbFixed02 = new System.Windows.Forms.Label();
@@ -113,14 +113,14 @@
             // 
             this.treeView1.Location = new System.Drawing.Point(230, 67);
             this.treeView1.Name = "treeView1";
-            treeNode1.Name = "SetMethod";
-            treeNode1.Text = "Method";
-            treeNode2.Name = "SetClass";
-            treeNode2.Text = "Class";
-            treeNode3.Name = "SetNamespace";
-            treeNode3.Text = "Namespace";
+            treeNode4.Name = "SetMethod";
+            treeNode4.Text = "Method";
+            treeNode5.Name = "SetClass";
+            treeNode5.Text = "Class";
+            treeNode6.Name = "SetNamespace";
+            treeNode6.Text = "Namespace";
             this.treeView1.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
-            treeNode3});
+            treeNode6});
             this.treeView1.Size = new System.Drawing.Size(182, 142);
             this.treeView1.TabIndex = 6;
             // 
@@ -162,6 +162,7 @@
             this.btStackTrace.TabIndex = 10;
             this.btStackTrace.Text = "StackTrace";
             this.btStackTrace.UseVisualStyleBackColor = true;
+            this.btStackTrace.Click += new System.EventHandler(this.btStackTrace_Click);
             // 
             // lbLikelyCause
             // 
