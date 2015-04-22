@@ -14,9 +14,8 @@ namespace CategorizeModule
         public const String STRONG_POST = "Strong Postcondition";
         public const String WEAK_POST = "Weak Postcondition";
         public const String STRONG_INV = "Strong Invariant";
+
         public const String NOT_EVAL_EXP = "Cannot be Evaluated";
-        public const String BAD_FORMMED_EXP = "Incorrect Expression";
-        public const String NULL_RELATED = "Null-Related - Code Error";
     }
 
     public class Categorize

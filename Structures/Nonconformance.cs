@@ -150,7 +150,12 @@ namespace Structures
         /// <returns>Concatenation of values that defines different nonconformances.</returns>
         public String GetIdentifier()
         {
-            return this._type + "." + this._namespaceName + "." + this._className + "." + this._methodName;
+            string toReturn = this._type + "." + this._namespaceName + "." + this._className + "." + this._methodName;
+            for (int i = 0; i < this._methodParameters.Length; i++)
+            {
+                toReturn += "." + this._methodParameters[i];
+            }
+            return toReturn;
         }
 
         // Save StackTrace of nonconformance on the object on a array.
@@ -235,7 +240,12 @@ namespace Structures
                     this._namespaceName = m.Groups[1].Value;
                 this._className = m.Groups[3].Value;
                 this._methodName = m.Groups[4].Value;
+
                 this._methodParameters = (m.Groups[5].Value.Split(','));
+                for (int i = 0; i < this._methodParameters.Length; i++)
+                {
+                    this._methodParameters[i] = this._methodParameters[i].Split(' ')[0].Trim();
+                }
             }
         }
 
@@ -256,6 +266,10 @@ namespace Structures
             hash = (hash * 7) + this.GetNameSpace().GetHashCode();
             hash = (hash * 7) + this.GetClassName().GetHashCode();
             hash = (hash * 7) + this.GetMethodName().GetHashCode();
+            for (int i = 0; i < this._methodParameters.Length; i++)
+            {
+                hash = (hash * 7) + this._methodParameters[i].GetHashCode();
+            }
             return hash;
         }
     }
