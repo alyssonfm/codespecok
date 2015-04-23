@@ -23,7 +23,7 @@ namespace ContractOK
             InitializeComponent();
 
             backgroundWorkerProgressBar.WorkerReportsProgress = true;
-            backgroundWorkerProgressBar.WorkerSupportsCancellation = true;
+            backgroundWorkerProgressBar.WorkerSupportsCancellation = false;
 
             lbStage.Text = "Current Stage: "+ "Creating Directories";
             progressBar.Value = 0;
@@ -92,7 +92,7 @@ namespace ContractOK
 
             textArea.Text += text;
             this._detectionSuceeded = false;
-            lbStage.Text = "Detection Phase finished with an error.";
+            lbStage.Text = "Detection Phase finished with errors.";
 
             ModifyButton();
         }
