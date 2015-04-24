@@ -207,6 +207,10 @@
             this.btRun.UseVisualStyleBackColor = true;
             this.btRun.Click += new System.EventHandler(this.btRun_Click);
             // 
+            // folderBrowserLibDialog
+            // 
+            this.folderBrowserLibDialog.HelpRequest += new System.EventHandler(this.folderBrowserLibDialog_HelpRequest);
+            // 
             // solutionFileBrowserDialog
             // 
             this.solutionFileBrowserDialog.FileName = "solutionFileBrowserDialog";
@@ -215,7 +219,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(631, 203);
+            this.ClientSize = new System.Drawing.Size(688, 203);
             this.Controls.Add(this.btRun);
             this.Controls.Add(this.btClean);
             this.Controls.Add(this.lbSetSrc);

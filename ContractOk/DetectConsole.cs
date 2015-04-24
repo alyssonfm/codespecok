@@ -13,9 +13,9 @@ namespace ContractOK
         private bool _detectionSuceeded;
         private bool _pauseProgressBar = false;
         private int _steps = 0;
-        private int _velocity = 2;
+        private double _velocity = 2;
 
-        private const int _SECONDS = 1000;
+        private const double _SECONDS = 1000;
 
         public DetectConsole(Detect d)
         {
