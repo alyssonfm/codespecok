@@ -14,8 +14,6 @@ namespace CategorizeModule
         public const String STRONG_POST = "Strong Postcondition";
         public const String WEAK_POST = "Weak Postcondition";
         public const String STRONG_INV = "Strong Invariant";
-
-        public const String NOT_EVAL_EXP = "Cannot be Evaluated";
     }
 
     public class Categorize
@@ -50,26 +48,16 @@ namespace CategorizeModule
 
         public string CategorizePrecondition(Nonconformance n)
         {
-            try
-            {
                 this._examiner.SetPrincipalClassName(n.GetNameSpace(), n.GetClassName());
 
                 if (this._examiner.CheckStrongPrecondition(n.GetMethodName(), n.GetParametersArray()))
                     return Cause.STRONG_PRE;
                 else
                     return Cause.WEAK_POST;
-            }
-            catch (FileNotFoundException e)
-            {
-                Console.WriteLine(e.Message);
-                return Cause.NOT_EVAL_EXP;
-            }
         }
 
         public string CategorizePostcondition(Nonconformance n)
         {
-            try
-            {
                 this._examiner.SetPrincipalClassName(n.GetNameSpace(), n.GetClassName());
 
                 if (this._examiner.CheckWeakPrecondition(n.GetMethodName(), n.GetParametersArray()))
@@ -78,29 +66,16 @@ namespace CategorizeModule
                     return Cause.WEAK_PRE;
                 else
                     return Cause.STRONG_POST;
-            }
-            catch (FileNotFoundException e)
-            {
-                Console.WriteLine(e.Message);
-                return Cause.NOT_EVAL_EXP;
-            }
         }
 
         public string CategorizeInvariant(Nonconformance n)
         {
-            try
-            {
                 this._examiner.SetPrincipalClassName(n.GetNameSpace(), n.GetClassName());
 
                 if (this._examiner.CheckWeakPrecondition(n.GetMethodName(), n.GetParametersArray()))
                     return Cause.WEAK_PRE;
                 else
                     return Cause.STRONG_INV;
-            }
-            catch (FileNotFoundException e)
-            {
-                Console.WriteLine(e.Message);
-                return Cause.NOT_EVAL_EXP;
             }
         }
     }
