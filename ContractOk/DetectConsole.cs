@@ -13,9 +13,9 @@ namespace ContractOK
         private bool _detectionSuceeded;
         private bool _pauseProgressBar = false;
         private int _steps = 0;
-        private int _velocity = 2;
+        private double _velocity = 2;
 
-        private const int _SECONDS = 1000;
+        private const double _SECONDS = 1000;
 
         public DetectConsole(Detect d)
         {
@@ -23,7 +23,7 @@ namespace ContractOK
             InitializeComponent();
 
             backgroundWorkerProgressBar.WorkerReportsProgress = true;
-            backgroundWorkerProgressBar.WorkerSupportsCancellation = true;
+            backgroundWorkerProgressBar.WorkerSupportsCancellation = false;
 
             lbStage.Text = "Current Stage: "+ "Creating Directories";
             progressBar.Value = 0;
@@ -92,7 +92,7 @@ namespace ContractOK
 
             textArea.Text += text;
             this._detectionSuceeded = false;
-            lbStage.Text = "Detection Phase finished with an error.";
+            lbStage.Text = "Detection Phase finished with errors.";
 
             ModifyButton();
         }

@@ -56,5 +56,10 @@ namespace ContractOK
         {
 
         }
+
+        private void folderBrowserLibDialog_HelpRequest(object sender, EventArgs e)
+        {
+
+        }
     }
 }
