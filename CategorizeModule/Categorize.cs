@@ -76,7 +76,6 @@ namespace CategorizeModule
                     return Cause.WEAK_PRE;
                 else
                     return Cause.STRONG_INV;
-            }
         }
     }
 }
