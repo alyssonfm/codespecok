@@ -263,6 +263,8 @@ namespace Structures
         public override int GetHashCode()
         {
             int hash = 13;
+            if (IsMeaningless())
+                return hash;
             hash = (hash * 7) + this.GetNameSpace().GetHashCode();
             hash = (hash * 7) + this.GetClassName().GetHashCode();
             hash = (hash * 7) + this.GetMethodName().GetHashCode();

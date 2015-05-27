@@ -65,7 +65,9 @@ namespace CategorizeModule
                 {
                     StepOnFunctions(a.Expression);
                 }
-                inv.ArgumentList.Arguments
+                var member = inv.Expression as MemberAccessExpressionSyntax;
+                var name = (member.Expression as IdentifierNameSyntax).Identifier;
+                //inv.Expression;
             }
         }
 

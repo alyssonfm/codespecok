@@ -13,10 +13,10 @@ namespace CategorizeTest
         // These tests, still depend that the bin file are on bin folder.
         enum NonconformancesSuite { Boogie = 0 };
 
-        private string[] sourceFolderPath = { @"C:\Users\denni_000\OneDrive\Documents\ContractOK-UE\UE04-Boogie-15NC\Source" };
-        private string[] binFolderPath = { @"C:\Users\denni_000\OneDrive.old\Documents\ContractOK-UE\UE04-Boogie-15NC\Binaries" };
+        private string[] sourceFolderPath = { @"E:\OneDrive\Documents\ContractOK-UE\UE04-Boogie-15NC\Source" };
+        private string[] binFolderPath = { @"E:\OneDrive\Documents\ContractOK-UE\UE04-Boogie-15NC\Binaries" };
         private string[] solutionFile = { @"Boogie.sln" };
-        private string[] testResultsPath = { @"C:\Users\denni_000\Documents\contractok\CategorizeModule\Resources\TestResultFromBoogie.xml" };
+        private string[] testResultsPath = { @"E:\Git\contractok\CategorizeModule\Resources\TestResultFromBoogie.xml" };
         private string[][] correctLikelyCause = { new string[] { "Weak Precondition", "Strong Invariant", "Strong Invariant", "Strong Invariant", "Strong Precondition", "Strong Precondition", "Strong Precondition", "Strong Precondition", "Strong Precondition", "Strong Precondition", "Strong Precondition", "Strong Precondition", "Strong Precondition", "Strong Precondition", "Strong Precondition" } };
 
         private HashSet<Nonconformance> GetNonconformancesSuite(NonconformancesSuite suite)

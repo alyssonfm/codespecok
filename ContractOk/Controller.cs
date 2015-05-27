@@ -1,4 +1,4 @@
-﻿//#define MAKE_TESTS
+﻿#define MAKE_TESTS
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;

@@ -16,7 +16,7 @@ namespace CategorizeModule.Tests
             MethodDeclarationSyntax test;
             List<ReachableMethod> methodsAvailable;
 
-            WalkOnTest(test, methodsAvailable);
+            //WalkOnTest(test, methodsAvailable);
         }
     }
 }
