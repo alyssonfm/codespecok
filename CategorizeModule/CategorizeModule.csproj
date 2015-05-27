@@ -109,11 +109,15 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="ReachableMethod.cs" />
+    <Compile Include="Score.cs" />
     <Compile Include="Tests\CategorizationTesting.cs" />
     <Compile Include="Categorize.cs" />
     <Compile Include="CustomAssemblyLoader.cs" />
     <Compile Include="Examinator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tests\StaticAnalysisTesting.cs" />
+    <Compile Include="Walker.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Commons\Commons.csproj">
