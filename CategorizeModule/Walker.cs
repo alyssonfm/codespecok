@@ -11,8 +11,17 @@ namespace CategorizeModule
 {
     class Walker
     {
-        public static Score WalkOnTest(MethodDeclarationSyntax test, List<ReachableMethod> methodsAvailable)
+        private ReachableMethodList _methods;
+
+        public Walker(Solution sln) {
+            // The Reachable methods will be initialized on search through Solution.
+            this._methods = new ReachableMethodList(sln);
+        }
+
+        public Score WalkOnTest(MethodDeclarationSyntax test, ReachableMethodList methodsAvailable)
         {
+            methodsAvailable.ResetScore();
+
             SyntaxList<StatementSyntax> block = test.Body.Statements;
             
             foreach (StatementSyntax s in block)
@@ -20,56 +29,72 @@ namespace CategorizeModule
                 if (s is ExpressionStatementSyntax)
                 {
                     ExpressionStatementSyntax e = (ExpressionStatementSyntax) s;
-                    StepOnFunctions(e.Expression);
+                    StepOnFunctions(e.Expression, ReachableMethodList.TEST_RANDOOP_CLASS);
                 }
             }
 
-            return null;
+            return _methods.GetScores();
         }
 
-        private static void StepOnFunctions(ExpressionSyntax line)
+        private Score StepOnFunctions(ExpressionSyntax line, string actualClass)
         {
+            Score score = new Score();
+
             if (line is ParenthesizedExpressionSyntax)
             {
-                StepOnFunctions(((ParenthesizedExpressionSyntax)line).Expression);
+                StepOnFunctions(((ParenthesizedExpressionSyntax)line).Expression, actualClass);
             }
             else if (line is BinaryExpressionSyntax)
             {
-                StepOnFunctions(((BinaryExpressionSyntax)line).Left);
-                StepOnFunctions(((BinaryExpressionSyntax)line).Right);
+                StepOnFunctions(((BinaryExpressionSyntax)line).Left, actualClass);
+                StepOnFunctions(((BinaryExpressionSyntax)line).Right, actualClass);
             }
             else if (line is PrefixUnaryExpressionSyntax)
             {
-                StepOnFunctions(((PrefixUnaryExpressionSyntax)line).Operand);
+                StepOnFunctions(((PrefixUnaryExpressionSyntax)line).Operand, actualClass);
             }
             else if (line is PostfixUnaryExpressionSyntax)
             {
-                StepOnFunctions(((PostfixUnaryExpressionSyntax)line).Operand);
+                StepOnFunctions(((PostfixUnaryExpressionSyntax)line).Operand, actualClass);
             }
             else if (line is AssignmentExpressionSyntax)
             {
-                StepOnFunctions(((AssignmentExpressionSyntax)line).Left);
-            }
-            else if (line is IdentifierNameSyntax)
-            {
-                return;
-            }
-            else if (line is MemberAccessExpressionSyntax)
-            {
-                return;
+                StepOnFunctions(((AssignmentExpressionSyntax)line).Left, actualClass);
             }
             else if (line is InvocationExpressionSyntax)
             {
                 InvocationExpressionSyntax inv = (InvocationExpressionSyntax)line;
                 foreach(ArgumentSyntax a in inv.ArgumentList.Arguments)
                 {
-                    StepOnFunctions(a.Expression);
+                    StepOnFunctions(a.Expression, actualClass);
                 }
-                var member = inv.Expression as MemberAccessExpressionSyntax;
-                var name = (member.Expression as IdentifierNameSyntax).Identifier;
-                //inv.Expression;
+                
+                MemberAccessExpressionSyntax member = inv.Expression as MemberAccessExpressionSyntax;
+                string methodName = (member.Name as IdentifierNameSyntax).Identifier.Text;
+                string filterHelper = (member.Expression as IdentifierNameSyntax).Identifier.Text;
+
+                // Treat cases where function can be acessed or not.
+                score.Add(WalkOn(GetMethod(methodName, actualClass, filterHelper)));
             }
+
+            return score;
         }
 
+        private Score WalkOn(MethodDeclarationSyntax method)
+        {
+            string actualClass = GetClassOf(method);
+
+
+        }
+
+        private string GetClassOf(MethodDeclarationSyntax method)
+        {
+            throw new NotImplementedException();
+        }
+
+        private MethodDeclarationSyntax GetMethod(string methodName, string actualClass, string filterHelper)
+        {
+            return _methods.SearchMethod(methodName, actualClass, filterHelper);
+        }
     }
 }
