@@ -29,5 +29,20 @@ namespace CategorizeModule
         {
             throw new NotImplementedException();
         }
+
+        internal ReachableMethod GetLastMethodFound()
+        {
+            throw new NotImplementedException();
+        }
+
+        internal bool MethodIsReachable(string methodName, string actualClass, string filterHelper)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal void CalculateStrongInv()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
