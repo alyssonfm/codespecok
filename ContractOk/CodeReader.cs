@@ -11,7 +11,6 @@ namespace ContractOK
 {
     class CodeReader
     {
-
         public static String GetTestMethod(String namefile)
         {
             SyntaxTree tree = CSharpSyntaxTree.ParseText(GetTextFromFile(namefile));
@@ -21,33 +20,6 @@ namespace ContractOK
 
             return methodDecl.ToString();
         }
-
-        public static ClassDeclarationSyntax GetClassFromList(SyntaxList<MemberDeclarationSyntax> list, string name)
-        {
-            foreach (ClassDeclarationSyntax c in list)
-            {
-                string nameOfClass = c.Identifier.Value.ToString();
-                if (nameOfClass.Equals(name))
-                {
-                    return c;
-                }
-            }
-            return null;
-        }
-
-        public static  NamespaceDeclarationSyntax GetNamepaceFromList(SyntaxList<MemberDeclarationSyntax> list, string name)
-        {
-            foreach (NamespaceDeclarationSyntax n in list)
-            {
-                string nameOfNameSpace = ((IdentifierNameSyntax)n.Name).Identifier.Value.ToString();
-                if (nameOfNameSpace.Equals(name))
-                {
-                    return n;
-                }
-            }
-            return null;
-        }
-
         public static String GetTextFromFile(string namefile)
         {
             using (StreamReader sr = new StreamReader(Constants.TEST_OUTPUT + Constants.FILE_SEPARATOR +  namefile + ".cs"))

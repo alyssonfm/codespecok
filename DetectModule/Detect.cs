@@ -1,4 +1,4 @@
-﻿#define DETECT_READY
+﻿//#define DETECT_READY
 using Commons;
 using Structures;
 using System;

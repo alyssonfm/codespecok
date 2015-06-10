@@ -1,15 +1,25 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace CategorizeModule
 {
-    class ReachableMethod
+    public class ReachableMethod
     {
         private BaseMethodDeclarationSyntax _method;
         private Score _score;
         private string _class;
         private string _namespace;
         private List<string> _fields;
+
+        public ReachableMethod(BaseMethodDeclarationSyntax m, string c, string n, List<string> fs)
+        {
+            _method = m;
+            _class = c;
+            _namespace = n;
+            SetFields(fs);
+        }
+
         public Score GetScore()
         {
             return _score;
@@ -25,6 +35,13 @@ namespace CategorizeModule
         public BaseMethodDeclarationSyntax GetMethod()
         {
             return _method;
+        }
+        public string GetMethodName()
+        {
+            if (_method is ConstructorDeclarationSyntax)
+                return "ctor";
+            else
+                return ((MethodDeclarationSyntax)_method).Identifier.Value.ToString();
         }
         public bool IsField(ExpressionSyntax e)
         {
@@ -49,6 +66,20 @@ namespace CategorizeModule
                 }
                 return false;
             }
+        }
+        public void SetFields(List<string> fieldsList)
+        {
+            _fields = fieldsList;
+        }
+
+        internal void ResetScore()
+        {
+            _score.InitScore();
+        }
+
+        public List<Point> GetPoint()
+        {
+            return _score.getPoints(this);   
         }
     }
 }

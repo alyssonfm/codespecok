@@ -1,20 +1,44 @@
 ﻿using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
+using Commons;
+using System.IO;
+using System.Linq;
+using Microsoft.CodeAnalysis.CSharp;
 
 namespace CategorizeModule
 {
-    class Walker
+    public class Walker
     {
         private ReachableMethodList _methods;
 
-        public Walker(Solution sln) {
+        public Walker(string solutionPath) {
             // The Reachable methods will be initialized on search through Solution.
-            this._methods = new ReachableMethodList(sln);
+            this._methods = new ReachableMethodList(solutionPath);
         }
 
-        public Score WalkOnTest(MethodDeclarationSyntax test)
+        public static String GetTextFromFile(string namefile)
         {
+            using (StreamReader sr = new StreamReader(Constants.TEST_OUTPUT + Constants.FILE_SEPARATOR + namefile + ".cs"))
+            {
+                String line = sr.ReadToEnd();
+                return line;
+            }
+        }
+        public static MethodDeclarationSyntax GetTestMethod(String namefile)
+        {
+            SyntaxTree tree = CSharpSyntaxTree.ParseText(GetTextFromFile(namefile));
+            var root = (CompilationUnitSyntax)tree.GetRoot();
+            var classDecl = (ClassDeclarationSyntax)root.Members.ElementAt(0);
+            MethodDeclarationSyntax methodDecl = (MethodDeclarationSyntax)classDecl.Members.ElementAt(0);
+
+            return methodDecl;
+        }
+
+        public List<Point> WalkOnTest(string testlocation)
+        {
+            MethodDeclarationSyntax test = GetTestMethod(testlocation);
             this._methods.ResetScore();
 
             SyntaxList<StatementSyntax> block = test.Body.Statements;
@@ -39,7 +63,7 @@ namespace CategorizeModule
                 }
             }
             _methods.CalculateStrongInv();
-            return _methods.GetScores();
+            return _methods.GetPoints();
         }
 
         private bool MethodIsReachable(string methodName, string actualClass, string filterHelper)
@@ -100,7 +124,7 @@ namespace CategorizeModule
                 if (line is ExpressionStatementSyntax)
                 {
                     ExpressionStatementSyntax e = (ExpressionStatementSyntax)line;
-                    List<ExpressionSyntax> fieldsWhereValueChanged = GetAttibutionVitims(e.Expression);
+                    List<ExpressionSyntax> fieldsWhereValueChanged = GetAttibutionVictims(e.Expression);
                     foreach (ExpressionSyntax exp in fieldsWhereValueChanged)
                     {
                         if (method.IsField(exp))
@@ -131,17 +155,17 @@ namespace CategorizeModule
             return method.GetScore();
         }
 
-        private List<ExpressionSyntax> GetAttibutionVitims(ExpressionSyntax line)
+        private List<ExpressionSyntax> GetAttibutionVictims(ExpressionSyntax line)
         {
             List<ExpressionSyntax> attibutes = new List<ExpressionSyntax>();
             if (line is ParenthesizedExpressionSyntax)
             {
-                attibutes.AddRange(GetAttibutionVitims(((ParenthesizedExpressionSyntax)line).Expression));
+                attibutes.AddRange(GetAttibutionVictims(((ParenthesizedExpressionSyntax)line).Expression));
             }
             else if (line is BinaryExpressionSyntax)
             {
-                attibutes.AddRange(GetAttibutionVitims(((BinaryExpressionSyntax)line).Left));
-                attibutes.AddRange(GetAttibutionVitims(((BinaryExpressionSyntax)line).Right));
+                attibutes.AddRange(GetAttibutionVictims(((BinaryExpressionSyntax)line).Left));
+                attibutes.AddRange(GetAttibutionVictims(((BinaryExpressionSyntax)line).Right));
             }
             else if (line is PrefixUnaryExpressionSyntax)
             {
@@ -160,7 +184,7 @@ namespace CategorizeModule
                 InvocationExpressionSyntax inv = (InvocationExpressionSyntax)line;
                 foreach (ArgumentSyntax a in inv.ArgumentList.Arguments)
                 {
-                    attibutes.AddRange(GetAttibutionVitims(a.Expression));
+                    attibutes.AddRange(GetAttibutionVictims(a.Expression));
                 }
             }
             return attibutes;
@@ -191,12 +215,11 @@ namespace CategorizeModule
             }
             return contracts;
         }
-
-
         private ReachableMethod GetMethodFound()
         {
             return _methods.GetLastMethodFound();
         }
+
     }
     
 }

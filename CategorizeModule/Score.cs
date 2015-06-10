@@ -1,13 +1,23 @@
-﻿namespace CategorizeModule
+﻿using System.Collections.Generic;
+
+namespace CategorizeModule
 {
-    class Score
+    public class Score 
     {
         private InvariantTable _myself;
         private InvariantTable _others;
 
         public Score()
         {
+            InitScore();
         }
+
+        public void InitScore()
+        {
+            _myself = new InvariantTable();
+            _others = new InvariantTable();
+        }
+
         public InvariantTable GetMyself()
         {
             return this._myself;
@@ -70,6 +80,7 @@
             IncrementMyselfCodeError(v);
             IncrementOthersCodeError(v);
         }
+
         private void IncrementMyselfCodeError(int points)
         {
             _myself.CodeError += points;
@@ -96,9 +107,19 @@
         {
             _myself.StrongInv += v;
         }
+
+        public List<Point> getPoints(ReachableMethod rm)
+        {
+            List<Point> lp = new List<Point>();
+            lp.Add(new Point("Code Error", rm.GetMethodName(), rm.GetClass(), rm.GetNamespace(), _others.CodeError, _myself.CodeError));
+            lp.Add(new Point("Weak Pre", rm.GetMethodName(), rm.GetClass(), rm.GetNamespace(), _others.WeakPre, _myself.WeakPre));
+            lp.Add(new Point("Weak Pos", rm.GetMethodName(), rm.GetClass(), rm.GetNamespace(), _others.WeakPos, _myself.WeakPos));
+            lp.Add(new Point("Strong Inv", rm.GetMethodName(), rm.GetClass(), rm.GetNamespace(), _others.StrongInv, _myself.StrongInv));
+            return lp;
+        }
     }
 
-    class InvariantTable
+    public class InvariantTable
     {
         public int CodeError = 0;
         public int WeakPre = 0;
