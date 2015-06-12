@@ -1,4 +1,4 @@
-﻿//#define MAKE_TESTS
+﻿#define MAKE_TESTS
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
@@ -35,7 +35,7 @@ namespace ContractOK
         }
 
         static public void MakeTests(){
-            (new CategorizeTest.CategorizationTesting()).TestNonconformancesLikelyCause();
+            (new CategorizeTest.StaticAnalysisTesting()).TestNonconformancesLikelyCause();
         }
 
         static public void StartDetectPhase(String srcFolder, String slnFile, String libFolder, String time){
