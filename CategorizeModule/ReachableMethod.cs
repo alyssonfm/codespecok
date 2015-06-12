@@ -74,12 +74,12 @@ namespace CategorizeModule
 
         internal void ResetScore()
         {
-            _score.InitScore();
+            _score = new Score();
         }
 
-        public List<Point> GetPoint()
+        public List<Point> GetPoints()
         {
-            return _score.getPoints(this);   
+            return _score.GetPoints(this);   
         }
     }
 }

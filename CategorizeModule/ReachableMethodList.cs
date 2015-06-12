@@ -153,7 +153,7 @@ namespace CategorizeModule
             List<Point> sc = new List<Point>();
             foreach(ReachableMethod rm in _methods)
             {
-                sc.AddRange(rm.GetPoint());
+                sc.AddRange(rm.GetPoints());
             }
             sc.Sort();
             return sc;
@@ -169,20 +169,25 @@ namespace CategorizeModule
             List<ReachableMethod> methodsWithSameName = new List<ReachableMethod>();
             foreach(ReachableMethod rm in _methods)
             {
-                if (rm.GetMethod() is ConstructorDeclarationSyntax)
-                    if (((ConstructorDeclarationSyntax)rm.GetMethod()).Identifier.Value.ToString().Equals(methodName))
+                BaseMethodDeclarationSyntax bmds = rm.GetMethod();
+                if (bmds is ConstructorDeclarationSyntax)
+                {
+                    if (rm.GetClass().Equals(methodName))
                     {
                         methodsWithSameName.Add(rm);
                     }
+                }
                 else
-                    if(((MethodDeclarationSyntax)rm.GetMethod()).Identifier.Value.ToString().Equals(methodName))
+                {
+                    if (((MethodDeclarationSyntax)bmds).Identifier.Value.ToString().Equals(methodName))
                     {
                         methodsWithSameName.Add(rm);
                     }
+                }
             }
             List<ReachableMethod> methodsInTheSpecifiedClass = new List<ReachableMethod>();
             foreach (ReachableMethod rm in methodsWithSameName) {
-                if (rm.GetClass().Equals(actualClass))
+                if (filterHelper.Contains(rm.GetClass()))
                     methodsInTheSpecifiedClass.Add(rm);
             }
             if(methodsInTheSpecifiedClass.Count > 0)

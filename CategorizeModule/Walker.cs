@@ -20,7 +20,7 @@ namespace CategorizeModule
 
         public static String GetTextFromFile(string namefile)
         {
-            using (StreamReader sr = new StreamReader(Constants.TEST_OUTPUT + Constants.FILE_SEPARATOR + namefile + ".cs"))
+            using (StreamReader sr = new StreamReader(namefile))
             {
                 String line = sr.ReadToEnd();
                 return line;
@@ -58,6 +58,26 @@ namespace CategorizeModule
                         if (MethodIsReachable(methodName, ReachableMethodList.TEST_RANDOOP_CLASS, filterHelper)) {
                             ReachableMethod m = GetMethodFound();
                             WalkOn(m);
+                        }
+                    }
+                }
+                if(s is LocalDeclarationStatementSyntax)
+                {
+                    LocalDeclarationStatementSyntax ldss = (LocalDeclarationStatementSyntax)s;
+                    SeparatedSyntaxList<VariableDeclaratorSyntax> lvds = ldss.Declaration.Variables;
+                    foreach(VariableDeclaratorSyntax vds in lvds)
+                    {
+                        if (vds.Initializer.Value is ObjectCreationExpressionSyntax)
+                        {
+                            ObjectCreationExpressionSyntax oces = (ObjectCreationExpressionSyntax) vds.Initializer.Value;
+                            QualifiedNameSyntax qns = (QualifiedNameSyntax)oces.Type;
+                            string className = qns.Right.ToString();
+                            string namespaceName = qns.Left.ToString();
+                            if(MethodIsReachable(className, ReachableMethodList.TEST_RANDOOP_CLASS, namespaceName + "." + className))
+                            {
+                                ReachableMethod rm = GetMethodFound();
+                                WalkOn(rm);
+                            }
                         }
                     }
                 }
@@ -110,6 +130,7 @@ namespace CategorizeModule
         private Score WalkOn(ReachableMethod method)
         {
             string actualClass = method.GetClass();
+            string actualNamespace = method.GetNamespace();
 
             ContractArguments contracts = GetContractsPreAndPostFromMethod(method.GetMethod());
             if (contracts.Requires.Count == 0)
@@ -138,7 +159,20 @@ namespace CategorizeModule
                         // Verify if its reachable
                         MemberAccessExpressionSyntax member = inv.Expression as MemberAccessExpressionSyntax;
                         string methodName = (member.Name as IdentifierNameSyntax).Identifier.Text;
-                        string filterHelper = (member.Expression as IdentifierNameSyntax).Identifier.Text;
+                        string filterHelper = "";
+                        if (member.Expression is IdentifierNameSyntax)
+                        {
+                            filterHelper = (member.Expression as IdentifierNameSyntax).Identifier.Text;
+                        }
+                        else if(member.Expression is ThisExpressionSyntax)
+                        {
+                            filterHelper = actualNamespace + "." + actualClass;
+                        }
+                        else
+                        {
+                            filterHelper = actualNamespace + "." + actualClass;
+                        }
+
 
                         if (MethodIsReachable(methodName, actualClass, filterHelper))
                         {

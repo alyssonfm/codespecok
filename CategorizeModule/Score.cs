@@ -108,7 +108,7 @@ namespace CategorizeModule
             _myself.StrongInv += v;
         }
 
-        public List<Point> getPoints(ReachableMethod rm)
+        public List<Point> GetPoints(ReachableMethod rm)
         {
             List<Point> lp = new List<Point>();
             lp.Add(new Point("Code Error", rm.GetMethodName(), rm.GetClass(), rm.GetNamespace(), _others.CodeError, _myself.CodeError));
@@ -121,9 +121,17 @@ namespace CategorizeModule
 
     public class InvariantTable
     {
-        public int CodeError = 0;
-        public int WeakPre = 0;
-        public int WeakPos = 0;
-        public int StrongInv = 0;
+        public int CodeError;
+        public int WeakPre;
+        public int WeakPos;
+        public int StrongInv;
+
+        public InvariantTable()
+        {
+            CodeError = 0;
+            WeakPre = 0;
+            WeakPos = 0;
+            StrongInv = 0;
+        }
     }
 }
