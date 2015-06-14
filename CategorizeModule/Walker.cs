@@ -83,7 +83,9 @@ namespace CategorizeModule
                 }
             }
             _methods.CalculateStrongInv();
-            return _methods.GetPoints();
+            List<Point> toReturn = _methods.GetPoints();
+            toReturn.Reverse();
+            return toReturn;
         }
 
         private bool MethodIsReachable(string methodName, string actualClass, string filterHelper)
