@@ -1,4 +1,4 @@
-﻿#define MAKE_TESTS
+﻿//#define MAKE_TESTS
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
@@ -13,7 +13,7 @@ namespace ContractOK
         private static MainScreen mainSc;
         private static DetectConsole dconSc;
         private static DetectedDisplay ddisSc;
-        private static CategorizedDisplay cdisSc;
+        private static AnalyzedDisplay cdisSc;
         private static HashSet<Nonconformance> nonconformances;
         private static String sourceFolder;
         private static String solutionFile;
@@ -59,7 +59,7 @@ namespace ContractOK
                 dconSc.Visible = false;
             else if (ddisSc.Visible)
                 ddisSc.Visible = false;
-            cdisSc = new CategorizedDisplay(nonconformances);
+            cdisSc = new AnalyzedDisplay(nonconformances);
             Application.DoEvents();
         }
 

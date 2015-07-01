@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Linq;
 using System.IO;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 using Microsoft.CodeAnalysis.MSBuild;
 using Commons;
+using Structures;
 
 namespace CategorizeModule
 {
@@ -19,32 +21,47 @@ namespace CategorizeModule
             OpenSolutionFile(solutionPath);
             LoadMethods();
         }
-
+        /// <summary>
+        /// Initialize reachable methods list.
+        /// </summary>
         private void LoadMethods()
         {
             this._methods = new List<ReachableMethod>();
-            List<Document> docs = GetDocumentsToSearchForClass();
-            foreach (Document d in docs)
+            foreach (Document d in GetDocumentsToSearchForClass())
             {
                 SearchForMethodsOnDocument(d);
             }
         }
-
-        private void TakeMethodsFromClass(ClassDeclarationSyntax cl, string namespaceName)
+        /// <summary>
+        /// Get all methods from class and declare them as Reachable methods.
+        /// </summary>
+        /// <param name="cds">The class to be searched</param>
+        /// <param name="nds">The namespace of class to be searched</param>
+        /// <param name="model">The semantic model of AST where class was loaded</param>
+        private void TakeMethodsFromClass(ClassDeclarationSyntax cds, NamespaceDeclarationSyntax nds, SemanticModel model)
         {
-            string className = cl.Identifier.ToString();
-            List<BaseMethodDeclarationSyntax> methods = new List<BaseMethodDeclarationSyntax>();
-            foreach (MemberDeclarationSyntax m in cl.Members)
-            {
-                if (m is ConstructorDeclarationSyntax | m is MethodDeclarationSyntax)
+            string className = cds.Identifier.ToString();
+            string namespaceName = (nds == null)? "" : nds.Name.ToString();
+            List<String> fields = new List<String>();
+
+            // Get all fields from class.
+            foreach (FieldDeclarationSyntax fieldNode in cds.DescendantNodes().OfType<FieldDeclarationSyntax>())
+                foreach (VariableDeclaratorSyntax variable in fieldNode.Declaration.Variables)
                 {
-                    BaseMethodDeclarationSyntax baseMethod = (BaseMethodDeclarationSyntax)m;
-                    ReachableMethod rm = new ReachableMethod(baseMethod, className, namespaceName, new List<string>());
-                    this._methods.Add(rm);
+                    ISymbol fieldSymbol = model.GetDeclaredSymbol(variable);
+                    fields.Add(fieldSymbol.Name.ToString());
                 }
+            // Get all methods in class and declares as ReachableMethod
+            foreach (BaseMethodDeclarationSyntax baseMethod in cds.DescendantNodes().OfType<BaseMethodDeclarationSyntax>())
+            {
+                ReachableMethod rm = new ReachableMethod(baseMethod, className, namespaceName, fields);
+                this._methods.Add(rm);
             }
         }
-
+        /// <summary>
+        /// Open Solution file, and ensures there are projects on it.
+        /// </summary>
+        /// <param name="solutionPath">The path to solution needed to load</param>
         private void OpenSolutionFile(string solutionPath)
         {
             // Precondition:
@@ -73,92 +90,65 @@ namespace CategorizeModule
                                           + "SolutionPath ==" + solutionPath);
             }
         }
+        /// <summary>
+        /// It returns all Documents in Solution to keep them available for search in classes on them.
+        /// </summary>
+        /// <returns>List of all Documents in local Solution</returns>
         private List<Document> GetDocumentsToSearchForClass()
         {
-            List<Document> docsGeneral = new List<Document>();
+            List<Document> docs = new List<Document>();
+            // Add all docs in all projects from Solution to list.
             foreach (Project proj in this._sln.Projects)
-            {
                 foreach (Document d in proj.Documents)
-                {
-                    docsGeneral.Add(d);
-                }
-            }
-            return docsGeneral;
+                    docs.Add(d);
+            return docs;
         }
-
+        /// <summary>
+        /// Search through all methods in Document, turning them into Reachable Methods and adding them
+        /// to local Reachable Methods list.
+        /// </summary>
+        /// <param name="doc">The Document to be searched</param>
         private void SearchForMethodsOnDocument(Document doc)
         {
-            // Load AST its root node.
+            // Load AST and SemanticModel from Doc.
             SyntaxTree st = doc.GetSyntaxTreeAsync().Result;
+            SemanticModel model = doc.GetSemanticModelAsync().Result;
             var root = (CompilationUnitSyntax)st.GetRoot();
 
-            List<NamespaceDeclarationSyntax> namespaces = GetNamepacesFromList(root.Members);
-            foreach (NamespaceDeclarationSyntax n in namespaces)
-            {
-                string nameNamespace = n.Name.ToString();
-                List<ClassDeclarationSyntax> cl01 = GetClassesFromList(n.Members);
-                foreach (ClassDeclarationSyntax c in cl01)
-                {
-                    TakeMethodsFromClass(c, nameNamespace);
-                }
-            }
-            List<ClassDeclarationSyntax> cl02 = GetClassesFromList(root.Members);
-            foreach (ClassDeclarationSyntax c in cl02)
-            {
-                TakeMethodsFromClass(c, "");
-            }
-        }
-
-        public List<NamespaceDeclarationSyntax> GetNamepacesFromList(SyntaxList<MemberDeclarationSyntax> list)
-        {
-            List<NamespaceDeclarationSyntax> nl = new List<NamespaceDeclarationSyntax>();
-            foreach (MemberDeclarationSyntax m in list)
-            {
-                if (m is NamespaceDeclarationSyntax)
-                {
-                    NamespaceDeclarationSyntax n = (NamespaceDeclarationSyntax)m;
-                    nl.Add(n);
-                }
-
-            }
-            return nl;
-        }
-
-        public List<ClassDeclarationSyntax> GetClassesFromList(SyntaxList<MemberDeclarationSyntax> list)
-        {
-            List<ClassDeclarationSyntax> cl = new List<ClassDeclarationSyntax>();
-            foreach (MemberDeclarationSyntax m in list)
-            {
-                if (m is ClassDeclarationSyntax)
-                {
-                    ClassDeclarationSyntax c = (ClassDeclarationSyntax)m;
-                    cl.Add(c);
-                }
-            }
-            return cl;
+            // Through all namespaces, get Methods from each class
+            foreach (NamespaceDeclarationSyntax nds in root.Members.OfType<NamespaceDeclarationSyntax>())
+                foreach (ClassDeclarationSyntax cds in nds.Members.OfType<ClassDeclarationSyntax>())
+                    TakeMethodsFromClass(cds, nds, model);
+            // Through all classes without namespace, get Methods from each class
+            foreach (ClassDeclarationSyntax cds in root.Members.OfType<ClassDeclarationSyntax>())
+                TakeMethodsFromClass(cds, null, model);
         }
 
         public static string TEST_RANDOOP_CLASS { get; internal set; }
-
+        /// <summary>
+        /// Reset score on all reachable methods.
+        /// </summary>
         public void ResetScore()
         {
             foreach (ReachableMethod rm in _methods)
-            {
                 rm.ResetScore();
-            }
         }
-
+        /// <summary>
+        /// Get the list of points from scores in all reachable methods.
+        /// </summary>
+        /// <returns>List of points of all reachable methods</returns>
         public List<Point> GetPoints()
         {
-            List<Point> sc = new List<Point>();
+            List<Point> lsPoint = new List<Point>();
             foreach(ReachableMethod rm in _methods)
-            {
-                sc.AddRange(rm.GetPoints());
-            }
-            sc.Sort();
-            return sc;
+                lsPoint.AddRange(rm.GetPoints());
+            lsPoint.Sort();
+            return lsPoint;
         }
-
+        /// <summary>
+        /// Get last method found with MethodIsReachable
+        /// </summary>
+        /// <returns>A method found with MethodIsReachable</returns>
         public ReachableMethod GetLastMethodFound()
         {
             return this._lastMethodFound;

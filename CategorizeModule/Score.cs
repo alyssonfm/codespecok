@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Structures;
+using System.Collections.Generic;
 
 namespace CategorizeModule
 {

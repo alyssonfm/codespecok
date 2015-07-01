@@ -1,7 +1,8 @@
-﻿using System;
+﻿using Structures;
 using System.Collections.Generic;
 using CategorizeModule;
 using System.Diagnostics;
+
 
 namespace CategorizeTest
 {
@@ -21,9 +22,13 @@ namespace CategorizeTest
                         + "\nLikely Source: " + p.GetLikelyCause() + "\n");
                     if (!(p.GetMyself() == 0))
                     {
-                        Debug.WriteLine("There are " + p.GetMyself() + " cases on this method and\n");
+                        Debug.WriteLine("There are " + p.GetMyself() + " cases on this method" + ((p.GetOthers() - p.GetMyself() == 0) ? "" : " and\n"));
                     }
-                    Debug.WriteLine("There are " + p.GetOthers() + " cases on methods called by this method\n\n");
+                    if (!(p.GetOthers() - p.GetMyself() == 0))
+                    {
+                        Debug.WriteLine("There are " + (p.GetOthers() - p.GetMyself()) + " cases on methods called by this method");
+                    }
+                    Debug.WriteLine("\n");
                 }
                 
             }

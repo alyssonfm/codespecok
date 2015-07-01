@@ -19,10 +19,12 @@ namespace CategorizeModule
     public class Categorize
     {
         private Examinator _examiner;
+        private Walker _analyser;
 
         public HashSet<Nonconformance> categorize(HashSet<Nonconformance> errors, String sourceFolder, String solutionPath)
         {
             this._examiner = new Examinator(sourceFolder + Constants.FILE_SEPARATOR + solutionPath);
+            this._analyser = new Walker(sourceFolder + Constants.FILE_SEPARATOR + solutionPath);
             for (int i = 0; i < errors.Count; i++)
             {
                 Nonconformance n = errors.ElementAt(i);
@@ -35,7 +37,7 @@ namespace CategorizeModule
                         n.SetLikelyCause(CategorizePostcondition(n));
                         break;
                     case Structures.CategoryType.INVARIANT:
-                        n.SetLikelyCause(CategorizeInvariant(n));
+                        n.SetLikelySources(this._analyser.WalkOnTest(Constants.TEST_OUTPUT + n.GetTestFileName()));
                         break;
                     default:
                         break;

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Structures;
 
 namespace CategorizeModule
 {
@@ -62,6 +63,8 @@ namespace CategorizeModule
                 foreach(string field in _fields)
                 {
                     if (field.Equals(e.ToString()))
+                        return true;
+                    if (("this." + field).Equals(e.ToString()))
                         return true;
                 }
                 return false;

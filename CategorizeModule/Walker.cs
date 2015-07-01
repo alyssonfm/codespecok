@@ -2,7 +2,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
-using Commons;
+using Structures;
 using System.IO;
 using System.Linq;
 using Microsoft.CodeAnalysis.CSharp;
@@ -183,7 +183,8 @@ namespace CategorizeModule
                         }
                         else
                         {
-                            method.GetScore().IncrementCodeError();
+                            if(!filterHelper.Equals("Contract"))
+                                method.GetScore().IncrementCodeError();
                         }
                     }
                 }

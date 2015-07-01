@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
 namespace Structures
@@ -40,6 +41,7 @@ namespace Structures
         private String[] _methodParameters;
         // Categorization module main product.
         private String _likelyCause = "";
+        private List<Point> _points = new List<Point>();
         // StackTrace related.
         private String [] _stackTraceOrder;
         private int _stackTraceLenght;
@@ -74,6 +76,14 @@ namespace Structures
         public string GetLikelyCause()
         {
             return this._likelyCause;
+        }
+        public void SetLikelySources(List<Point> points) {
+            _points = points;
+        }
+
+        public List<Point> GetLikelySources()
+        {
+            return _points;
         }
         /// <summary>
         /// Get Namespace where nonconformance was found.

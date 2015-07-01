@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CategorizeModule
+namespace Structures
 {
     public class Point : IComparable<Point>
     {   
