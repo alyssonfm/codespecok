@@ -53,7 +53,7 @@ namespace CategorizeModule
                         // Verify if its reachable
                         MemberAccessExpressionSyntax member = inv.Expression as MemberAccessExpressionSyntax;
                         string methodName = (member.Name as IdentifierNameSyntax).Identifier.Text;
-                        string filterHelper = (member.Expression as IdentifierNameSyntax).Identifier.Text;
+                        string filterHelper = GetExpressionIdentifier(member.Expression);
 
                         if (MethodIsReachable(methodName, ReachableMethodList.TEST_RANDOOP_CLASS, filterHelper)) {
                             ReachableMethod m = GetMethodFound();
@@ -83,9 +83,27 @@ namespace CategorizeModule
                 }
             }
             _methods.CalculateStrongInv();
-            List<Point> toReturn = _methods.GetPoints();
-            toReturn.Reverse();
+            List<Point> temp = _methods.GetPoints();
+            temp.Reverse();
+            List<Point> toReturn = new List<Point>();
+            for(int i = 0; i < 5; i++)
+            {
+                toReturn.Add(temp.ElementAt(i));
+            }
             return toReturn;
+        }
+
+        private string GetExpressionIdentifier(ExpressionSyntax expressionSyntax)
+        {
+            if (expressionSyntax is ParenthesizedExpressionSyntax)
+            {
+                return GetExpressionIdentifier(((ParenthesizedExpressionSyntax)expressionSyntax).Expression);
+            }
+            else if(expressionSyntax is IdentifierNameSyntax)
+            {
+                return (expressionSyntax as IdentifierNameSyntax).Identifier.Text;
+            }
+            return "";
         }
 
         private bool MethodIsReachable(string methodName, string actualClass, string filterHelper)

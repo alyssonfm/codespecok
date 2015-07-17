@@ -79,6 +79,22 @@ namespace Structures
         }
         public void SetLikelySources(List<Point> points) {
             _points = points;
+            int n = _points.Count;
+            double sumPoints = 0.0;
+            for (int i = 0; i < n; i++) {
+                sumPoints += points[i].GetMyself() * 1000.0;
+                sumPoints += points[i].GetOthers();
+            }
+
+            for(int i = 0; i < n; i++)
+            {
+                double pont = points[i].GetMyself() * 1000.0 + points[i].GetOthers();
+                if(sumPoints <= 0.0)
+                    points[i].SetPercent(0.0);
+                else
+                    points[i].SetPercent((double)(pont / sumPoints) * 100.0);
+            }
+
         }
 
         public List<Point> GetLikelySources()

@@ -113,9 +113,9 @@ namespace CategorizeModule
         {
             List<Point> lp = new List<Point>();
             lp.Add(new Point("Code Error", rm.GetMethodName(), rm.GetClass(), rm.GetNamespace(), _others.CodeError, _myself.CodeError));
-            lp.Add(new Point("Weak Pre", rm.GetMethodName(), rm.GetClass(), rm.GetNamespace(), _others.WeakPre, _myself.WeakPre));
-            lp.Add(new Point("Weak Pos", rm.GetMethodName(), rm.GetClass(), rm.GetNamespace(), _others.WeakPos, _myself.WeakPos));
-            lp.Add(new Point("Strong Inv", rm.GetMethodName(), rm.GetClass(), rm.GetNamespace(), _others.StrongInv, _myself.StrongInv));
+            lp.Add(new Point("Weak Precondition", rm.GetMethodName(), rm.GetClass(), rm.GetNamespace(), _others.WeakPre, _myself.WeakPre));
+            lp.Add(new Point("Weak Postcondition", rm.GetMethodName(), rm.GetClass(), rm.GetNamespace(), _others.WeakPos, _myself.WeakPos));
+            lp.Add(new Point("Strong Invariant", rm.GetMethodName(), rm.GetClass(), rm.GetNamespace(), _others.StrongInv, _myself.StrongInv));
             return lp;
         }
     }

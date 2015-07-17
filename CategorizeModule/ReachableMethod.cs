@@ -41,6 +41,10 @@ namespace CategorizeModule
         {
             if (_method is ConstructorDeclarationSyntax)
                 return "ctor";
+            else if (_method is DestructorDeclarationSyntax)
+                return "dtor";
+            else if (_method is OperatorDeclarationSyntax)
+                return "op_" + ((OperatorDeclarationSyntax)_method).OperatorKeyword.Text;
             else
                 return ((MethodDeclarationSyntax)_method).Identifier.Value.ToString();
         }

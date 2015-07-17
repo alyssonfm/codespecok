@@ -10,6 +10,7 @@ namespace Structures
         private string _namespace;
         private int _myself;
         private int _others;
+        private double _percent;
             
         public Point(string lc, string m, string c, string n, int others, int myself)
         {
@@ -19,6 +20,16 @@ namespace Structures
             setNamespace(n);
             setOthers(others);
             setMyself(myself);
+        }
+
+        public void SetPercent(double percent)
+        {
+            this._percent = percent;
+        }
+
+        public double GetPercent()
+        {
+            return this._percent;
         }
 
         private void setMyself(int myself)

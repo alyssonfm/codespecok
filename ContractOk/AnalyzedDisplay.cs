@@ -10,26 +10,31 @@ namespace ContractOK
 {
     public partial class AnalyzedDisplay : Form
     {
-        private HashSet<Nonconformance> nonconformances;
         private HashSet<Nonconformance> invariants;
-        private TreeNode nodeNamespace;
-        private TreeNode nodeClass;
-        private TreeNode nodeMethod;
+        private TreeNode nodeNCNamespace;
+        private TreeNode nodePMNamespace;
+        private TreeNode nodeNCClass;
+        private TreeNode nodePMClass;
+        private TreeNode nodeNCMethod;
+        private TreeNode nodePMMethod;
         private bool HasAnyIndexSelected = false;
         private int numberMethods = 0;
 
         public AnalyzedDisplay(HashSet<Nonconformance> nonconformance)
         {
             InitializeComponent();
-            InitializeInvariants(nonconformances);
+            InitializeInvariants(nonconformance);
             InitializeListNonconformances();
 
             btStackTrace.Visible = false;
+            
+            this.nodeNCNamespace = tvNonconformanceLocation.Nodes[0];
+            this.nodeNCClass = this.nodeNCNamespace.Nodes[0];
+            this.nodeNCMethod = this.nodeNCClass.Nodes[0];
 
-            TreeNodeCollection nodes = treeView1.Nodes;
-            this.nodeNamespace = treeView1.Nodes[0];
-            this.nodeClass = this.nodeNamespace.Nodes[0];
-            this.nodeMethod = this.nodeClass.Nodes[0];
+            this.nodePMNamespace = tvProblematicMethodLocation.Nodes[0];
+            this.nodePMClass = this.nodePMNamespace.Nodes[0];
+            this.nodePMMethod = this.nodePMClass.Nodes[0];
 
             this.Closing += (object sender, CancelEventArgs e) =>
             {
@@ -48,17 +53,19 @@ namespace ContractOK
             }
             listBoxNonconformances.SelectionMode = SelectionMode.One;
         }
-        private void InitializeListProblematicMethods()
+        private void InitializeListProblematicMethods(Nonconformance n)
         {
+            listBoxProblematicMethods.Items.Clear();
+
             numberMethods = 0;
-            if(invariants.ElementAt(listBoxNonconformances.SelectedIndex).GetLikelySources().Count > 0)
+            if(n.GetLikelySources().Count > 0)
             {
-                numberMethods = invariants.ElementAt(listBoxNonconformances.SelectedIndex).GetLikelySources().Count;
+                numberMethods = n.GetLikelySources().Count;
             }
             for (int i = 0; i < numberMethods; i++)
             {
-                listBoxProblematicMethods.Items.Add(i + " - " + invariants.ElementAt(listBoxNonconformances.SelectedIndex).GetLikelySources().ElementAt(i).GetMethod() + 
-                ", "   + invariants.ElementAt(listBoxProblematicMethods.SelectedIndex).GetLikelySources().ElementAt(i).GetLikelyCause());
+                listBoxProblematicMethods.Items.Add(i + " - " + n.GetLikelySources().ElementAt(i).GetMethod() + 
+                ", "   + n.GetLikelySources().ElementAt(i).GetLikelyCause());
             }
             listBoxNonconformances.SelectionMode = SelectionMode.One;
         }
@@ -76,12 +83,14 @@ namespace ContractOK
 
         private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            Nonconformance n = nonconformances.ElementAt(listBoxNonconformances.SelectedIndex);
+            Nonconformance n = invariants.ElementAt(listBoxNonconformances.SelectedIndex);
             tbTextSample.Text = CodeReader.GetTestMethod(n.GetTestFileName());
-            this.nodeNamespace.Text = n.GetNameSpace();
-            this.nodeClass.Text = n.GetClassName();
-            this.nodeMethod.Text = n.GetMethodName();
-            lbSetLikelyCause.Text = n.GetLikelyCause();
+            this.nodeNCNamespace.Text = n.GetNameSpace();
+            this.nodeNCClass.Text = n.GetClassName();
+            this.nodeNCMethod.Text = n.GetMethodName();
+            lbSetLikelySource.Text = n.GetLikelyCause();
+
+            InitializeListProblematicMethods(n);
 
             this.HasAnyIndexSelected = true;
             btStackTrace.Visible = true;
@@ -122,12 +131,34 @@ namespace ContractOK
             if (HasAnyIndexSelected)
             {
                 string toShow = "Stack Trace of Nonconformance: \n\n   ";
-                foreach (var line in nonconformances.ElementAt(listBoxNonconformances.SelectedIndex).GetStackTrace())
+                foreach (var line in invariants.ElementAt(listBoxNonconformances.SelectedIndex).GetStackTrace())
                 {
                     toShow += line + "\n";
                 }
                 MessageBox.Show(toShow);
             }
+        }
+
+        private void listBoxProblematicMethods_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Nonconformance n = invariants.ElementAt(listBoxNonconformances.SelectedIndex);
+            this.nodePMNamespace.Text = n.GetLikelySources().ElementAt(listBoxProblematicMethods.SelectedIndex).GetNamespace();
+            this.nodePMClass.Text = n.GetLikelySources().ElementAt(listBoxProblematicMethods.SelectedIndex).GetClass();
+            this.nodePMMethod.Text = n.GetLikelySources().ElementAt(listBoxProblematicMethods.SelectedIndex).GetMethod();
+            lbSetLikelySource.Text = n.GetLikelySources().ElementAt(listBoxProblematicMethods.SelectedIndex).GetLikelyCause();
+            Double percentNumber = n.GetLikelySources().ElementAt(listBoxProblematicMethods.SelectedIndex).GetPercent();
+            string percentString = (Math.Round(percentNumber, 2)).ToString();
+            lbSetProbability.Text = percentString + "%";
+        }
+
+        private void lbFixed04_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void labelProblematicMethodLocation_Click(object sender, EventArgs e)
+        {
+            
         }
     }
 }

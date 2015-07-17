@@ -37,7 +37,7 @@ namespace CategorizeModule
                         n.SetLikelyCause(CategorizePostcondition(n));
                         break;
                     case Structures.CategoryType.INVARIANT:
-                        n.SetLikelySources(this._analyser.WalkOnTest(Constants.TEST_OUTPUT + n.GetTestFileName()));
+                        n.SetLikelySources(this._analyser.WalkOnTest(Constants.TEST_OUTPUT + Constants.FILE_SEPARATOR + n.GetTestFileName() + ".cs"));
                         break;
                     default:
                         break;
