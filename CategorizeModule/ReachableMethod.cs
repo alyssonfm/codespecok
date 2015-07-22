@@ -1,10 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Structures;
 
 namespace CategorizeModule
 {
+    /// <summary>
+    /// Class made to turn Method manipulation and search easier.
+    /// </summary>
     public class ReachableMethod
     {
         private BaseMethodDeclarationSyntax _method;
@@ -12,13 +14,13 @@ namespace CategorizeModule
         private string _class;
         private string _namespace;
         private List<string> _fields;
-
-        public ReachableMethod(BaseMethodDeclarationSyntax m, string c, string n, List<string> fs)
+        
+        public ReachableMethod(BaseMethodDeclarationSyntax methodDecl, string nameOfClass, string nameOfNamespace, List<string> fieldsOfClass)
         {
-            _method = m;
-            _class = c;
-            _namespace = n;
-            SetFields(fs);
+            _method = methodDecl;
+            _class = nameOfClass;
+            _namespace = nameOfNamespace;
+            SetFields(fieldsOfClass);
         }
 
         public Score GetScore()

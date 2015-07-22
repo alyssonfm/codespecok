@@ -122,8 +122,10 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="ReachableClass.cs" />
     <Compile Include="ReachableMethod.cs" />
     <Compile Include="ReachableMethodList.cs" />
+    <Compile Include="ReachableNamespace.cs" />
     <Compile Include="Score.cs" />
     <Compile Include="Tests\CategorizationTesting.cs" />
     <Compile Include="Categorize.cs" />
