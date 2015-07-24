@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Structures;
 
@@ -10,36 +11,36 @@ namespace CategorizeModule
     public class ReachableMethod
     {
         private BaseMethodDeclarationSyntax _method;
+        private ReachableNamespace _originNamespace;
+        private ReachableClass _originClass;
         private Score _score;
-        private string _class;
-        private string _namespace;
         private List<string> _fields;
-        
-        public ReachableMethod(BaseMethodDeclarationSyntax methodDecl, string nameOfClass, string nameOfNamespace, List<string> fieldsOfClass)
+        private bool _wasVisited = false;
+        private bool _wasStrongInvCalculated = false;
+
+        public ReachableMethod(BaseMethodDeclarationSyntax methodDecl, ReachableClass originClass, ReachableNamespace originNamespace)
         {
             _method = methodDecl;
-            _class = nameOfClass;
-            _namespace = nameOfNamespace;
-            SetFields(fieldsOfClass);
+            _originNamespace = originNamespace;
+            _originClass = originClass;
         }
-
         public Score GetScore()
         {
             return _score;
         }
         public string GetClass()
         {
-            return _class;
+            return _originClass.GetName();
         }
         public string GetNamespace()
         {
-            return _namespace;
+            return _originNamespace.GetName();
         }
         public BaseMethodDeclarationSyntax GetMethod()
         {
             return _method;
         }
-        public string GetMethodName()
+        public string GetName()
         {
             if (_method is ConstructorDeclarationSyntax)
                 return "ctor";
@@ -66,7 +67,7 @@ namespace CategorizeModule
             }
             else
             {
-                foreach(string field in _fields)
+                foreach(string field in GetFields())
                 {
                     if (field.Equals(e.ToString()))
                         return true;
@@ -76,6 +77,20 @@ namespace CategorizeModule
                 return false;
             }
         }
+        public void CalculateStrongInv()
+        {
+            if (!_wasStrongInvCalculated && !_originClass.WasStrongInvCalculated())
+            {
+                _originClass.CalculateStrongInv(this);
+                _wasStrongInvCalculated = true;
+            }
+        }
+
+        private IEnumerable<string> GetFields()
+        {
+            return _originClass.GetFieldsOfClass();
+        }
+
         public void SetFields(List<string> fieldsList)
         {
             _fields = fieldsList;
@@ -85,7 +100,14 @@ namespace CategorizeModule
         {
             _score = new Score();
         }
-
+        public bool WasVisited()
+        {
+            return _wasVisited;
+        }
+        public void Visit()
+        {
+            _wasVisited = true;
+        }
         public List<Point> GetPoints()
         {
             return _score.GetPoints(this);   

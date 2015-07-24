@@ -64,8 +64,15 @@ namespace ContractOK
             }
             for (int i = 0; i < numberMethods; i++)
             {
-                listBoxProblematicMethods.Items.Add(i + " - " + n.GetLikelySources().ElementAt(i).GetMethod() + 
-                ", "   + n.GetLikelySources().ElementAt(i).GetLikelyCause());
+                if (n.GetLikelySources().ElementAt(i).GetLikelyCause().Equals("Strong Invariant") || n.GetLikelySources().ElementAt(i).GetMethod().Equals("ctor")) { 
+                    listBoxProblematicMethods.Items.Add(i + " - " + n.GetLikelySources().ElementAt(i).GetClass() +
+                        ", " + n.GetLikelySources().ElementAt(i).GetLikelyCause());
+                }
+                else
+                {
+                    listBoxProblematicMethods.Items.Add(i + " - " + n.GetLikelySources().ElementAt(i).GetMethod() + 
+                        ", "   + n.GetLikelySources().ElementAt(i).GetLikelyCause());
+                }
             }
             listBoxNonconformances.SelectionMode = SelectionMode.One;
         }
@@ -87,7 +94,10 @@ namespace ContractOK
             tbTextSample.Text = CodeReader.GetTestMethod(n.GetTestFileName());
             this.nodeNCNamespace.Text = n.GetNameSpace();
             this.nodeNCClass.Text = n.GetClassName();
-            this.nodeNCMethod.Text = n.GetMethodName();
+            if(n.GetMethodName().Contains("ctor"))
+                this.nodeNCMethod.Text = n.GetClassName();
+            else
+                this.nodeNCMethod.Text = n.GetMethodName();
             lbSetLikelySource.Text = n.GetLikelyCause();
 
             InitializeListProblematicMethods(n);
@@ -144,7 +154,14 @@ namespace ContractOK
             Nonconformance n = invariants.ElementAt(listBoxNonconformances.SelectedIndex);
             this.nodePMNamespace.Text = n.GetLikelySources().ElementAt(listBoxProblematicMethods.SelectedIndex).GetNamespace();
             this.nodePMClass.Text = n.GetLikelySources().ElementAt(listBoxProblematicMethods.SelectedIndex).GetClass();
-            this.nodePMMethod.Text = n.GetLikelySources().ElementAt(listBoxProblematicMethods.SelectedIndex).GetMethod();
+            if (n.GetLikelySources().ElementAt(listBoxProblematicMethods.SelectedIndex).GetLikelyCause().Equals("Strong Invariant") || n.GetLikelySources().ElementAt(listBoxProblematicMethods.SelectedIndex).GetMethod().Equals("ctor"))
+            {
+                this.nodePMMethod.Text = n.GetLikelySources().ElementAt(listBoxProblematicMethods.SelectedIndex).GetClass();
+            }
+            else
+            {
+                this.nodePMMethod.Text = n.GetLikelySources().ElementAt(listBoxProblematicMethods.SelectedIndex).GetMethod();
+            }
             lbSetLikelySource.Text = n.GetLikelySources().ElementAt(listBoxProblematicMethods.SelectedIndex).GetLikelyCause();
             Double percentNumber = n.GetLikelySources().ElementAt(listBoxProblematicMethods.SelectedIndex).GetPercent();
             string percentString = (Math.Round(percentNumber, 2)).ToString();

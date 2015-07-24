@@ -28,16 +28,16 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.TreeNode treeNode7 = new System.Windows.Forms.TreeNode("Method");
-            System.Windows.Forms.TreeNode treeNode8 = new System.Windows.Forms.TreeNode("Class", new System.Windows.Forms.TreeNode[] {
-            treeNode7});
-            System.Windows.Forms.TreeNode treeNode9 = new System.Windows.Forms.TreeNode("Namespace", new System.Windows.Forms.TreeNode[] {
-            treeNode8});
-            System.Windows.Forms.TreeNode treeNode10 = new System.Windows.Forms.TreeNode("Method");
-            System.Windows.Forms.TreeNode treeNode11 = new System.Windows.Forms.TreeNode("Class", new System.Windows.Forms.TreeNode[] {
-            treeNode10});
-            System.Windows.Forms.TreeNode treeNode12 = new System.Windows.Forms.TreeNode("Namespace", new System.Windows.Forms.TreeNode[] {
-            treeNode11});
+            System.Windows.Forms.TreeNode treeNode1 = new System.Windows.Forms.TreeNode("Method");
+            System.Windows.Forms.TreeNode treeNode2 = new System.Windows.Forms.TreeNode("Class", new System.Windows.Forms.TreeNode[] {
+            treeNode1});
+            System.Windows.Forms.TreeNode treeNode3 = new System.Windows.Forms.TreeNode("Namespace", new System.Windows.Forms.TreeNode[] {
+            treeNode2});
+            System.Windows.Forms.TreeNode treeNode4 = new System.Windows.Forms.TreeNode("Method");
+            System.Windows.Forms.TreeNode treeNode5 = new System.Windows.Forms.TreeNode("Class", new System.Windows.Forms.TreeNode[] {
+            treeNode4});
+            System.Windows.Forms.TreeNode treeNode6 = new System.Windows.Forms.TreeNode("Namespace", new System.Windows.Forms.TreeNode[] {
+            treeNode5});
             this.lbFixed01 = new System.Windows.Forms.Label();
             this.lbSetNumberNonconformances = new System.Windows.Forms.Label();
             this.lbFixed02 = new System.Windows.Forms.Label();
@@ -125,14 +125,14 @@
             // 
             this.tvNonconformanceLocation.Location = new System.Drawing.Point(230, 67);
             this.tvNonconformanceLocation.Name = "tvNonconformanceLocation";
-            treeNode7.Name = "SetMethod";
-            treeNode7.Text = "Method";
-            treeNode8.Name = "SetClass";
-            treeNode8.Text = "Class";
-            treeNode9.Name = "SetNamespace";
-            treeNode9.Text = "Namespace";
+            treeNode1.Name = "SetMethod";
+            treeNode1.Text = "Method";
+            treeNode2.Name = "SetClass";
+            treeNode2.Text = "Class";
+            treeNode3.Name = "SetNamespace";
+            treeNode3.Text = "Namespace";
             this.tvNonconformanceLocation.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
-            treeNode9});
+            treeNode3});
             this.tvNonconformanceLocation.Size = new System.Drawing.Size(257, 108);
             this.tvNonconformanceLocation.TabIndex = 6;
             // 
@@ -218,14 +218,14 @@
             // 
             this.tvProblematicMethodLocation.Location = new System.Drawing.Point(230, 207);
             this.tvProblematicMethodLocation.Name = "tvProblematicMethodLocation";
-            treeNode10.Name = "SetMethod";
-            treeNode10.Text = "Method";
-            treeNode11.Name = "SetClass";
-            treeNode11.Text = "Class";
-            treeNode12.Name = "SetNamespace";
-            treeNode12.Text = "Namespace";
+            treeNode4.Name = "SetMethod";
+            treeNode4.Text = "Method";
+            treeNode5.Name = "SetClass";
+            treeNode5.Text = "Class";
+            treeNode6.Name = "SetNamespace";
+            treeNode6.Text = "Namespace";
             this.tvProblematicMethodLocation.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
-            treeNode12});
+            treeNode6});
             this.tvProblematicMethodLocation.Size = new System.Drawing.Size(257, 108);
             this.tvProblematicMethodLocation.TabIndex = 17;
             // 
@@ -246,9 +246,9 @@
             this.labelProbability.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel, ((byte)(0)));
             this.labelProbability.Location = new System.Drawing.Point(536, 267);
             this.labelProbability.Name = "labelProbability";
-            this.labelProbability.Size = new System.Drawing.Size(84, 20);
+            this.labelProbability.Size = new System.Drawing.Size(80, 20);
             this.labelProbability.TabIndex = 18;
-            this.labelProbability.Text = "Likelyhood";
+            this.labelProbability.Text = "Likelihood";
             // 
             // lbSetProbability
             // 

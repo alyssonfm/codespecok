@@ -1,39 +1,86 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Threading.Tasks;
 
 namespace CategorizeModule
 {
-    class ReachableClass
+    public class ReachableClass
     {
-        private ClassDeclarationSyntax _classDeclaration;
         private ReachableNamespace _originNamespace;
         private ReachableClass _originClass;
+        private List<ReachableMethod> _methods;
         private List<string> _fields;
+        private List<string> _invariants;
         private string _nameOfClass;
-        private string originClassName;
-        private ClassDeclarationSyntax cds;
-        private SemanticModel model;
         private bool _isInnerClass = false;
+        private bool _wasStrongInvCalculated = false;
+        private bool _wasVisited = false;
 
-        public ReachableClass(ClassDeclarationSyntax classDecl, SemanticModel model, ReachableNamespace origin)
+        public ReachableClass(ClassDeclarationSyntax classDecl, SemanticModel model, ReachableNamespace originNamespace)
         {
             SetClassDeclaration(classDecl, model);
-            _originNamespace = origin;
+            InitializeNamespace(originNamespace);
+            InitializeMethods(classDecl, model);
         }
-
         public ReachableClass(ReachableClass originClass, ClassDeclarationSyntax classDecl, SemanticModel model, ReachableNamespace originNamespace)
         {
-            _isInnerClass = true;
+            InitializeInnerClass(originClass);
             SetClassDeclaration(classDecl, model);
-            _originNamespace = originNamespace;
-            _originClass = _originClass;
+            InitializeNamespace(originNamespace);
+            InitializeMethods(classDecl, model);
+        }
+        private void InitializeMethods(ClassDeclarationSyntax classDecl, SemanticModel model)
+        {
+            _methods = new List<ReachableMethod>();
+            foreach (BaseMethodDeclarationSyntax baseMethod in classDecl.DescendantNodes().OfType<BaseMethodDeclarationSyntax>())
+            {
+                ReachableMethod rm = new ReachableMethod(baseMethod, this, _originNamespace);
+                if (rm.GetName().Equals("LocalInvariant"))
+                {
+                    InitializeInvariants(rm);
+                }
+                else
+                {
+                    this._methods.Add(rm);
+                }
+            }
+        }
+        private void InitializeInvariants(ReachableMethod rm)
+        {
+            _invariants = new List<string>();
+            foreach (StatementSyntax s in rm.GetMethod().Body.Statements)
+            {
+                if (s is ExpressionStatementSyntax)
+                {
+                    ExpressionStatementSyntax e = (ExpressionStatementSyntax)s;
+
+                    if (e.Expression is InvocationExpressionSyntax)
+                    {
+                        string contractType = ((MemberAccessExpressionSyntax)((InvocationExpressionSyntax)e.Expression).Expression).Name.Identifier.Value.ToString();
+                        if (contractType.Equals("Invariant"))
+                        {
+                            _invariants.Add(((InvocationExpressionSyntax)e.Expression).ArgumentList.Arguments[0].ToString());
+                        }
+                    }
+                }
+            }
+        }
+        public int GetNumberOfInvariants()
+        {
+            return _invariants.Count;
         }
 
+        private void InitializeNamespace(ReachableNamespace origin)
+        {
+            _originNamespace = origin;
+        }
+        private void InitializeInnerClass(ReachableClass originClass)
+        {
+            _isInnerClass = true;
+            _originClass = originClass;
+        }
         private void SetClassDeclaration(ClassDeclarationSyntax classDecl, SemanticModel model)
         {
             if (classDecl == null)
@@ -41,7 +88,6 @@ namespace CategorizeModule
             InitializeClass(classDecl);
             InitializeFields(classDecl,  model);
         }
-
         private void InitializeFields(ClassDeclarationSyntax classDeclaration, SemanticModel model)
         {
             List<String> fields = new List<String>();
@@ -72,9 +118,60 @@ namespace CategorizeModule
             return _originNamespace.GetName();
         }
 
+        public string GetFullName()
+        {
+            if (_isInnerClass)
+            {
+                return _originClass.GetFullName() + "." + GetName();
+            }
+            return GetNameOfNamespace() + "." + GetName();
+        }
+
         public List<string> GetFieldsOfClass()
         {
             return _fields;
+        }
+
+        public ReachableMethod SearchMethod(string nameOfMethod)
+        {
+            for (int i = 0; i < _methods.Count; i++)
+            {
+                if (nameOfMethod.Contains(_methods.ElementAt(i).GetName()))
+                {
+                    return _methods.ElementAt(i);
+                }
+            }
+            return null;
+        }
+        public int GetNumberOfMethods()
+        {
+            return _methods.Count;
+        }
+
+        public ReachableMethod GetMethodAt(int index)
+        {
+            return _methods.ElementAt(index);
+        }
+
+        public void ResetScore()
+        {
+            foreach (ReachableMethod rm in _methods)
+                rm.ResetScore();
+        }
+        public bool WasStrongInvCalculated()
+        {
+            return _wasStrongInvCalculated;
+        }
+        public void CalculateStrongInv(ReachableMethod method)
+        {
+            if (!_wasStrongInvCalculated)
+            {
+                for (int i = 0; i < GetNumberOfInvariants(); i++)
+                {
+                    method.GetScore().IncrementStrongInv();
+                }
+                _wasStrongInvCalculated = true;
+            }
         }
     }
 }

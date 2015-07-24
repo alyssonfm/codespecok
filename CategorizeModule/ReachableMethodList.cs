@@ -15,49 +15,13 @@ namespace CategorizeModule
         private Solution _sln;
         private List<ReachableMethod> _methods;
         private ReachableMethod _lastMethodFound;
-
-        public ReachableMethodList(string solutionPath)
-        {
-            OpenSolutionFile(solutionPath);
-            LoadMethods();
-        }
-        /// <summary>
-        /// Initialize reachable methods list.
-        /// </summary>
-        private void LoadMethods()
-        {
-            this._methods = new List<ReachableMethod>();
-            foreach (Document d in GetDocumentsToSearchForClass())
-            {
-                SearchForMethodsOnDocument(d);
-            }
-        }
+        
         /// <summary>
         /// Get all methods from class and declare them as Reachable methods.
         /// </summary>
         /// <param name="cds">The class to be searched</param>
         /// <param name="nds">The namespace of class to be searched</param>
         /// <param name="model">The semantic model of AST where class was loaded</param>
-        private void TakeMethodsFromClass(ClassDeclarationSyntax cds, NamespaceDeclarationSyntax nds, SemanticModel model)
-        {
-            string className = cds.Identifier.ToString();
-            string namespaceName = (nds == null)? "" : nds.Name.ToString();
-            List<String> fields = new List<String>();
-
-            // Get all fields from class.
-            foreach (FieldDeclarationSyntax fieldNode in cds.DescendantNodes().OfType<FieldDeclarationSyntax>())
-                foreach (VariableDeclaratorSyntax variable in fieldNode.Declaration.Variables)
-                {
-                    ISymbol fieldSymbol = model.GetDeclaredSymbol(variable);
-                    fields.Add(fieldSymbol.Name.ToString());
-                }
-            // Get all methods in class and declares as ReachableMethod
-            foreach (BaseMethodDeclarationSyntax baseMethod in cds.DescendantNodes().OfType<BaseMethodDeclarationSyntax>())
-            {
-                ReachableMethod rm = new ReachableMethod(baseMethod, className, namespaceName, fields);
-                this._methods.Add(rm);
-            }
-        }
         /// <summary>
         /// Open Solution file, and ensures there are projects on it.
         /// </summary>
@@ -102,26 +66,6 @@ namespace CategorizeModule
                 foreach (Document d in proj.Documents)
                     docs.Add(d);
             return docs;
-        }
-        /// <summary>
-        /// Search through all methods in Document, turning them into Reachable Methods and adding them
-        /// to local Reachable Methods list.
-        /// </summary>
-        /// <param name="doc">The Document to be searched</param>
-        private void SearchForMethodsOnDocument(Document doc)
-        {
-            // Load AST and SemanticModel from Doc.
-            SyntaxTree st = doc.GetSyntaxTreeAsync().Result;
-            SemanticModel model = doc.GetSemanticModelAsync().Result;
-            var root = (CompilationUnitSyntax)st.GetRoot();
-
-            // Through all namespaces, get Methods from each class
-            foreach (NamespaceDeclarationSyntax nds in root.Members.OfType<NamespaceDeclarationSyntax>())
-                foreach (ClassDeclarationSyntax cds in nds.Members.OfType<ClassDeclarationSyntax>())
-                    TakeMethodsFromClass(cds, nds, model);
-            // Through all classes without namespace, get Methods from each class
-            foreach (ClassDeclarationSyntax cds in root.Members.OfType<ClassDeclarationSyntax>())
-                TakeMethodsFromClass(cds, null, model);
         }
 
         public static string TEST_RANDOOP_CLASS { get; internal set; }

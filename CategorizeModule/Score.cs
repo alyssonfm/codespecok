@@ -112,10 +112,14 @@ namespace CategorizeModule
         public List<Point> GetPoints(ReachableMethod rm)
         {
             List<Point> lp = new List<Point>();
-            lp.Add(new Point("Code Error", rm.GetMethodName(), rm.GetClass(), rm.GetNamespace(), _others.CodeError, _myself.CodeError));
-            lp.Add(new Point("Weak Precondition", rm.GetMethodName(), rm.GetClass(), rm.GetNamespace(), _others.WeakPre, _myself.WeakPre));
-            lp.Add(new Point("Weak Postcondition", rm.GetMethodName(), rm.GetClass(), rm.GetNamespace(), _others.WeakPos, _myself.WeakPos));
-            lp.Add(new Point("Strong Invariant", rm.GetMethodName(), rm.GetClass(), rm.GetNamespace(), _others.StrongInv, _myself.StrongInv));
+            if(_others.CodeError > 0 || _myself.CodeError > 0)
+                lp.Add(new Point("Code Error", rm.GetName(), rm.GetClass(), rm.GetNamespace(), _others.CodeError, _myself.CodeError));
+            if(_others.WeakPre > 0 || _myself.WeakPre > 0)
+                lp.Add(new Point("Weak Precondition", rm.GetName(), rm.GetClass(), rm.GetNamespace(), _others.WeakPre, _myself.WeakPre));
+            if(_others.WeakPos > 0 || _myself.WeakPos > 0)
+                lp.Add(new Point("Weak Postcondition", rm.GetName(), rm.GetClass(), rm.GetNamespace(), _others.WeakPos, _myself.WeakPos));
+            if(_others.StrongInv > 0 || _myself.StrongInv > 0)
+                lp.Add(new Point("Strong Invariant", rm.GetName(), rm.GetClass(), rm.GetNamespace(), _others.StrongInv, _myself.StrongInv));
             return lp;
         }
     }

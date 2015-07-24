@@ -1,17 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace CategorizeModule
 {
-    class ReachableNamespace
+    public class ReachableNamespace
     {
         private List<ReachableClass> _classes;
-        private string _name;
+        private string _nameOfNamespace;
 
         public ReachableNamespace(NamespaceDeclarationSyntax namespaceDeclaration, SemanticModel model)
         {
@@ -26,13 +23,13 @@ namespace CategorizeModule
 
         private void SetName(string v)
         {
-            _name = v;
+            _nameOfNamespace = v;
         }
         
 
         public string GetName()
         {
-            return _name;
+            return _nameOfNamespace;
         }
 
         public void InitializeClasses(SyntaxList<MemberDeclarationSyntax> members, SemanticModel model) 
@@ -55,6 +52,34 @@ namespace CategorizeModule
                 _classes.Add(rc);
                 InitializeInnerClasses(rc, cds.Members, model);
             }
+        }
+
+        public ReachableClass SearchClass(string nameOfClass)
+        {
+            for (int i = 0; i < _classes.Count; i++)
+            {
+                if (nameOfClass.Contains(_classes.ElementAt(i).GetName()))
+                {
+                    return _classes.ElementAt(i);
+                }
+            }
+            return null;
+        }
+
+        public int GetNumberOfClasses()
+        {
+            return _classes.Count;
+        }
+
+        public ReachableClass GetClassAt(int index)
+        {
+            return _classes.ElementAt(index);
+        }
+
+        public void ResetScore()
+        {
+            foreach (ReachableClass rc in _classes)
+                rc.ResetScore();
         }
     }
 }
