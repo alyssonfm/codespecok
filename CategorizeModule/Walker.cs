@@ -11,6 +11,7 @@ namespace CategorizeModule
 {
     public class Walker
     {
+        public const string TEST_RANDOOP_CLASS = "RandoopTest";
         private ReachableSolution _sln;
 
         public Walker(string solutionPath) {
@@ -36,10 +37,10 @@ namespace CategorizeModule
             return methodDecl;
         }
 
-        public List<Point> WalkOnTest(string testlocation)
+        public List<Point> WalkOnTest(string testlocation, string category)
         {
             MethodDeclarationSyntax test = GetTestMethod(testlocation);
-            this._sln.ResetScore();
+            this._sln.ResetScore(category);
 
             SyntaxList<StatementSyntax> block = test.Body.Statements;
             
@@ -55,7 +56,7 @@ namespace CategorizeModule
                         string methodName = (member.Name as IdentifierNameSyntax).Identifier.Text;
                         string filterHelper = GetExpressionIdentifier(member.Expression);
 
-                        if (MethodIsReachable(methodName, ReachableMethodList.TEST_RANDOOP_CLASS, filterHelper)) {
+                        if (MethodIsReachable(methodName, TEST_RANDOOP_CLASS, filterHelper)) {
                             ReachableMethod m = GetMethodFound();
                             WalkOn(m);
                         }
@@ -73,7 +74,7 @@ namespace CategorizeModule
                             QualifiedNameSyntax qns = (QualifiedNameSyntax)oces.Type;
                             string className = qns.Right.ToString();
                             string namespaceName = qns.Left.ToString();
-                            if(MethodIsReachable(".ctor", ReachableMethodList.TEST_RANDOOP_CLASS, namespaceName + "." + className))
+                            if(MethodIsReachable(".ctor", TEST_RANDOOP_CLASS, namespaceName + "." + className))
                             {
                                 ReachableMethod rm = GetMethodFound();
                                 WalkOn(rm);
@@ -90,7 +91,7 @@ namespace CategorizeModule
                                     MemberAccessExpressionSyntax maesClass = (MemberAccessExpressionSyntax)maesMethod.Expression;
                                     string className = maesClass.Name.Identifier.Text;
                                     string namespaceName = maesClass.Expression.ToString();
-                                    if (MethodIsReachable(methodName, ReachableMethodList.TEST_RANDOOP_CLASS, namespaceName + "." + className))
+                                    if (MethodIsReachable(methodName, TEST_RANDOOP_CLASS, namespaceName + "." + className))
                                     {
                                         ReachableMethod rm = GetMethodFound();
                                         WalkOn(rm);
@@ -100,7 +101,7 @@ namespace CategorizeModule
                                 {
                                     IdentifierNameSyntax maesClass = (IdentifierNameSyntax)maesMethod.Expression;
                                     string className = maesClass.Identifier.Text;
-                                    if (MethodIsReachable(methodName, ReachableMethodList.TEST_RANDOOP_CLASS, className))
+                                    if (MethodIsReachable(methodName, TEST_RANDOOP_CLASS, className))
                                     {
                                         ReachableMethod rm = GetMethodFound();
                                         WalkOn(rm);
@@ -111,7 +112,7 @@ namespace CategorizeModule
                             {
                                 IdentifierNameSyntax ins = (IdentifierNameSyntax)ies.Expression;
                                 string methodName = ins.Identifier.Text;
-                                if (MethodIsReachable(methodName, ReachableMethodList.TEST_RANDOOP_CLASS, ""))
+                                if (MethodIsReachable(methodName, TEST_RANDOOP_CLASS, ""))
                                 {
                                     ReachableMethod rm = GetMethodFound();
                                     WalkOn(rm);
@@ -195,9 +196,21 @@ namespace CategorizeModule
 
             ContractArguments contracts = GetContractsPreAndPostFromMethod(method.GetMethod());
             if (contracts.Requires.Count == 0)
+            { 
                 method.GetScore().IncrementWeakPre();
+            }
+            else
+            {
+                method.GetScore().IncrementStrongPre(contracts.Requires.Count);
+            }
             if (contracts.Ensures.Count == 0)
+            {
                 method.GetScore().IncrementWeakPos();
+            }
+            else
+            {
+                method.GetScore().IncrementStrongPos(contracts.Ensures.Count);
+            }
 
             SyntaxList<StatementSyntax> block = method.GetMethod().Body.Statements;
 
@@ -219,7 +232,11 @@ namespace CategorizeModule
                     {
                         // Verify if its reachable
                         MemberAccessExpressionSyntax member = inv.Expression as MemberAccessExpressionSyntax;
-                        string methodName = (member.Name as IdentifierNameSyntax).Identifier.Text;
+                        string methodName = "";
+                        if (member.Name is IdentifierNameSyntax)
+                            methodName = (member.Name as IdentifierNameSyntax).Identifier.Text;
+                        else if (member.Name is GenericNameSyntax)
+                            methodName = (member.Name as GenericNameSyntax).Identifier.Text;
                         string filterHelper = "";
                         if (member.Expression is IdentifierNameSyntax)
                         {

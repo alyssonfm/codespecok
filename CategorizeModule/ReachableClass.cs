@@ -34,6 +34,7 @@ namespace CategorizeModule
         private void InitializeMethods(ClassDeclarationSyntax classDecl, SemanticModel model)
         {
             _methods = new List<ReachableMethod>();
+            _invariants = new List<string>();
             foreach (BaseMethodDeclarationSyntax baseMethod in classDecl.DescendantNodes().OfType<BaseMethodDeclarationSyntax>())
             {
                 ReachableMethod rm = new ReachableMethod(baseMethod, this, _originNamespace);
@@ -49,7 +50,6 @@ namespace CategorizeModule
         }
         private void InitializeInvariants(ReachableMethod rm)
         {
-            _invariants = new List<string>();
             foreach (StatementSyntax s in rm.GetMethod().Body.Statements)
             {
                 if (s is ExpressionStatementSyntax)
@@ -153,10 +153,10 @@ namespace CategorizeModule
             return _methods.ElementAt(index);
         }
 
-        public void ResetScore()
+        public void ResetScore(string category)
         {
             foreach (ReachableMethod rm in _methods)
-                rm.ResetScore();
+                rm.ResetScore(category);
         }
         public bool WasStrongInvCalculated()
         {

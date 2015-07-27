@@ -11,7 +11,7 @@ namespace CategorizeTest
         public void TestNonconformancesLikelyCause()
         {
             Walker w = new Walker(@"E:\Git\testingcategorization\TestingCategorization.sln");
-            List<Point> lp = w.WalkOnTest(@"E:\Git\testingcategorization\RandoopTest82486739703059104.cs");
+            List<Point> lp = w.WalkOnTest(@"E:\Git\testingcategorization\RandoopTest82486739703059104.cs", CategoryType.INVARIANT);
             int counter = 1;
             Debug.WriteLine("Test initialized...\n\n");
             foreach (Point p in lp)

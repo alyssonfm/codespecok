@@ -76,10 +76,10 @@ namespace CategorizeModule
             return _classes.ElementAt(index);
         }
 
-        public void ResetScore()
+        public void ResetScore(string category)
         {
             foreach (ReachableClass rc in _classes)
-                rc.ResetScore();
+                rc.ResetScore(category);
         }
     }
 }

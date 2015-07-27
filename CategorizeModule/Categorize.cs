@@ -31,13 +31,13 @@ namespace CategorizeModule
                 switch (n.GetContractType())
                 {
                     case Structures.CategoryType.PRECONDITION:
-                        n.SetLikelyCause(CategorizePrecondition(n));
+                        n.SetLikelySources(this._analyser.WalkOnTest(Constants.TEST_OUTPUT + Constants.FILE_SEPARATOR + n.GetTestFileName() + ".cs", CategoryType.PRECONDITION));
                         break;
                     case Structures.CategoryType.POSTCONDITION:
-                        n.SetLikelyCause(CategorizePostcondition(n));
+                        n.SetLikelySources(this._analyser.WalkOnTest(Constants.TEST_OUTPUT + Constants.FILE_SEPARATOR + n.GetTestFileName() + ".cs", CategoryType.POSTCONDITION));
                         break;
                     case Structures.CategoryType.INVARIANT:
-                        n.SetLikelySources(this._analyser.WalkOnTest(Constants.TEST_OUTPUT + Constants.FILE_SEPARATOR + n.GetTestFileName() + ".cs"));
+                        n.SetLikelySources(this._analyser.WalkOnTest(Constants.TEST_OUTPUT + Constants.FILE_SEPARATOR + n.GetTestFileName() + ".cs", CategoryType.INVARIANT));
                         break;
                     default:
                         break;

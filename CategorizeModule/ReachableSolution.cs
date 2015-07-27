@@ -177,10 +177,10 @@ namespace CategorizeModule
             return this._lastMethodFound;
         }
 
-        public void ResetScore()
+        public void ResetScore(string category)
         {
             foreach (ReachableNamespace rn in _namespaces)
-                rn.ResetScore();
+                rn.ResetScore(category);
         }
 
         public List<Point> GetPoints()

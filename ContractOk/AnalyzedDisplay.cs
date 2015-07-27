@@ -10,7 +10,7 @@ namespace ContractOK
 {
     public partial class AnalyzedDisplay : Form
     {
-        private HashSet<Nonconformance> invariants;
+        private HashSet<Nonconformance> nonconformances;
         private TreeNode nodeNCNamespace;
         private TreeNode nodePMNamespace;
         private TreeNode nodeNCClass;
@@ -23,7 +23,7 @@ namespace ContractOK
         public AnalyzedDisplay(HashSet<Nonconformance> nonconformance)
         {
             InitializeComponent();
-            InitializeInvariants(nonconformance);
+            InitializeNonconformances(nonconformance);
             InitializeListNonconformances();
 
             btStackTrace.Visible = false;
@@ -46,10 +46,10 @@ namespace ContractOK
 
         private void InitializeListNonconformances()
         {
-            lbSetNumberNonconformances.Text = invariants.Count + "";
-            for (int i = 0; i < invariants.Count; i++)
+            lbSetNumberNonconformances.Text = nonconformances.Count + "";
+            for (int i = 0; i < nonconformances.Count; i++)
             {
-                listBoxNonconformances.Items.Add(i + " - " + invariants.ElementAt(i).GetContractType());
+                listBoxNonconformances.Items.Add(i + " - " + nonconformances.ElementAt(i).GetContractType());
             }
             listBoxNonconformances.SelectionMode = SelectionMode.One;
         }
@@ -77,20 +77,18 @@ namespace ContractOK
             listBoxNonconformances.SelectionMode = SelectionMode.One;
         }
 
-        private void InitializeInvariants(HashSet<Nonconformance> nonconformances)
+        private void InitializeNonconformances(HashSet<Nonconformance> nonconformances)
         {
-            this.invariants = new HashSet<Nonconformance>();
+            this.nonconformances = new HashSet<Nonconformance>();
             foreach(Nonconformance n in nonconformances)
             {
-                if (n.GetContractType().Equals("invariant")) {
-                    invariants.Add(n);
-                }
+                this.nonconformances.Add(n);
             }
         }
 
         private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            Nonconformance n = invariants.ElementAt(listBoxNonconformances.SelectedIndex);
+            Nonconformance n = nonconformances.ElementAt(listBoxNonconformances.SelectedIndex);
             tbTextSample.Text = CodeReader.GetTestMethod(n.GetTestFileName());
             this.nodeNCNamespace.Text = n.GetNameSpace();
             this.nodeNCClass.Text = n.GetClassName();
@@ -141,7 +139,7 @@ namespace ContractOK
             if (HasAnyIndexSelected)
             {
                 string toShow = "Stack Trace of Nonconformance: \n\n   ";
-                foreach (var line in invariants.ElementAt(listBoxNonconformances.SelectedIndex).GetStackTrace())
+                foreach (var line in nonconformances.ElementAt(listBoxNonconformances.SelectedIndex).GetStackTrace())
                 {
                     toShow += line + "\n";
                 }
@@ -151,7 +149,7 @@ namespace ContractOK
 
         private void listBoxProblematicMethods_SelectedIndexChanged(object sender, EventArgs e)
         {
-            Nonconformance n = invariants.ElementAt(listBoxNonconformances.SelectedIndex);
+            Nonconformance n = nonconformances.ElementAt(listBoxNonconformances.SelectedIndex);
             this.nodePMNamespace.Text = n.GetLikelySources().ElementAt(listBoxProblematicMethods.SelectedIndex).GetNamespace();
             this.nodePMClass.Text = n.GetLikelySources().ElementAt(listBoxProblematicMethods.SelectedIndex).GetClass();
             if (n.GetLikelySources().ElementAt(listBoxProblematicMethods.SelectedIndex).GetLikelyCause().Equals("Strong Invariant") || n.GetLikelySources().ElementAt(listBoxProblematicMethods.SelectedIndex).GetMethod().Equals("ctor"))

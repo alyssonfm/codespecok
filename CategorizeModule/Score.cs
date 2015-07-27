@@ -5,25 +5,32 @@ namespace CategorizeModule
 {
     public class Score 
     {
-        private InvariantTable _myself;
-        private InvariantTable _others;
+        private ScoreTable _myself;
+        private ScoreTable _others;
+        private string _category;
 
-        public Score()
+        public Score(string category)
         {
-            InitScore();
+            InitScore(category);
         }
 
-        public void InitScore()
+        public void InitScore(string category)
         {
-            _myself = new InvariantTable();
-            _others = new InvariantTable();
+            _category = category;
+            _myself = new ScoreTable();
+            _others = new ScoreTable();
         }
 
-        public InvariantTable GetMyself()
+        public string GetCategory()
+        {
+            return this._category;
+        }
+
+        public ScoreTable GetMyself()
         {
             return this._myself;
         }
-        public InvariantTable GetOthers()
+        public ScoreTable GetOthers()
         {
             return this._others;
         }
@@ -39,37 +46,72 @@ namespace CategorizeModule
             IncrementMyselfWeakPre(1);
             IncrementOthersWeakPre(1);
         }
+        public void IncrementStrongPre()
+        {
+            IncrementMyselfStrongPre(1);
+            IncrementOthersStrongPre(1);
+        }
         public void IncrementWeakPre(int v)
         {
             IncrementMyselfWeakPre(v);
             IncrementOthersWeakPre(v);
         }
+        public void IncrementStrongPre(int v)
+        {
+            IncrementMyselfStrongPre(v);
+            IncrementOthersStrongPre(v);
+        }
         private void IncrementMyselfWeakPre(int points)
         {
             _myself.WeakPre += points;
+        }
+        private void IncrementMyselfStrongPre(int points)
+        {
+            _myself.StrongPre += points;
         }
         private void IncrementOthersWeakPre(int points)
         {
             _others.WeakPre += points;
         }
-
+        private void IncrementOthersStrongPre(int points)
+        {
+            _others.StrongPre += points;
+        }
         public void IncrementWeakPos()
         {
             IncrementMyselfWeakPos(1);
             IncrementOthersWeakPos(1);
+        }
+        public void IncrementStrongPos()
+        {
+            IncrementMyselfStrongPos(1);
+            IncrementOthersStrongPos(1);
         }
         public void IncrementWeakPos(int v)
         {
             IncrementMyselfWeakPos(v);
             IncrementOthersWeakPos(v);
         }
+        public void IncrementStrongPos(int v)
+        {
+            IncrementMyselfStrongPos(v);
+            IncrementOthersStrongPos(v);
+        }
         private void IncrementMyselfWeakPos(int points)
         {
             _myself.WeakPos += points;
         }
+        private void IncrementMyselfStrongPos(int points)
+        {
+            _myself.StrongPos += points;
+        }
         private void IncrementOthersWeakPos(int points)
         {
             _others.WeakPos += points;
+        }
+        private void IncrementOthersStrongPos(int points)
+        {
+            _others.StrongPos += points;
         }
         public void IncrementCodeError()
         {
@@ -118,24 +160,32 @@ namespace CategorizeModule
                 lp.Add(new Point("Weak Precondition", rm.GetName(), rm.GetClass(), rm.GetNamespace(), _others.WeakPre, _myself.WeakPre));
             if(_others.WeakPos > 0 || _myself.WeakPos > 0)
                 lp.Add(new Point("Weak Postcondition", rm.GetName(), rm.GetClass(), rm.GetNamespace(), _others.WeakPos, _myself.WeakPos));
-            if(_others.StrongInv > 0 || _myself.StrongInv > 0)
+            if (_category.Equals(CategoryType.PRECONDITION) && (_others.StrongPre > 0 || _myself.StrongPre > 0))
+                lp.Add(new Point("Strong Precondition", rm.GetName(), rm.GetClass(), rm.GetNamespace(), _others.StrongPre, _myself.StrongPre));
+            if (_category.Equals(CategoryType.POSTCONDITION) && (_others.StrongPos > 0 || _myself.StrongPos > 0))
+                lp.Add(new Point("Strong Postcondition", rm.GetName(), rm.GetClass(), rm.GetNamespace(), _others.StrongPos, _myself.StrongPos));
+            if (_category.Equals(CategoryType.INVARIANT) && (_others.StrongInv > 0 || _myself.StrongInv > 0))
                 lp.Add(new Point("Strong Invariant", rm.GetName(), rm.GetClass(), rm.GetNamespace(), _others.StrongInv, _myself.StrongInv));
             return lp;
         }
     }
 
-    public class InvariantTable
+    public class ScoreTable
     {
         public int CodeError;
         public int WeakPre;
         public int WeakPos;
+        public int StrongPre;
+        public int StrongPos;
         public int StrongInv;
 
-        public InvariantTable()
+        public ScoreTable()
         {
             CodeError = 0;
             WeakPre = 0;
             WeakPos = 0;
+            StrongPre = 0;
+            StrongPos = 0;
             StrongInv = 0;
         }
     }

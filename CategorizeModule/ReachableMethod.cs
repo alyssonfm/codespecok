@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Structures;
 
@@ -96,9 +95,9 @@ namespace CategorizeModule
             _fields = fieldsList;
         }
 
-        internal void ResetScore()
+        internal void ResetScore(string category)
         {
-            _score = new Score();
+            _score = new Score(category);
         }
         public bool WasVisited()
         {
