@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using CategorizeModule;
 using System.Diagnostics;
-
+using System;
 
 namespace CategorizeTest
 {
@@ -32,7 +32,7 @@ namespace CategorizeTest
                 }
                 
             }
-
+            
             Debug.WriteLine("Test finalized...");
         }
     }

@@ -195,20 +195,14 @@ namespace CategorizeModule
             string actualNamespace = method.GetNamespace();
 
             ContractArguments contracts = GetContractsPreAndPostFromMethod(method.GetMethod());
-            if (contracts.Requires.Count == 0)
-            { 
+            if (contracts.Requires.Count == 0) { 
                 method.GetScore().IncrementWeakPre();
-            }
-            else
-            {
+            } else {
                 method.GetScore().IncrementStrongPre(contracts.Requires.Count);
             }
-            if (contracts.Ensures.Count == 0)
-            {
+            if (contracts.Ensures.Count == 0) {
                 method.GetScore().IncrementWeakPos();
-            }
-            else
-            {
+            } else {
                 method.GetScore().IncrementStrongPos(contracts.Ensures.Count);
             }
 

@@ -65,7 +65,6 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
     <None Include="Resources\build.exe" />
   </ItemGroup>
@@ -73,13 +72,13 @@
     <None Include="Resources\nant.exe" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\randoop.exe" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\testdll.exe" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\vstest.exe" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\randoop.exe" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

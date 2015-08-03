@@ -39,6 +39,8 @@ namespace CategorizeModule
             IncrementOthersCodeError(score.GetOthers().CodeError);
             IncrementOthersWeakPos(score.GetOthers().WeakPos);
             IncrementOthersWeakPre(score.GetOthers().WeakPre);
+            IncrementOthersStrongPos(score.GetOthers().StrongPos);
+            IncrementOthersStrongPre(score.GetOthers().StrongPre);
         }
 
         public void IncrementWeakPre()
