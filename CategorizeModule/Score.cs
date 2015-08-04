@@ -1,8 +1,13 @@
 ﻿using Structures;
+using System;
 using System.Collections.Generic;
 
 namespace CategorizeModule
 {
+
+    /// <summary>
+    /// Class responsible to calculate Score for each Likely Source in each ReachableMethod.
+    /// </summary>
     public class Score 
     {
         private ScoreTable _myself;
@@ -36,159 +41,226 @@ namespace CategorizeModule
         }
         public void Add(Score score)
         {
-            IncrementOthersCodeError(score.GetOthers().CodeError);
-            IncrementOthersWeakPos(score.GetOthers().WeakPos);
-            IncrementOthersWeakPre(score.GetOthers().WeakPre);
-            IncrementOthersStrongPos(score.GetOthers().StrongPos);
-            IncrementOthersStrongPre(score.GetOthers().StrongPre);
-        }
-
-        public void IncrementWeakPre()
-        {
-            IncrementMyselfWeakPre(1);
-            IncrementOthersWeakPre(1);
-        }
-        public void IncrementStrongPre()
-        {
-            IncrementMyselfStrongPre(1);
-            IncrementOthersStrongPre(1);
-        }
-        public void IncrementWeakPre(int v)
-        {
-            IncrementMyselfWeakPre(v);
-            IncrementOthersWeakPre(v);
-        }
-        public void IncrementStrongPre(int v)
-        {
-            IncrementMyselfStrongPre(v);
-            IncrementOthersStrongPre(v);
-        }
-        private void IncrementMyselfWeakPre(int points)
-        {
-            _myself.WeakPre += points;
-        }
-        private void IncrementMyselfStrongPre(int points)
-        {
-            _myself.StrongPre += points;
-        }
-        private void IncrementOthersWeakPre(int points)
-        {
-            _others.WeakPre += points;
-        }
-        private void IncrementOthersStrongPre(int points)
-        {
-            _others.StrongPre += points;
-        }
-        public void IncrementWeakPos()
-        {
-            IncrementMyselfWeakPos(1);
-            IncrementOthersWeakPos(1);
-        }
-        public void IncrementStrongPos()
-        {
-            IncrementMyselfStrongPos(1);
-            IncrementOthersStrongPos(1);
-        }
-        public void IncrementWeakPos(int v)
-        {
-            IncrementMyselfWeakPos(v);
-            IncrementOthersWeakPos(v);
-        }
-        public void IncrementStrongPos(int v)
-        {
-            IncrementMyselfStrongPos(v);
-            IncrementOthersStrongPos(v);
-        }
-        private void IncrementMyselfWeakPos(int points)
-        {
-            _myself.WeakPos += points;
-        }
-        private void IncrementMyselfStrongPos(int points)
-        {
-            _myself.StrongPos += points;
-        }
-        private void IncrementOthersWeakPos(int points)
-        {
-            _others.WeakPos += points;
-        }
-        private void IncrementOthersStrongPos(int points)
-        {
-            _others.StrongPos += points;
+            _others.IncrementCodeError(score.GetOthers().GetCodeError());
+            _others.IncrementWeakPre(score.GetOthers().GetWeakPre());
+            _others.IncrementWeakPos(score.GetOthers().GetWeakPos());
+            _others.IncrementStrongPre(score.GetOthers().GetStrongPre());
+            _others.IncrementStrongPos(score.GetOthers().GetStrongPos());
         }
         public void IncrementCodeError()
         {
-            IncrementMyselfCodeError(1);
-            IncrementOthersCodeError(1);
+            IncrementCodeError(1);
         }
-        public void IncrementCodeError(int v)
+        public void IncrementCodeError(int value)
         {
-            IncrementMyselfCodeError(v);
-            IncrementOthersCodeError(v);
+            _myself.IncrementCodeError(value);
+            _others.IncrementCodeError(value);
         }
-
-        private void IncrementMyselfCodeError(int points)
+        public void IncrementWeakPre()
         {
-            _myself.CodeError += points;
+            IncrementWeakPre(1);
         }
-        private void IncrementOthersCodeError(int points)
+        public void IncrementWeakPre(int value)
         {
-            _others.CodeError += points;
+            _myself.IncrementWeakPre(value);
+            _others.IncrementWeakPre(value);
+        }
+        public void IncrementWeakPos()
+        {
+            IncrementWeakPos(1);
+        }
+        public void IncrementWeakPos(int value)
+        {
+            _myself.IncrementWeakPos(value);
+            _others.IncrementWeakPos(value);
+        }
+        public void IncrementStrongPre()
+        {
+            IncrementStrongPre(1);
+        }
+        public void IncrementStrongPre(int value)
+        {
+            _myself.IncrementStrongPre(value);
+            _others.IncrementStrongPre(value);
+        }
+        public void IncrementStrongPos()
+        {
+            IncrementStrongPos(1);
+        }
+        public void IncrementStrongPos(int value)
+        {
+            _myself.IncrementStrongPre(value);
+            _others.IncrementStrongPre(value);
         }
         public void IncrementStrongInv()
         {
-            IncrementMyselfStrongInv(1);
-            IncrementOthersStrongInv(1);
+            IncrementStrongInv(1);
         }
-        public void IncrementStrongInv(int v)
+        public void IncrementStrongInv(int value)
         {
-            IncrementMyselfStrongInv(v);
-            IncrementOthersStrongInv(v);
+            _myself.IncrementStrongInv(value);
+            _others.IncrementStrongInv(value);
         }
-        private void IncrementOthersStrongInv(int v)
+        private bool VerifyPositiveValues(int a, int b)
         {
-            _others.StrongInv += v;
-        }
-        private void IncrementMyselfStrongInv(int v)
-        {
-            _myself.StrongInv += v;
+            return a > 0 || b > 0;
         }
 
-        public List<Point> GetPoints(ReachableMethod rm)
+        public List<Point> GetPoints(RMethod rm)
         {
             List<Point> lp = new List<Point>();
-            if(_others.CodeError > 0 || _myself.CodeError > 0)
-                lp.Add(new Point("Code Error", rm.GetName(), rm.GetClass(), rm.GetNamespace(), _others.CodeError, _myself.CodeError));
-            if(_others.WeakPre > 0 || _myself.WeakPre > 0)
-                lp.Add(new Point("Weak Precondition", rm.GetName(), rm.GetClass(), rm.GetNamespace(), _others.WeakPre, _myself.WeakPre));
-            if(_others.WeakPos > 0 || _myself.WeakPos > 0)
-                lp.Add(new Point("Weak Postcondition", rm.GetName(), rm.GetClass(), rm.GetNamespace(), _others.WeakPos, _myself.WeakPos));
-            if (_category.Equals(CategoryType.PRECONDITION) && (_others.StrongPre > 0 || _myself.StrongPre > 0))
-                lp.Add(new Point("Strong Precondition", rm.GetName(), rm.GetClass(), rm.GetNamespace(), _others.StrongPre, _myself.StrongPre));
-            if (_category.Equals(CategoryType.POSTCONDITION) && (_others.StrongPos > 0 || _myself.StrongPos > 0))
-                lp.Add(new Point("Strong Postcondition", rm.GetName(), rm.GetClass(), rm.GetNamespace(), _others.StrongPos, _myself.StrongPos));
-            if (_category.Equals(CategoryType.INVARIANT) && (_others.StrongInv > 0 || _myself.StrongInv > 0))
-                lp.Add(new Point("Strong Invariant", rm.GetName(), rm.GetClass(), rm.GetNamespace(), _others.StrongInv, _myself.StrongInv));
+            AddCodeErrorPoints(rm, lp);
+            AddWeakPrePoints(rm, lp);
+            AddWeakPosPoints(rm, lp);
+            AddStrongPrePoints(rm, lp);
+            AddStrongPosPoints(rm, lp);
+            AddStrongInvPoints(rm, lp);
             return lp;
         }
+
+        private void AddStrongInvPoints(RMethod rm, List<Point> lp)
+        {
+            if (_category.Equals(CategoryType.INVARIANT) && VerifyPositiveValues(_others.GetStrongInv(), _myself.GetStrongInv()))
+                lp.AddPoint(Cause.STRONG_INV, rm, _others.GetStrongInv(), _myself.GetStrongInv());
+        }
+
+        private void AddStrongPosPoints(RMethod rm, List<Point> lp)
+        {
+            if (_category.Equals(CategoryType.POSTCONDITION) && VerifyPositiveValues(_others.GetStrongPos(), _myself.GetStrongPos()))
+                lp.AddPoint(Cause.STRONG_POST, rm, _others.GetStrongPos(), _myself.GetStrongPos());
+        }
+
+        private void AddStrongPrePoints(RMethod rm, List<Point> lp)
+        {
+            if (_category.Equals(CategoryType.PRECONDITION) && VerifyPositiveValues(_others.GetStrongPre(), _myself.GetStrongPre()))
+                lp.AddPoint(Cause.STRONG_PRE, rm, _others.GetStrongPre(), _myself.GetStrongPre());
+        }
+
+        private void AddWeakPosPoints(RMethod rm, List<Point> lp)
+        {
+            if (VerifyPositiveValues(_others.GetWeakPos(), _myself.GetWeakPos()))
+                lp.AddPoint(Cause.WEAK_POST, rm, _others.GetWeakPos(), _myself.GetWeakPos());
+        }
+
+        private void AddWeakPrePoints(RMethod rm, List<Point> lp)
+        {
+            if (VerifyPositiveValues(_others.GetWeakPre(), _myself.GetWeakPre()))
+                lp.AddPoint(Cause.WEAK_PRE, rm, _others.GetWeakPre(), _myself.GetWeakPre());
+        }
+
+        private void AddCodeErrorPoints(RMethod rm, List<Point> lp)
+        {
+            if (VerifyPositiveValues(_others.GetCodeError(), _myself.GetCodeError()))
+                lp.AddPoint(Cause.CODE_ERROR, rm, _others.GetCodeError(), _myself.GetCodeError());
+        }
+    }
+    public static class Cause
+    {
+        public const string STRONG_PRE = "Strong Precondition";
+        public const string WEAK_PRE = "Weak Precondition";
+        public const string STRONG_POST = "Strong Postcondition";
+        public const string WEAK_POST = "Weak Postcondition";
+        public const string STRONG_INV = "Strong Invariant";
+        public const string CODE_ERROR = "Code Error";
     }
 
     public class ScoreTable
     {
-        public int CodeError;
-        public int WeakPre;
-        public int WeakPos;
-        public int StrongPre;
-        public int StrongPos;
-        public int StrongInv;
+        private int _CodeError;
+        private int _WeakPre;
+        private int _WeakPos;
+        private int _StrongPre;
+        private int _StrongPos;
+        private int _StrongInv;
 
         public ScoreTable()
         {
-            CodeError = 0;
-            WeakPre = 0;
-            WeakPos = 0;
-            StrongPre = 0;
-            StrongPos = 0;
-            StrongInv = 0;
+            SetCodeError(0);
+            SetWeakPre(0);
+            SetWeakPos(0);
+            SetStrongPre(0);
+            SetStrongPos(0);
+            SetStrongInv(0);
+        }
+
+        public int GetCodeError()
+        {
+            return _CodeError;
+        }
+
+        public void SetCodeError(int value){
+            _CodeError = value;
+        }
+        public void IncrementCodeError(int value) {
+            _CodeError += value;
+        }
+        public int GetWeakPre()
+        {
+            return _WeakPre;
+        }
+
+        public void SetWeakPre(int value)
+        {
+            _WeakPre = value;
+        }
+        public void IncrementWeakPre(int value)
+        {
+            _WeakPre += value;
+        }
+        public int GetWeakPos()
+        {
+            return _WeakPos;
+        }
+
+        public void SetWeakPos(int value)
+        {
+            _WeakPos = value;
+        }
+        public void IncrementWeakPos(int value)
+        {
+            _WeakPos += value;
+        }
+
+        public int GetStrongPre()
+        {
+            return _StrongPre;
+        }
+
+        public void SetStrongPre(int value)
+        {
+            _StrongPre = value;
+        }
+        public void IncrementStrongPre(int value)
+        {
+            _StrongPre += value;
+        }
+
+        public int GetStrongPos()
+        {
+            return _StrongPos;
+        }
+
+        public void SetStrongPos(int value)
+        {
+            _StrongPos = value;
+        }
+        public void IncrementStrongPos(int value)
+        {
+            _StrongPos += value;
+        }
+
+        public int GetStrongInv()
+        {
+            return _StrongInv;
+        }
+
+        public void SetStrongInv(int value)
+        {
+            _StrongInv = value;
+        }
+        public void IncrementStrongInv(int value)
+        {
+            _StrongInv += value;
         }
     }
 }

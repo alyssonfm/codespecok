@@ -1,83 +1,51 @@
 ﻿using System;
-using System.IO;
 using System.Collections.Generic;
-using System.Linq;
 using Commons;
 using Structures;
 
 namespace CategorizeModule
 {
-    public static class Cause
-    {
-        public const String STRONG_PRE = "Strong Precondition";
-        public const String WEAK_PRE = "Weak Precondition";
-        public const String STRONG_POST = "Strong Postcondition";
-        public const String WEAK_POST = "Weak Postcondition";
-        public const String STRONG_INV = "Strong Invariant";
-    }
-
+    /// <summary>
+    /// Class responsible to categorize all Nonconformances detected. It users an static analyser
+    /// to define a set of LikelySources for each Nonconformance.
+    /// </summary>
     public class Categorize
     {
-        private Examinator _examiner;
         private Walker _analyser;
 
-        public HashSet<Nonconformance> categorize(HashSet<Nonconformance> errors, String sourceFolder, String solutionPath)
+        /// <summary>
+        /// Map a List of LikelySources for each Nonconformance.
+        /// </summary>
+        /// <param name="errors">The set of nonconformances</param>
+        /// <param name="solutionSourceFolder">Path of source folder of the project solution.</param>
+        /// <param name="solutionFileName">Project Solution filename, with it's extension.</param>
+        /// <returns>The set of nonconformances already categorized.</returns>
+        public HashSet<Nonconformance> categorize(HashSet<Nonconformance> errors, String solutionSourceFolder, String solutionFileName)
         {
-            this._examiner = new Examinator(sourceFolder + Constants.FILE_SEPARATOR + solutionPath);
-            this._analyser = new Walker(sourceFolder + Constants.FILE_SEPARATOR + solutionPath);
-            for (int i = 0; i < errors.Count; i++)
-            {
-                Nonconformance n = errors.ElementAt(i);
-                switch (n.GetContractType())
-                {
-                    case Structures.CategoryType.PRECONDITION:
-                        n.SetLikelySources(this._analyser.WalkOnTest(Constants.TEST_OUTPUT + Constants.FILE_SEPARATOR + n.GetTestFileName() + ".cs", CategoryType.PRECONDITION));
-                        break;
-                    case Structures.CategoryType.POSTCONDITION:
-                        n.SetLikelySources(this._analyser.WalkOnTest(Constants.TEST_OUTPUT + Constants.FILE_SEPARATOR + n.GetTestFileName() + ".cs", CategoryType.POSTCONDITION));
-                        break;
-                    case Structures.CategoryType.INVARIANT:
-                        n.SetLikelySources(this._analyser.WalkOnTest(Constants.TEST_OUTPUT + Constants.FILE_SEPARATOR + n.GetTestFileName() + ".cs", CategoryType.INVARIANT));
-                        break;
-                    default:
-                        break;
-                }
-            }
+            // Initialize Walker giving local of solution to be analyzed.
+            this._analyser = Factory.CreateWalker(solutionSourceFolder, solutionFileName);
+            // Iterate over all nonconformance, categorizing all.
+            foreach (Nonconformance n in errors) 
+                CategorizeAs(n, n.GetContractType());
 
+            // Save results on XML, that can be saved later.
             GenerateResult.Save(errors, true);
             return errors;
         }
-
-        public string CategorizePrecondition(Nonconformance n)
+        /// <summary>
+        /// Assign a List of Likely Sources for the nonconformance given.
+        /// </summary>
+        /// <param name="nonconformance">The nonconformance given.</param>
+        /// <param name="category">The type of nonconformance.</param>
+        private void CategorizeAs(Nonconformance nonconformance, string category)
         {
-                this._examiner.SetPrincipalClassName(n.GetNameSpace(), n.GetClassName());
-
-                if (this._examiner.CheckStrongPrecondition(n.GetMethodName(), n.GetParametersArray()))
-                    return Cause.STRONG_PRE;
-                else
-                    return Cause.WEAK_POST;
-        }
-
-        public string CategorizePostcondition(Nonconformance n)
-        {
-                this._examiner.SetPrincipalClassName(n.GetNameSpace(), n.GetClassName());
-
-                if (this._examiner.CheckWeakPrecondition(n.GetMethodName(), n.GetParametersArray()))
-                    return Cause.WEAK_PRE;
-                if (this._examiner.CheckWeakPostcondition(n.GetMethodName(), n.GetParametersArray()))
-                    return Cause.WEAK_PRE;
-                else
-                    return Cause.STRONG_POST;
-        }
-
-        public string CategorizeInvariant(Nonconformance n)
-        {
-                this._examiner.SetPrincipalClassName(n.GetNameSpace(), n.GetClassName());
-
-                if (this._examiner.CheckWeakPrecondition(n.GetMethodName(), n.GetParametersArray()))
-                    return Cause.WEAK_PRE;
-                else
-                    return Cause.STRONG_INV;
+            // Resets Score depending on category of Nonconformance.
+            _analyser.ResetScore(category);
+            // Creates test and walk on it, receiving a list of points as result.
+            RTest test = nonconformance.CreateTest();
+            List<Point> points = _analyser.WalkOn(test);
+            // Set the likely sources of nonconformance with points.
+            nonconformance.SetLikelySources(points);
         }
     }
 }

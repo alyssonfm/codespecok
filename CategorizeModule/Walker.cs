@@ -1,50 +1,41 @@
-﻿using System.Collections.Generic;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 using Structures;
+using System;
 using System.IO;
 using System.Linq;
-using Microsoft.CodeAnalysis.CSharp;
+using System.Collections.Generic;
 
 namespace CategorizeModule
 {
+    class ContractArguments
+    {
+        public ContractArguments()
+        {
+            this.Requires = new List<ArgumentSyntax>();
+            this.Ensures = new List<ArgumentSyntax>();
+        }
+        public List<ArgumentSyntax> Requires { get; set; }
+        public List<ArgumentSyntax> Ensures { get; set; }
+    }
+
     public class Walker
     {
         public const string TEST_RANDOOP_CLASS = "RandoopTest";
-        private ReachableSolution _sln;
+        private RSolution _sln;
 
         public Walker(string solutionPath) {
             // The Reachable methods will be initialized on search through Solution.
-            this._sln = new ReachableSolution(solutionPath);
+            this._sln = new RSolution(solutionPath);
         }
 
-        public static String GetTextFromFile(string namefile)
-        {
-            using (StreamReader sr = new StreamReader(namefile))
-            {
-                String line = sr.ReadToEnd();
-                return line;
-            }
+        public void ResetScore(string category) {
+            _sln.ResetScore(category);
         }
-        public static MethodDeclarationSyntax GetTestMethod(String namefile)
-        {
-            SyntaxTree tree = CSharpSyntaxTree.ParseText(GetTextFromFile(namefile));
-            var root = (CompilationUnitSyntax)tree.GetRoot();
-            var classDecl = (ClassDeclarationSyntax)root.Members.ElementAt(0);
-            MethodDeclarationSyntax methodDecl = (MethodDeclarationSyntax)classDecl.Members.ElementAt(0);
-
-            return methodDecl;
-        }
-
-        public List<Point> WalkOnTest(string testlocation, string category)
-        {
-            MethodDeclarationSyntax test = GetTestMethod(testlocation);
-            this._sln.ResetScore(category);
-
-            SyntaxList<StatementSyntax> block = test.Body.Statements;
-            
-            foreach (StatementSyntax s in block)
+        public List<Point> WalkOn(RTest test)
+        {   
+            foreach (StatementSyntax s in test.GetStatements())
             {
                 if (s is ExpressionStatementSyntax)
                 {
@@ -52,14 +43,9 @@ namespace CategorizeModule
                     List<InvocationExpressionSyntax> funs = SearchFunctions(e.Expression);
                     foreach (InvocationExpressionSyntax inv in funs) {
                         // Verify if its reachable
-                        MemberAccessExpressionSyntax member = inv.Expression as MemberAccessExpressionSyntax;
-                        string methodName = (member.Name as IdentifierNameSyntax).Identifier.Text;
-                        string filterHelper = GetExpressionIdentifier(member.Expression);
-
-                        if (MethodIsReachable(methodName, TEST_RANDOOP_CLASS, filterHelper)) {
-                            ReachableMethod m = GetMethodFound();
-                            WalkOn(m);
-                        }
+                        MemberAccessExpressionSyntax maesMethod = inv.Expression as MemberAccessExpressionSyntax;
+                        string methodName = (maesMethod.Name as IdentifierNameSyntax).Identifier.Text;
+                        WalkOnGeneralMethodCall(maesMethod, methodName);
                     }
                 }
                 if(s is LocalDeclarationStatementSyntax)
@@ -76,7 +62,7 @@ namespace CategorizeModule
                             string namespaceName = qns.Left.ToString();
                             if(MethodIsReachable(".ctor", TEST_RANDOOP_CLASS, namespaceName + "." + className))
                             {
-                                ReachableMethod rm = GetMethodFound();
+                                RMethod rm = GetMethodFound();
                                 WalkOn(rm);
                             }
                         }
@@ -86,6 +72,7 @@ namespace CategorizeModule
                             if (ies.Expression is MemberAccessExpressionSyntax) {
                                 MemberAccessExpressionSyntax maesMethod = (MemberAccessExpressionSyntax)ies.Expression;
                                 string methodName = maesMethod.Name.Identifier.Text;
+                                // Cast Problem maesMethod.Expression 
                                 if (maesMethod.Expression is MemberAccessExpressionSyntax)
                                 {
                                     MemberAccessExpressionSyntax maesClass = (MemberAccessExpressionSyntax)maesMethod.Expression;
@@ -93,7 +80,7 @@ namespace CategorizeModule
                                     string namespaceName = maesClass.Expression.ToString();
                                     if (MethodIsReachable(methodName, TEST_RANDOOP_CLASS, namespaceName + "." + className))
                                     {
-                                        ReachableMethod rm = GetMethodFound();
+                                        RMethod rm = GetMethodFound();
                                         WalkOn(rm);
                                     }
                                 }
@@ -103,9 +90,13 @@ namespace CategorizeModule
                                     string className = maesClass.Identifier.Text;
                                     if (MethodIsReachable(methodName, TEST_RANDOOP_CLASS, className))
                                     {
-                                        ReachableMethod rm = GetMethodFound();
+                                        RMethod rm = GetMethodFound();
                                         WalkOn(rm);
                                     }
+                                }
+                                else
+                                {
+                                    WalkOnGeneralMethodCall(maesMethod, methodName);
                                 }
                             }
                             else if(ies.Expression is IdentifierNameSyntax)
@@ -114,7 +105,7 @@ namespace CategorizeModule
                                 string methodName = ins.Identifier.Text;
                                 if (MethodIsReachable(methodName, TEST_RANDOOP_CLASS, ""))
                                 {
-                                    ReachableMethod rm = GetMethodFound();
+                                    RMethod rm = GetMethodFound();
                                     WalkOn(rm);
                                 }
                             }
@@ -131,6 +122,34 @@ namespace CategorizeModule
                     toReturn.Add(temp.ElementAt(i));
             }
             return toReturn;
+        }
+
+        private bool WalkOnGeneralMethodCall(MemberAccessExpressionSyntax maesMethod, string methodName)
+        {
+            // Verify if its reachable
+            string filterHelper = GetExpressionIdentifier(maesMethod.Expression);
+
+            if (MethodIsReachable(methodName, TEST_RANDOOP_CLASS, filterHelper))
+            {
+                RMethod m = GetMethodFound();
+                WalkOn(m);
+                return true;
+            }
+            return false;
+        }
+
+        private bool WalkOnGeneralMethodCall(RMethod method, MemberAccessExpressionSyntax maesMethod, string methodName)
+        {
+            if(WalkOnGeneralMethodCall(maesMethod, methodName))
+            {
+                return true;
+            }
+            else
+            {
+                method.GetScore().IncrementCodeError();
+                return false;
+            }
+            
         }
 
         private string GetExpressionIdentifier(ExpressionSyntax expressionSyntax)
@@ -187,7 +206,7 @@ namespace CategorizeModule
             return funs;
         }
 
-        private Score WalkOn(ReachableMethod method)
+        private Score WalkOn(RMethod method)
         {
             method.CalculateStrongInv();
             method.Visit();
@@ -246,7 +265,7 @@ namespace CategorizeModule
                         }
                         if (MethodIsReachable(methodName, actualClass, filterHelper))
                         {
-                            ReachableMethod m = GetMethodFound();
+                            RMethod m = GetMethodFound();
                             method.GetScore().Add(WalkOn(m));
                         }
                         else
@@ -270,7 +289,7 @@ namespace CategorizeModule
                             string namespaceName = qns.Left.ToString();
                             if (MethodIsReachable(".ctor", actualClass, namespaceName + "." + className))
                             {
-                                ReachableMethod rm = GetMethodFound();
+                                RMethod rm = GetMethodFound();
                                 WalkOn(rm);
                             }
                         }
@@ -288,7 +307,7 @@ namespace CategorizeModule
                                     string namespaceName = maesClass.Expression.ToString();
                                     if (MethodIsReachable(methodName, actualClass, namespaceName + "." + className))
                                     {
-                                        ReachableMethod rm = GetMethodFound();
+                                        RMethod rm = GetMethodFound();
                                         WalkOn(rm);
                                     }
                                 }
@@ -298,7 +317,7 @@ namespace CategorizeModule
                                     string className = maesClass.Identifier.Text;
                                     if (MethodIsReachable(methodName, actualClass, className))
                                     {
-                                        ReachableMethod rm = GetMethodFound();
+                                        RMethod rm = GetMethodFound();
                                         WalkOn(rm);
                                     }
                                 }
@@ -309,7 +328,7 @@ namespace CategorizeModule
                                 string methodName = ins.Identifier.Text;
                                 if (MethodIsReachable(methodName, actualClass, ""))
                                 {
-                                    ReachableMethod rm = GetMethodFound();
+                                    RMethod rm = GetMethodFound();
                                     WalkOn(rm);
                                 }
                             }
@@ -381,7 +400,7 @@ namespace CategorizeModule
             }
             return contracts;
         }
-        private ReachableMethod GetMethodFound()
+        private RMethod GetMethodFound()
         {
             return _sln.GetLastMethodFound();
         }
