@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -8,17 +9,41 @@ namespace CategorizeModule
     public class RNamespace
     {
         private List<RClass> _classes;
+        private List<string> _imports;
         private string _nameOfNamespace;
+        private string _projectName;
 
-        public RNamespace(NamespaceDeclarationSyntax namespaceDeclaration, SemanticModel model)
+        public RNamespace(NamespaceDeclarationSyntax namespaceDeclaration, SemanticModel model, string projectName, List<string> imports) 
         {
-            SetNamespaceDeclaration(namespaceDeclaration);
+            SetNamespaceDeclaration(namespaceDeclaration, projectName, imports);
             InitializeClasses(namespaceDeclaration.Members, model);
         }
 
-        private void SetNamespaceDeclaration(NamespaceDeclarationSyntax namespaceDeclaration)
+        private void SetNamespaceDeclaration(NamespaceDeclarationSyntax namespaceDeclaration, string projectName, List<string> imports)
         {
             SetName(namespaceDeclaration.Name.ToString());
+            SetProjectName(projectName);
+            SetImports(imports);
+        }
+
+        private void SetImports(List<string> imports)
+        {
+            _imports = imports;
+        }
+
+        public List<string> GetImports()
+        {
+            return _imports;
+        }
+
+        private void SetProjectName(string projectName)
+        {
+            _projectName = projectName;
+        }
+
+        public string GetProjectName()
+        {
+            return _projectName;
         }
 
         private void SetName(string v)

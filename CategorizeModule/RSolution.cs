@@ -6,22 +6,41 @@ using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.MSBuild;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 
 namespace CategorizeModule
 {
-    class RSolution
+    public class RSolution
     {
         private RMethod _lastMethodFound;
+        private RClass _lastClassFound;
+        private List<string> _projectsNames;
 
         private List<RNamespace> _namespaces;
         public RSolution(string solutionPath)
         {
             IEnumerable<Project> projects = OpenSolutionFile(solutionPath);
             LoadMethods(projects);
+            Revise();
         }
+
+        private void Revise()
+        {
+            foreach(RClass c in this.GetAllClasses())
+            {
+                c.Revise(this);
+            }
+        }
+
+        public int GetNumberOfNamespaces()
+        {
+            return _namespaces.Count;
+        }
+
         private void LoadMethods(IEnumerable<Project> projects)
         {
             this._namespaces = new List<RNamespace>();
+            this._projectsNames = projects.GetNames();
             foreach (Document d in GetDocumentsToSearchForClass(projects))
             {
                 SearchForMethodsOnDocument(d);
@@ -30,17 +49,48 @@ namespace CategorizeModule
         private void SearchForMethodsOnDocument(Document doc)
         {
             // Load AST and SemanticModel from Doc.
-            SyntaxTree st = doc.GetSyntaxTreeAsync().Result;
-            SemanticModel model = doc.GetSemanticModelAsync().Result;
-            var root = (CompilationUnitSyntax)st.GetRoot();
+            SemanticModel model = doc.GetSemanticModel();
+            CompilationUnitSyntax root = doc.GetCompilationUnit();
+            List<string> imports = GetImportsNames(root);
 
             // Through all namespaces, get Methods from each class
             foreach (NamespaceDeclarationSyntax nds in root.Members.OfType<NamespaceDeclarationSyntax>())
             {
-                RNamespace rn = new RNamespace(nds, model);
+                RNamespace rn = new RNamespace(nds, model, doc.Project.Name, imports);
                 _namespaces.Add(rn);
             }
         }
+
+        private List<string> GetImportsNames(CompilationUnitSyntax root)
+        {
+            List<string> imports = new List<string>();
+            foreach(UsingDirectiveSyntax u in root.Usings)
+            {
+                string i = u.Name.ToString();
+                if(i.StartWithAnyOfThese(_projectsNames))
+                    imports.Add(u.Name.ToString());
+            }
+            return imports;
+        }
+
+        public bool ClassIsReachable(RClass origin, string superClass, List<string> import)
+        {
+            foreach(RClass c in this.GetAllClasses())
+            {
+                if((origin.GetProject().Equals(c.GetProject()) || c.GetProject().AreStartOfAnyOfThese(import)) && c.GetName().Equals(superClass))
+                {
+                    _lastClassFound = c;
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public RClass GetLastClassFound()
+        {
+            return _lastClassFound;
+        }
+
         private List<Document> GetDocumentsToSearchForClass(IEnumerable<Project> projects)
         {
             List<Document> docs = new List<Document>();
@@ -50,6 +100,12 @@ namespace CategorizeModule
                     docs.Add(d);
             return docs;
         }
+
+        public RNamespace GetNamespaceAt(int i)
+        {
+            return _namespaces.ElementAt(i);
+        }
+
         private IEnumerable<Project> OpenSolutionFile(string solutionPath)
         {
             Solution sln;
@@ -105,7 +161,7 @@ namespace CategorizeModule
         internal void CalculateStrongInv()
         {
             for (int i = 0; i < GetNumberOfNamepaces(); i++)
-            {
+            {   
                 for (int j = 0; j < GetNamepaceAt(i).GetNumberOfClasses(); j++)
                 {
                     for (int k = 0; k < GetNamepaceAt(i).GetClassAt(j).GetNumberOfMethods(); k++)

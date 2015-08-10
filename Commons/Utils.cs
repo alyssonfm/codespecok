@@ -11,6 +11,32 @@ namespace Commons
             return data != null && data.Any<T>();
         }
 
+        public static bool IsAnyOfThese(this string data, List<string> these) {
+            foreach(string s in these)
+            {
+                if (data.Equals(s))
+                    return true;
+            }
+            return false;
+        }
+        public static bool StartWithAnyOfThese(this string data, List<string> these)
+        {
+            foreach (string s in these)
+            {
+                if (data.StartsWith(s))
+                    return true;
+            }
+            return false;
+        }
+        public static bool AreStartOfAnyOfThese(this string data, List<string> these)
+        {
+            foreach (string s in these)
+            {
+                if (s.StartsWith(data))
+                    return true;
+            }
+            return false;
+        }
         public static List<T> GetList<T>()
         {
             return new List<T>((T[])Enum.GetValues(typeof(T)));

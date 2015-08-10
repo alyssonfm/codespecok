@@ -12,31 +12,6 @@ namespace CategorizeModule
 {
     public static class RoslynToolbox
     {
-        public static MethodDeclarationSyntax GetFirstMethod(this ClassDeclarationSyntax root) {
-            return root.Members.OfType<MethodDeclarationSyntax>().ElementAt(0);
-        }
-
-        public static ClassDeclarationSyntax GetFirstClass(this CompilationUnitSyntax root)
-        {
-            return root.Members.OfType<ClassDeclarationSyntax>().ElementAt(0);
-        }
-
-        public static CompilationUnitSyntax GetCompilationUnit(string namefile)
-        {
-            return (CompilationUnitSyntax) CSharpSyntaxTree.ParseText(GetTextFromFile(namefile)).GetRoot();   
-        }
-
-        public static String GetTextFromFile(string namefile)
-        {
-            using (StreamReader sr = new StreamReader(namefile))
-            {
-                return sr.ReadToEnd();
-            }
-        }
-
-        public static SyntaxList<StatementSyntax> GetBlock(this MethodDeclarationSyntax method)
-        {
-            return method.Body.Statements;
-        }
+        
     }
 }

@@ -22,7 +22,7 @@ namespace CategorizeModule
 
     public class Walker
     {
-        public const string TEST_RANDOOP_CLASS = "RandoopTest";
+        private const string TEST_RANDOOP_CLASS = "RandoopTest";
         private RSolution _sln;
 
         public Walker(string solutionPath) {

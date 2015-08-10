@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Structures;
 
@@ -12,6 +13,7 @@ namespace CategorizeModule
         private BaseMethodDeclarationSyntax _method;
         private RNamespace _originNamespace;
         private RClass _originClass;
+        private RMethod _baseMethod;
         private Score _score;
         private List<string> _fields;
         private bool _wasVisited = false;
@@ -83,6 +85,11 @@ namespace CategorizeModule
                 _originClass.CalculateStrongInv(this);
                 _wasStrongInvCalculated = true;
             }
+        }
+
+        public void AssignBaseMethod(RMethod bm)
+        {
+            _baseMethod = bm;
         }
 
         private IEnumerable<string> GetFields()

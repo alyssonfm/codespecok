@@ -16,7 +16,7 @@ namespace CategorizeModule
 
         private void SetCompilation(string namefile)
         {
-            _compilation = RoslynToolbox.GetCompilationUnit(namefile);
+            _compilation = Collector.GetCompilationUnit(namefile);
         }
 
         public SyntaxList<StatementSyntax> GetStatements()
