@@ -26,7 +26,20 @@ namespace Commons
             nonconformance.SetElementValue("type", n.GetContractType());
             if (isCategorized)
             {
-                nonconformance.SetElementValue("likelyCause", n.GetLikelyCause());
+                XElement likelyCauses = new XElement("LikelySouces");
+                XElement likelyCause = new XElement("problematicMethod");
+                List<Point> likelySources = n.GetLikelySources();
+                foreach (Point p in likelySources)
+                {
+                    likelyCause.SetElementValue("class", p.GetClass());
+                    likelyCause.SetElementValue("method", p.GetMethod());
+                    likelyCause.SetElementValue("namespace", p.GetNamespace());
+                    likelyCause.SetElementValue("likelycause", p.GetLikelyCause());
+                    likelyCause.SetElementValue("likelihood", p.GetPercent());
+                    likelyCauses.Add(likelyCause);
+                }
+
+                nonconformance.Add(likelyCauses);
             }
 
             XElement error = new XElement("Error");

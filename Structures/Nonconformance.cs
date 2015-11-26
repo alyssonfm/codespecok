@@ -234,7 +234,7 @@ namespace Structures
         private void SetTestInformations()
         {
             String test = "RandoopTest";
-            String unit = "UnitpTest";
+            String unit = "UnitTest";
             String data = this._stackTraceOrder[this._stackTraceLenght - 1];
             int first = data.LastIndexOf(test) + test.Length;
             int last = data.LastIndexOf("." + unit);

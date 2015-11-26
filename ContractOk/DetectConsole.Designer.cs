@@ -38,42 +38,38 @@
             // 
             // textArea
             // 
-            this.textArea.Location = new System.Drawing.Point(41, 71);
-            this.textArea.Margin = new System.Windows.Forms.Padding(4);
+            this.textArea.Location = new System.Drawing.Point(31, 58);
             this.textArea.Multiline = true;
             this.textArea.Name = "textArea";
             this.textArea.ReadOnly = true;
             this.textArea.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textArea.Size = new System.Drawing.Size(1145, 386);
+            this.textArea.Size = new System.Drawing.Size(860, 314);
             this.textArea.TabIndex = 0;
             this.textArea.TextChanged += new System.EventHandler(this.textArea_TextChanged);
             // 
             // lbStage
             // 
             this.lbStage.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel, ((byte)(0)));
-            this.lbStage.Location = new System.Drawing.Point(53, 26);
-            this.lbStage.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.lbStage.Location = new System.Drawing.Point(40, 21);
             this.lbStage.Name = "lbStage";
-            this.lbStage.Size = new System.Drawing.Size(375, 25);
+            this.lbStage.Size = new System.Drawing.Size(281, 20);
             this.lbStage.TabIndex = 1;
             this.lbStage.Text = "Detection Phase finished with errors.";
             // 
             // progressBar
             // 
-            this.progressBar.Location = new System.Drawing.Point(45, 475);
-            this.progressBar.Margin = new System.Windows.Forms.Padding(4);
+            this.progressBar.Location = new System.Drawing.Point(34, 386);
             this.progressBar.Name = "progressBar";
-            this.progressBar.Size = new System.Drawing.Size(1141, 32);
+            this.progressBar.Size = new System.Drawing.Size(856, 26);
             this.progressBar.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
             this.progressBar.TabIndex = 2;
             // 
             // btViewNonconformances
             // 
             this.btViewNonconformances.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel, ((byte)(0)));
-            this.btViewNonconformances.Location = new System.Drawing.Point(539, 20);
-            this.btViewNonconformances.Margin = new System.Windows.Forms.Padding(4);
+            this.btViewNonconformances.Location = new System.Drawing.Point(672, 16);
             this.btViewNonconformances.Name = "btViewNonconformances";
-            this.btViewNonconformances.Size = new System.Drawing.Size(267, 38);
+            this.btViewNonconformances.Size = new System.Drawing.Size(200, 31);
             this.btViewNonconformances.TabIndex = 3;
             this.btViewNonconformances.Text = "View Nonconformances";
             this.btViewNonconformances.UseVisualStyleBackColor = true;
@@ -82,10 +78,9 @@
             // btCategorize
             // 
             this.btCategorize.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel, ((byte)(0)));
-            this.btCategorize.Location = new System.Drawing.Point(847, 20);
-            this.btCategorize.Margin = new System.Windows.Forms.Padding(4);
+            this.btCategorize.Location = new System.Drawing.Point(396, 16);
             this.btCategorize.Name = "btCategorize";
-            this.btCategorize.Size = new System.Drawing.Size(316, 38);
+            this.btCategorize.Size = new System.Drawing.Size(237, 31);
             this.btCategorize.TabIndex = 4;
             this.btCategorize.Text = "Categorize";
             this.btCategorize.UseVisualStyleBackColor = true;
@@ -98,15 +93,14 @@
             // 
             // DetectConsole
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1232, 529);
+            this.ClientSize = new System.Drawing.Size(924, 430);
             this.Controls.Add(this.btCategorize);
             this.Controls.Add(this.btViewNonconformances);
             this.Controls.Add(this.progressBar);
             this.Controls.Add(this.lbStage);
             this.Controls.Add(this.textArea);
-            this.Margin = new System.Windows.Forms.Padding(4);
             this.MaximizeBox = false;
             this.Name = "DetectConsole";
             this.Text = "Detection Screen";
