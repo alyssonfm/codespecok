@@ -5,6 +5,7 @@ using System.Windows.Forms;
 using DetectModule;
 using CategorizeModule;
 using Structures;
+using System.Text.RegularExpressions;
 
 namespace ContractOK
 {
@@ -48,6 +49,28 @@ namespace ContractOK
             Application.DoEvents();
 
             nonconformances = d.DetectErrors(srcFolder, slnFile, libFolder, time);
+        }
+
+        static public bool checkProblemsWithInput(String srcFolder, String slnFile, String time)
+        {
+            return checkSlnField(slnFile) && checkSrcFolderField(srcFolder) && checkTimeField(time);
+        }
+
+        static public bool checkSrcFolderField(String srcFolder)
+        {
+            return (srcFolder != null && !srcFolder.Equals(""));
+        }
+
+        static public bool checkSlnField(String slnFile)
+        {
+            return (slnFile != null && !slnFile.Equals(""));
+        }
+
+        static public bool checkTimeField(String time)
+        {
+            Regex r = new Regex("\\d+");
+            Match m = r.Match(time);
+            return m.Success;
         }
 
         static public void StartCategorizationPhase()
