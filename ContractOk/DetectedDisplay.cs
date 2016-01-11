@@ -25,7 +25,7 @@ namespace ContractOK
             lbSetNumberNonconformances.Text = nonconformances.Count + "";
             for (int i = 0; i < nonconformances.Count; i++)
             {
-                listBox.Items.Add(i + " - " + nonconformances.ElementAt(i).GetContractType());
+                listBox.Items.Add((i + 1) + " - " + nonconformances.ElementAt(i).GetContractType());
             }
             listBox.SelectionMode = SelectionMode.One;
 

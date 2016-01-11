@@ -49,6 +49,8 @@ namespace CategorizeModule
                 return "dtor";
             else if (_method is OperatorDeclarationSyntax)
                 return "op_" + ((OperatorDeclarationSyntax)_method).OperatorKeyword.Text;
+            else if (_method is ConversionOperatorDeclarationSyntax)
+                return "op_" + ((ConversionOperatorDeclarationSyntax)_method).OperatorKeyword.Text;
             else
                 return ((MethodDeclarationSyntax)_method).Identifier.Value.ToString();
         }
