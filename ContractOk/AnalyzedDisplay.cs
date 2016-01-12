@@ -49,7 +49,8 @@ namespace ContractOK
             lbSetNumberNonconformances.Text = nonconformances.Count + "";
             for (int i = 0; i < nonconformances.Count; i++)
             {
-                listBoxNonconformances.Items.Add(i + " - " + nonconformances.ElementAt(i).GetContractType());
+                string output = (i+1) + " - " + nonconformances.ElementAt(i).GetContractType();
+                listBoxNonconformances.Items.Add(output);
             }
             listBoxNonconformances.SelectionMode = SelectionMode.One;
         }
@@ -64,14 +65,16 @@ namespace ContractOK
             }
             for (int i = 0; i < numberMethods; i++)
             {
-                if (n.GetLikelySources().ElementAt(i).GetLikelyCause().Equals("Strong Invariant") || n.GetLikelySources().ElementAt(i).GetMethod().Equals("ctor")) { 
-                    listBoxProblematicMethods.Items.Add(i + " - " + n.GetLikelySources().ElementAt(i).GetClass() +
-                        ", " + n.GetLikelySources().ElementAt(i).GetLikelyCause());
+                if (n.GetLikelySources().ElementAt(i).GetLikelyCause().Equals("Strong Invariant") || n.GetLikelySources().ElementAt(i).GetMethod().Equals("ctor")) {
+                    string output2 = (i+1) + " - " + n.GetLikelySources().ElementAt(i).GetClass() +
+                        ", " + n.GetLikelySources().ElementAt(i).GetLikelyCause();
+                    listBoxProblematicMethods.Items.Add(output2);
                 }
                 else
                 {
-                    listBoxProblematicMethods.Items.Add(i + " - " + n.GetLikelySources().ElementAt(i).GetMethod() + 
-                        ", "   + n.GetLikelySources().ElementAt(i).GetLikelyCause());
+                    string output3 = (i+1) + " - " + n.GetLikelySources().ElementAt(i).GetMethod() +
+                        ", " + n.GetLikelySources().ElementAt(i).GetLikelyCause();
+                    listBoxProblematicMethods.Items.Add(output3);
                 }
             }
             listBoxNonconformances.SelectionMode = SelectionMode.One;

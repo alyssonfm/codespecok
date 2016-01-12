@@ -114,7 +114,6 @@
     <Compile Include="RClass.cs" />
     <Compile Include="RMethod.cs" />
     <Compile Include="RNamespace.cs" />
-    <Compile Include="RoslynToolbox.cs" />
     <Compile Include="RSolution.cs" />
     <Compile Include="RTest.cs" />
     <Compile Include="Score.cs" />
