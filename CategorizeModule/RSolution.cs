@@ -146,7 +146,7 @@ namespace CategorizeModule
         {
             return _namespaces.ElementAt(index);
         }
-        private RNamespace SearchNamespace(string nameOfNamespace) throw StackOverflowException
+        private RNamespace SearchNamespace(string nameOfNamespace)
         {
             for(int i = 0; i < _namespaces.Count; i++)
             {
