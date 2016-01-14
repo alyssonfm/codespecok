@@ -146,15 +146,17 @@ namespace CategorizeModule
         {
             return _namespaces.ElementAt(index);
         }
-        private RNamespace SearchNamespace(string nameOfNamespace)
+       private RNamespace SearchNamespace(string nameOfNamespace)
         {
-            for(int i = 0; i < _namespaces.Count; i++)
+            for (int i = 0; i < _namespaces.Count; i++)
             {
                 if (nameOfNamespace.Contains(_namespaces.ElementAt(i).GetName()))
                 {
                     return _namespaces.ElementAt(i);
                 }
+              
             }
+           
             return null;
         }
 
