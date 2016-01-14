@@ -91,20 +91,22 @@ namespace ContractOK
 
         private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            Nonconformance n = nonconformances.ElementAt(listBoxNonconformances.SelectedIndex);
-            tbTextSample.Text = CodeReader.GetTestMethod(n.GetTestFileName());
-            this.nodeNCNamespace.Text = n.GetNameSpace();
-            this.nodeNCClass.Text = n.GetClassName();
-            if(n.GetMethodName().Contains("ctor"))
-                this.nodeNCMethod.Text = n.GetClassName();
-            else
-                this.nodeNCMethod.Text = n.GetMethodName();
-            lbSetLikelySource.Text = n.GetLikelyCause();
+            if (listBoxNonconformances.SelectedIndex >= 0) {
+                Nonconformance n = nonconformances.ElementAt(listBoxNonconformances.SelectedIndex);
+                tbTextSample.Text = CodeReader.GetTestMethod(n.GetTestFileName());
+                this.nodeNCNamespace.Text = n.GetNameSpace();
+                this.nodeNCClass.Text = n.GetClassName();
+                if (n.GetMethodName().Contains("ctor"))
+                    this.nodeNCMethod.Text = n.GetClassName();
+                else
+                    this.nodeNCMethod.Text = n.GetMethodName();
+                lbSetLikelySource.Text = n.GetLikelyCause();
 
-            InitializeListProblematicMethods(n);
+                InitializeListProblematicMethods(n);
 
-            this.HasAnyIndexSelected = true;
-            btStackTrace.Visible = true;
+                this.HasAnyIndexSelected = true;
+                btStackTrace.Visible = true;
+            }
         }
 
         private void btSaveResults_Click(object sender, EventArgs e)
@@ -152,21 +154,24 @@ namespace ContractOK
 
         private void listBoxProblematicMethods_SelectedIndexChanged(object sender, EventArgs e)
         {
-            Nonconformance n = nonconformances.ElementAt(listBoxNonconformances.SelectedIndex);
-            this.nodePMNamespace.Text = n.GetLikelySources().ElementAt(listBoxProblematicMethods.SelectedIndex).GetNamespace();
-            this.nodePMClass.Text = n.GetLikelySources().ElementAt(listBoxProblematicMethods.SelectedIndex).GetClass();
-            if (n.GetLikelySources().ElementAt(listBoxProblematicMethods.SelectedIndex).GetLikelyCause().Equals("Strong Invariant") || n.GetLikelySources().ElementAt(listBoxProblematicMethods.SelectedIndex).GetMethod().Equals("ctor"))
+            if (listBoxProblematicMethods.SelectedIndex >= 0)
             {
-                this.nodePMMethod.Text = n.GetLikelySources().ElementAt(listBoxProblematicMethods.SelectedIndex).GetClass();
+                Nonconformance n = nonconformances.ElementAt(listBoxNonconformances.SelectedIndex);
+                this.nodePMNamespace.Text = n.GetLikelySources().ElementAt(listBoxProblematicMethods.SelectedIndex).GetNamespace();
+                this.nodePMClass.Text = n.GetLikelySources().ElementAt(listBoxProblematicMethods.SelectedIndex).GetClass();
+                if (n.GetLikelySources().ElementAt(listBoxProblematicMethods.SelectedIndex).GetLikelyCause().Equals("Strong Invariant") || n.GetLikelySources().ElementAt(listBoxProblematicMethods.SelectedIndex).GetMethod().Equals("ctor"))
+                {
+                    this.nodePMMethod.Text = n.GetLikelySources().ElementAt(listBoxProblematicMethods.SelectedIndex).GetClass();
+                }
+                else
+                {
+                    this.nodePMMethod.Text = n.GetLikelySources().ElementAt(listBoxProblematicMethods.SelectedIndex).GetMethod();
+                }
+                lbSetLikelySource.Text = n.GetLikelySources().ElementAt(listBoxProblematicMethods.SelectedIndex).GetLikelyCause();
+                Double percentNumber = n.GetLikelySources().ElementAt(listBoxProblematicMethods.SelectedIndex).GetPercent();
+                string percentString = (Math.Round(percentNumber, 2)).ToString();
+                lbSetProbability.Text = percentString + "%";
             }
-            else
-            {
-                this.nodePMMethod.Text = n.GetLikelySources().ElementAt(listBoxProblematicMethods.SelectedIndex).GetMethod();
-            }
-            lbSetLikelySource.Text = n.GetLikelySources().ElementAt(listBoxProblematicMethods.SelectedIndex).GetLikelyCause();
-            Double percentNumber = n.GetLikelySources().ElementAt(listBoxProblematicMethods.SelectedIndex).GetPercent();
-            string percentString = (Math.Round(percentNumber, 2)).ToString();
-            lbSetProbability.Text = percentString + "%";
         }
 
         private void lbFixed04_Click(object sender, EventArgs e)
