@@ -305,7 +305,6 @@ namespace CategorizeModule
                             {
                                 // ObjectCreationExpressionSyntax oces = (ObjectCreationExpressionSyntax)vds.Initializer.Value;
                                 //IdentifierNameSyntax qns = (IdentifierNameSyntax)oces.Type;
-                                var variavelTemp = vds.GetType().GetProperties().ToString();
                                 string className = vds.GetType().GetProperties().ToString();
                                 string namespaceName = vds.GetType().Namespace;//ToString(); //qns.right.ToString();
                                 if (MethodIsReachable(".ctor", actualClass, namespaceName + "." + className))
