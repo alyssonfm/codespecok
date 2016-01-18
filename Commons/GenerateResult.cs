@@ -27,10 +27,11 @@ namespace Commons
             if (isCategorized)
             {
                 XElement likelyCauses = new XElement("LikelySouces");
-                XElement likelyCause = new XElement("problematicMethod");
+                
                 List<Point> likelySources = n.GetLikelySources();
                 foreach (Point p in likelySources)
                 {
+                    XElement likelyCause = new XElement("problematicMethod");
                     likelyCause.SetElementValue("class", p.GetClass());
                     likelyCause.SetElementValue("method", p.GetMethod());
                     likelyCause.SetElementValue("namespace", p.GetNamespace());
