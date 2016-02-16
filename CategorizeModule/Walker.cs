@@ -232,124 +232,127 @@ namespace CategorizeModule
                 method.GetScore().IncrementStrongPos(contracts.Ensures.Count);
             }
 
-            SyntaxList<StatementSyntax> block = method.GetMethod().Body.Statements;
-
-            foreach (StatementSyntax line in block)
+            if(method.GetMethod().Body != null)
             {
-                if (line is ExpressionStatementSyntax)
-                {
-                    ExpressionStatementSyntax e = (ExpressionStatementSyntax)line;
-                    List<ExpressionSyntax> fieldsWhereValueChanged = GetAttibutionVictims(e.Expression);
-                    foreach (ExpressionSyntax exp in fieldsWhereValueChanged)
-                    {
-                        if (method.IsField(exp))
-                        {
-                            method.GetScore().IncrementCodeError();
-                        }
-                    }
-                    List<InvocationExpressionSyntax> funs = SearchFunctions(e.Expression);
-                    foreach (InvocationExpressionSyntax inv in funs)
-                    {
-                        // Verify if its reachable
-                        string methodName = "";
-                        string filterHelper = "";
-                        if (inv.Expression is IdentifierNameSyntax)
-                        {
-                            methodName = (inv.Expression as IdentifierNameSyntax).Identifier.Text;
-                            filterHelper = actualNamespace + "." + actualClass;
-                        }
-                        else
-                        {
-                            MemberAccessExpressionSyntax member = inv.Expression as MemberAccessExpressionSyntax;
+                SyntaxList<StatementSyntax> block = method.GetMethod().Body.Statements;
 
-                            if (member.Name is IdentifierNameSyntax)
-                                methodName = (member.Name as IdentifierNameSyntax).Identifier.Text;
-                            else if (member.Name is GenericNameSyntax)
-                                methodName = (member.Name as GenericNameSyntax).Identifier.Text;
-                            if (member.Expression is IdentifierNameSyntax)
+                foreach (StatementSyntax line in block)
+                {
+                    if (line is ExpressionStatementSyntax)
+                    {
+                        ExpressionStatementSyntax e = (ExpressionStatementSyntax)line;
+                        List<ExpressionSyntax> fieldsWhereValueChanged = GetAttibutionVictims(e.Expression);
+                        foreach (ExpressionSyntax exp in fieldsWhereValueChanged)
+                        {
+                            if (method.IsField(exp))
                             {
-                                filterHelper = (member.Expression as IdentifierNameSyntax).Identifier.Text;
+                                method.GetScore().IncrementCodeError();
                             }
-                            else if (member.Expression is ThisExpressionSyntax)
+                        }
+                        List<InvocationExpressionSyntax> funs = SearchFunctions(e.Expression);
+                        foreach (InvocationExpressionSyntax inv in funs)
+                        {
+                            // Verify if its reachable
+                            string methodName = "";
+                            string filterHelper = "";
+                            if (inv.Expression is IdentifierNameSyntax)
                             {
+                                methodName = (inv.Expression as IdentifierNameSyntax).Identifier.Text;
                                 filterHelper = actualNamespace + "." + actualClass;
                             }
                             else
                             {
-                                filterHelper = actualNamespace + "." + actualClass;
-                            }
-                        }
+                                MemberAccessExpressionSyntax member = inv.Expression as MemberAccessExpressionSyntax;
 
-                        if (MethodIsReachable(methodName, actualClass, filterHelper))
-                        {
-                            RMethod m = GetMethodFound();
-                            method.GetScore().Add(WalkOn(m));
-                        }
-                        else
-                        {
-                            if(!filterHelper.Equals("Contract"))
-                                method.GetScore().IncrementCodeError();
+                                if (member.Name is IdentifierNameSyntax)
+                                    methodName = (member.Name as IdentifierNameSyntax).Identifier.Text;
+                                else if (member.Name is GenericNameSyntax)
+                                    methodName = (member.Name as GenericNameSyntax).Identifier.Text;
+                                if (member.Expression is IdentifierNameSyntax)
+                                {
+                                    filterHelper = (member.Expression as IdentifierNameSyntax).Identifier.Text;
+                                }
+                                else if (member.Expression is ThisExpressionSyntax)
+                                {
+                                    filterHelper = actualNamespace + "." + actualClass;
+                                }
+                                else
+                                {
+                                    filterHelper = actualNamespace + "." + actualClass;
+                                }
+                            }
+
+                            if (MethodIsReachable(methodName, actualClass, filterHelper))
+                            {
+                                RMethod m = GetMethodFound();
+                                method.GetScore().Add(WalkOn(m));
+                            }
+                            else
+                            {
+                                if (!filterHelper.Equals("Contract"))
+                                    method.GetScore().IncrementCodeError();
+                            }
                         }
                     }
-                }
-                if (line is LocalDeclarationStatementSyntax)
-                {
-                    LocalDeclarationStatementSyntax ldss = (LocalDeclarationStatementSyntax)line;
-                    SeparatedSyntaxList<VariableDeclaratorSyntax> lvds = ldss.Declaration.Variables;
-                    foreach (VariableDeclaratorSyntax vds in lvds)
+                    if (line is LocalDeclarationStatementSyntax)
                     {
-                        
-                        if (vds.Initializer != null)
+                        LocalDeclarationStatementSyntax ldss = (LocalDeclarationStatementSyntax)line;
+                        SeparatedSyntaxList<VariableDeclaratorSyntax> lvds = ldss.Declaration.Variables;
+                        foreach (VariableDeclaratorSyntax vds in lvds)
                         {
-                            if (vds.Initializer.Value is ObjectCreationExpressionSyntax)
+
+                            if (vds.Initializer != null)
                             {
-                                // ObjectCreationExpressionSyntax oces = (ObjectCreationExpressionSyntax)vds.Initializer.Value;
-                                //IdentifierNameSyntax qns = (IdentifierNameSyntax)oces.Type;
-                                string className = vds.GetType().GetProperties().ToString();
-                                string namespaceName = vds.GetType().Namespace;//ToString(); //qns..ToString();
-                                if (MethodIsReachable(".ctor", actualClass, namespaceName + "." + className))
+                                if (vds.Initializer.Value is ObjectCreationExpressionSyntax)
                                 {
-                                    RMethod rm = GetMethodFound();
-                                    WalkOn(rm);
-                                }
-                            }
-                            else if (vds.Initializer.Value is InvocationExpressionSyntax)
-                            {
-                                InvocationExpressionSyntax ies = (InvocationExpressionSyntax)vds.Initializer.Value;
-                                if (ies.Expression is MemberAccessExpressionSyntax)
-                                {
-                                    MemberAccessExpressionSyntax maesMethod = (MemberAccessExpressionSyntax)ies.Expression;
-                                    string methodName = maesMethod.Name.Identifier.Text;
-                                    if (maesMethod.Expression is MemberAccessExpressionSyntax)
-                                    {
-                                        MemberAccessExpressionSyntax maesClass = (MemberAccessExpressionSyntax)maesMethod.Expression;
-                                        string className = maesClass.Name.Identifier.Text;
-                                        string namespaceName = maesClass.Expression.ToString();
-                                        if (MethodIsReachable(methodName, actualClass, namespaceName + "." + className))
-                                        {
-                                            RMethod rm = GetMethodFound();
-                                            WalkOn(rm);
-                                        }
-                                    }
-                                    else if (maesMethod.Expression is IdentifierNameSyntax)
-                                    {
-                                        IdentifierNameSyntax maesClass = (IdentifierNameSyntax)maesMethod.Expression;
-                                        string className = maesClass.Identifier.Text;
-                                        if (MethodIsReachable(methodName, actualClass, className))
-                                        {
-                                            RMethod rm = GetMethodFound();
-                                            WalkOn(rm);
-                                        }
-                                    }
-                                }
-                                else if (ies.Expression is IdentifierNameSyntax)
-                                {
-                                    IdentifierNameSyntax ins = (IdentifierNameSyntax)ies.Expression;
-                                    string methodName = ins.Identifier.Text;
-                                    if (MethodIsReachable(methodName, actualClass, ""))
+                                    // ObjectCreationExpressionSyntax oces = (ObjectCreationExpressionSyntax)vds.Initializer.Value;
+                                    //IdentifierNameSyntax qns = (IdentifierNameSyntax)oces.Type;
+                                    string className = vds.GetType().GetProperties().ToString();
+                                    string namespaceName = vds.GetType().Namespace;//ToString(); //qns..ToString();
+                                    if (MethodIsReachable(".ctor", actualClass, namespaceName + "." + className))
                                     {
                                         RMethod rm = GetMethodFound();
                                         WalkOn(rm);
+                                    }
+                                }
+                                else if (vds.Initializer.Value is InvocationExpressionSyntax)
+                                {
+                                    InvocationExpressionSyntax ies = (InvocationExpressionSyntax)vds.Initializer.Value;
+                                    if (ies.Expression is MemberAccessExpressionSyntax)
+                                    {
+                                        MemberAccessExpressionSyntax maesMethod = (MemberAccessExpressionSyntax)ies.Expression;
+                                        string methodName = maesMethod.Name.Identifier.Text;
+                                        if (maesMethod.Expression is MemberAccessExpressionSyntax)
+                                        {
+                                            MemberAccessExpressionSyntax maesClass = (MemberAccessExpressionSyntax)maesMethod.Expression;
+                                            string className = maesClass.Name.Identifier.Text;
+                                            string namespaceName = maesClass.Expression.ToString();
+                                            if (MethodIsReachable(methodName, actualClass, namespaceName + "." + className))
+                                            {
+                                                RMethod rm = GetMethodFound();
+                                                WalkOn(rm);
+                                            }
+                                        }
+                                        else if (maesMethod.Expression is IdentifierNameSyntax)
+                                        {
+                                            IdentifierNameSyntax maesClass = (IdentifierNameSyntax)maesMethod.Expression;
+                                            string className = maesClass.Identifier.Text;
+                                            if (MethodIsReachable(methodName, actualClass, className))
+                                            {
+                                                RMethod rm = GetMethodFound();
+                                                WalkOn(rm);
+                                            }
+                                        }
+                                    }
+                                    else if (ies.Expression is IdentifierNameSyntax)
+                                    {
+                                        IdentifierNameSyntax ins = (IdentifierNameSyntax)ies.Expression;
+                                        string methodName = ins.Identifier.Text;
+                                        if (MethodIsReachable(methodName, actualClass, ""))
+                                        {
+                                            RMethod rm = GetMethodFound();
+                                            WalkOn(rm);
+                                        }
                                     }
                                 }
                             }
@@ -357,6 +360,8 @@ namespace CategorizeModule
                     }
                 }
             }
+
+           
 
             return method.GetScore();
         }
@@ -399,32 +404,36 @@ namespace CategorizeModule
         private ContractArguments GetContractsPreAndPostFromMethod(BaseMethodDeclarationSyntax method)
         {
             ContractArguments contracts = new ContractArguments();
-            foreach (StatementSyntax s in method.Body.Statements)
+            if(method.Body != null)
             {
-                if (s is ExpressionStatementSyntax)
+                foreach (StatementSyntax s in method.Body.Statements)
                 {
-                    ExpressionStatementSyntax e = (ExpressionStatementSyntax)s;
-
-                    if (e.Expression is InvocationExpressionSyntax)
+                    if (s is ExpressionStatementSyntax)
                     {
-                        string contractType = "";
-                        InvocationExpressionSyntax ex = (InvocationExpressionSyntax)e.Expression;
+                        ExpressionStatementSyntax e = (ExpressionStatementSyntax)s;
 
-                        if (ex.Expression is MemberAccessExpressionSyntax) contractType = ((MemberAccessExpressionSyntax)ex.Expression).Name.Identifier.Value.ToString();
-
-                        if (ex.Expression is IdentifierNameSyntax) contractType = ((IdentifierNameSyntax)ex.Expression).Identifier.Value.ToString();
-
-                        if (contractType.Equals("Requires"))
+                        if (e.Expression is InvocationExpressionSyntax)
                         {
-                            contracts.Requires.Add(((InvocationExpressionSyntax)e.Expression).ArgumentList.Arguments[0]);
-                        }
-                        else if (contractType.Equals("Ensures"))
-                        {
-                            contracts.Ensures.Add(((InvocationExpressionSyntax)e.Expression).ArgumentList.Arguments[0]);
+                            string contractType = "";
+                            InvocationExpressionSyntax ex = (InvocationExpressionSyntax)e.Expression;
+
+                            if (ex.Expression is MemberAccessExpressionSyntax) contractType = ((MemberAccessExpressionSyntax)ex.Expression).Name.Identifier.Value.ToString();
+
+                            if (ex.Expression is IdentifierNameSyntax) contractType = ((IdentifierNameSyntax)ex.Expression).Identifier.Value.ToString();
+
+                            if (contractType.Equals("Requires"))
+                            {
+                                contracts.Requires.Add(((InvocationExpressionSyntax)e.Expression).ArgumentList.Arguments[0]);
+                            }
+                            else if (contractType.Equals("Ensures"))
+                            {
+                                contracts.Ensures.Add(((InvocationExpressionSyntax)e.Expression).ArgumentList.Arguments[0]);
+                            }
                         }
                     }
                 }
             }
+            
             return contracts;
         }
         private RMethod GetMethodFound()
