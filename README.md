@@ -1,4 +1,4 @@
 ContractOk
 ================
 
-ContractOk is a tool for detecting and classifying nonconformances in C# -- Code Contracts systems.
+ContractOk is a tool for detecting nonconformances in C# -- Code Contracts systems.
